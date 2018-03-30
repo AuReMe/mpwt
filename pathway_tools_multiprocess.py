@@ -5,6 +5,15 @@ Created on Mon Feb 12 14:33:22 2018
 @author: maite and abelcour
 Description:
 From genbank file this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at last it will generate dat files for AuReMe.
+The script takes a folder name as argument. The folder structure expected is:
+Folder_input
+├── Folder_for_species_1
+│   └── Genbank_species_1
+├── Folder_for_species_2
+│   └── Genbank_species_2
+├── Folder_for_species_3
+│   └── Genbank_species_3
+│
 
 Usage:
 
@@ -23,35 +32,41 @@ import getpass
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
-def main():
-    run_folder= "/root/shared/"
+parser = argparse.ArgumentParser(usage="%prog -f FOLDER")
+parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing Genbank file.")
+
+parser_args = parser.parse_args(sys.argv[1:])
+
+def main(folder):
+    #run_folder= "/root/shared/"
     #args = docopt.docopt(__doc__) 
     #run_folder = args["--runs"]
     #for run in /shared:
     #a Run folder contains a GBK file and organism-params.dat and genetic-elemnts.dat
     #if .dat didn't exist, create them
-    run_ids = [i for i in os.walk(run_folder).next()[1]]
+    run_ids = [folder_id for folder_id in os.walk(folder).next()[1]]
+    genbank_paths = [folder + "/" + run_id for run_id in run_ids]
     p = Pool(processes=cpu_count())
     #run pwtools
     print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
-    for run_id in run_ids:
-    	run_folder_data = "/root/shared/%s/genomic_data/" %run_id
-    	pwt_run(run_folder_data)
+    for genbank_path in genbank_paths:
+        pwt_run(genbank_path)
     print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-    p.map(run_pwt, run_ids)
+    p.map(run_pwt, genbank_paths)
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
-    for run_id in run_ids:
-    	run_folder_data = "/root/shared/%s/genomic_data/" %run_id
-    	create_metadata(run_folder_data)
+    for genbank_path in genbank_paths:
+        create_metadata(genbank_path)
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-    p.map(run_pwt_dat, run_ids)
+    p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     #[None for _ in resultats]
 
 def pwt_run(run_folder):
-    genomic_folder = run_folder
+    """
+    Check if files needed by Pathway-Tools are available, if not create them.
+    """
     required_files = set(['organism-params.dat','genetic-elements.dat','script.lisp'])
-    files_in = set(os.walk(genomic_folder).next()[2])
+    files_in = set(os.walk(run_folder).next()[2])
     print("Checking for pathwaytools inputs:")
     if required_files.issubset(files_in):
         print("OK")
@@ -240,25 +255,25 @@ def create_metadata(run_folder):
          metadata_file.write('NIL)')
          metadata_file.write('\n\n')
 
-def run_pwt(run_id):
+def run_pwt(genbank_path):
     """
     Create PGDB using files created during 'create_dats_and_lisp'.
     """
-    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho /root/shared/%s/genomic_data/" %run_id
-    print cmd_pwt
+    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s/" %genbank_path
+    print(cmd_pwt)
     subprocess.call(cmd_pwt, shell=True)
 
-def run_pwt_dat(run_id):
+def run_pwt_dat(genbank_path):
     """
     Create dat file using a lisp script created during 'create_dats_and_lisp'.
     Add an input to the subprocess call to close the Navigator Window opening proposition ('Enter name of X-window server to connect to (of the form HOST:N.M):').
     If this proposition is not closed the script can't continue.
     """
-    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load /root/shared/%s/genomic_data/script.lisp" %run_id
-    print cmd_dat
+    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/" %genbank_path
+    print(cmd_dat)
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
     p.communicate(input='none')
 
 
 if __name__ == "__main__":
-    main()
+    main(parser_args.folder)
