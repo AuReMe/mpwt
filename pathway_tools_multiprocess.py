@@ -28,6 +28,7 @@ import docopt
 import sys
 import datetime
 import getpass
+import shutil
 
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
@@ -44,8 +45,8 @@ def main(folder):
     #for run in /shared:
     #a Run folder contains a GBK file and organism-params.dat and genetic-elemnts.dat
     #if .dat didn't exist, create them
-    run_ids = [folder_id for folder_id in os.walk(folder).next()[1]]
-    genbank_paths = [folder + "/" + run_id for run_id in run_ids]
+    run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
+    genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
     p = Pool(processes=cpu_count())
     #run pwtools
     print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
@@ -54,11 +55,17 @@ def main(folder):
     print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
+    pgdb_dat_folders = {}
     for genbank_path in genbank_paths:
-        create_metadata(genbank_path)
+        pgdb_dat_folder = create_metadata(genbank_path)
+        pgdb_dat_folders[genbank_path] = pgdb_dat_folder
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+    print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+    for genbank_path in pgdb_dat_folders:
+        move(genbank_path, pgdb_dat_folders[genbank_path])
+    print('~~~~~~~~~~The script have finished! Thank you for using it.')
     #[None for _ in resultats]
 
 def pwt_run(run_folder):
@@ -66,7 +73,7 @@ def pwt_run(run_folder):
     Check if files needed by Pathway-Tools are available, if not create them.
     """
     required_files = set(['organism-params.dat','genetic-elements.dat','script.lisp'])
-    files_in = set(os.walk(run_folder).next()[2])
+    files_in = set(next(os.walk(run_folder))[2])
     print("Checking for pathwaytools inputs:")
     if required_files.issubset(files_in):
         print("OK")
@@ -225,7 +232,7 @@ def create_metadata(run_folder):
     myDBName = species_name.replace(' ', '_')
 
     pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
-    pathway_tools_path = pathway_tools_str.split('is ')[1].strip('\n')
+    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
     pathway_tools_file = open(pathway_tools_path, 'r')   
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
     ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
@@ -255,11 +262,15 @@ def create_metadata(run_folder):
          metadata_file.write('NIL)')
          metadata_file.write('\n\n')
 
+    pgdb_dat_folder = file_path + myDBName.lower() + 'cyc/1.0/data/'
+
+    return pgdb_dat_folder
+
 def run_pwt(genbank_path):
     """
     Create PGDB using files created during 'create_dats_and_lisp'.
     """
-    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s/" %genbank_path
+    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s" %genbank_path
     print(cmd_pwt)
     subprocess.call(cmd_pwt, shell=True)
 
@@ -269,11 +280,21 @@ def run_pwt_dat(genbank_path):
     Add an input to the subprocess call to close the Navigator Window opening proposition ('Enter name of X-window server to connect to (of the form HOST:N.M):').
     If this proposition is not closed the script can't continue.
     """
-    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/" %genbank_path
+    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
     print(cmd_dat)
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
-    p.communicate(input='none')
+    p.communicate(input=b'none')
 
+def move(genbank_path, pgdb_dat_folder):
+    result_files = os.listdir(pgdb_dat_folder)
+
+    output_folder = genbank_path + 'output/'
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for result_file in result_files:
+        if '.dat' in result_file:
+            shutil.move(pgdb_dat_folder + result_file, output_folder)
 
 if __name__ == "__main__":
     main(parser_args.folder)
