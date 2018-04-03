@@ -21,14 +21,14 @@ Options;
 	-f --folder	folder.
 """
 import argparse
-import subprocess
 import csv
-import os
-import docopt
-import sys
 import datetime
+import docopt
 import getpass
+import os
 import shutil
+import subprocess
+import sys
 
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
@@ -286,11 +286,16 @@ def run_pwt_dat(genbank_path):
     p.communicate(input=b'none')
 
 def move(genbank_path, pgdb_folder):
+    """
+    Move the result files inside the shared folder containing the input data.
+    """
     output_folder = genbank_path + 'output/'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
     shutil.move(pgdb_folder, output_folder)
+    # Give access to the file for user outside the container.
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder], shell=True)
 
 if __name__ == "__main__":
     main(parser_args.folder)
