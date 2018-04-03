@@ -55,16 +55,16 @@ def main(folder):
     print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
-    pgdb_dat_folders = {}
+    pgdb_folders = {}
     for genbank_path in genbank_paths:
-        pgdb_dat_folder = create_metadata(genbank_path)
-        pgdb_dat_folders[genbank_path] = pgdb_dat_folder
+        pgdb_folder = create_metadata(genbank_path)
+        pgdb_folders[genbank_path] = pgdb_folder
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
-    for genbank_path in pgdb_dat_folders:
-        move(genbank_path, pgdb_dat_folders[genbank_path])
+    for genbank_path in pgdb_folders:
+        move(genbank_path, pgdb_folders[genbank_path])
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
     #[None for _ in resultats]
 
@@ -262,9 +262,9 @@ def create_metadata(run_folder):
          metadata_file.write('NIL)')
          metadata_file.write('\n\n')
 
-    pgdb_dat_folder = file_path + myDBName.lower() + 'cyc/1.0/data/'
+    pgdb_folder = file_path + myDBName.lower() + 'cyc/'
 
-    return pgdb_dat_folder
+    return pgdb_folder
 
 def run_pwt(genbank_path):
     """
@@ -285,12 +285,12 @@ def run_pwt_dat(genbank_path):
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
     p.communicate(input=b'none')
 
-def move(genbank_path, pgdb_dat_folder):
+def move(genbank_path, pgdb_folder):
     output_folder = genbank_path + 'output/'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    shutil.move(pgdb_dat_folder, output_folder)
+    shutil.move(pgdb_folder, output_folder)
 
 if __name__ == "__main__":
     main(parser_args.folder)
