@@ -295,7 +295,7 @@ def move(genbank_path, pgdb_folder):
 
     shutil.move(pgdb_folder, output_folder)
     # Give access to the file for user outside the container.
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder], shell=True)
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', genbank_path])
 
 if __name__ == "__main__":
     main(parser_args.folder)
