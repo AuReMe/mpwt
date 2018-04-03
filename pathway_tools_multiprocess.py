@@ -286,15 +286,11 @@ def run_pwt_dat(genbank_path):
     p.communicate(input=b'none')
 
 def move(genbank_path, pgdb_dat_folder):
-    result_files = os.listdir(pgdb_dat_folder)
-
     output_folder = genbank_path + 'output/'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    for result_file in result_files:
-        if '.dat' in result_file:
-            shutil.move(pgdb_dat_folder + result_file, output_folder)
+    shutil.move(pgdb_dat_folder, output_folder)
 
 if __name__ == "__main__":
     main(parser_args.folder)
