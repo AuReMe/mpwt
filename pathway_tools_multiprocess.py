@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb 12 14:33:22 2018
@@ -33,7 +34,7 @@ import sys
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
-parser = argparse.ArgumentParser(usage="%prog -f FOLDER")
+parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
 parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing Genbank file.")
 
 parser_args = parser.parse_args(sys.argv[1:])
