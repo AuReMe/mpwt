@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 12 14:33:22 2018
 
-@author: maite and abelcour
+"""
 Description:
 From genbank file this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at last it will generate dat files for AuReMe.
 The script takes a folder name as argument. The folder structure expected is:
@@ -15,12 +13,8 @@ Folder_input
 ├── Folder_for_species_3
 │   └── Genbank_species_3
 │
-
-Usage:
-
-Options;
-	-f --folder	folder.
 """
+
 import argparse
 import csv
 import datetime
@@ -35,21 +29,15 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
 parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
-parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing Genbank file.")
+parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
 
 parser_args = parser.parse_args(sys.argv[1:])
 
 def main(folder):
-    #run_folder= "/root/shared/"
-    #args = docopt.docopt(__doc__) 
-    #run_folder = args["--runs"]
-    #for run in /shared:
-    #a Run folder contains a GBK file and organism-params.dat and genetic-elemnts.dat
-    #if .dat didn't exist, create them
+    # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
     p = Pool(processes=cpu_count())
-    #run pwtools
     print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
     for genbank_path in genbank_paths:
         pwt_run(genbank_path)
