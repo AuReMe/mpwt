@@ -30,10 +30,13 @@ from multiprocessing import Pool, cpu_count
 
 parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
 parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
+parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.",default=None)
 
 parser_args = parser.parse_args(sys.argv[1:])
 
-def main(folder):
+def main():
+    folder = parser_args.folder
+    output_folder = parser_args.output
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
@@ -46,14 +49,14 @@ def main(folder):
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
-        pgdb_folder = create_metadata(genbank_path)
-        pgdb_folders[genbank_path] = pgdb_folder
+        pgdb_folder, species_name = create_metadata(genbank_path)
+        pgdb_folders[genbank_path] = (pgdb_folder, species_name)
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
-        move(genbank_path, pgdb_folders[genbank_path])
+        move(genbank_path, pgdb_folders[genbank_path], output_folder)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
     #[None for _ in resultats]
 
@@ -253,7 +256,7 @@ def create_metadata(run_folder):
 
     pgdb_folder = file_path + myDBName.lower() + 'cyc/'
 
-    return pgdb_folder
+    return pgdb_folder, species_name
 
 def run_pwt(genbank_path):
     """
@@ -274,17 +277,24 @@ def run_pwt_dat(genbank_path):
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
     p.communicate(input=b'none')
 
-def move(genbank_path, pgdb_folder):
+def move(genbank_path, pgdb_folder, output_folder):
     """
     Move the result files inside the shared folder containing the input data.
     """
-    output_folder = genbank_path + 'output/'
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    if output_folder is None:
+        output_folder_path = genbank_path + 'output/'
+        if not os.path.exists(output_folder_path):
+            os.makedirs(output_folder_path)
+        # Give access to the file for user outside the container.
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder_path])
 
-    shutil.move(pgdb_folder, output_folder)
-    # Give access to the file for user outside the container.
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', genbank_path])
+    else:
+        output_folder_path = output_folder + '/' + pgdb_folder[1] + '_output/'
+        if not os.path.exists(output_folder_path):
+            os.makedirs(output_folder_path)
+        # Give access to the file for user outside the container.
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
+    shutil.move(pgdb_folder[0], output_folder_path)
 if __name__ == "__main__":
-    main(parser_args.folder)
+    main()
