@@ -149,7 +149,7 @@ def create_dats_and_lisp(run_folder):
     lisp_file = run_folder + "script.lisp"
 
     # The name of the PGDB will be the name of the species.
-    myDBName = species_name.replace(' ', '_')
+    myDBName = species_name.replace(' ', '_').replace('/', '_')
 
     # Create the organism-params dat file.
     with open(organism_dat, 'w') as csvfile:
