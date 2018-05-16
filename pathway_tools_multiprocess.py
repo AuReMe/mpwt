@@ -254,7 +254,8 @@ def create_metadata(run_folder):
          metadata_file.write('NIL)')
          metadata_file.write('\n\n')
 
-    pgdb_folder = file_path + myDBName.lower() + 'cyc/'
+    # Replace all / by _ to ensure that there is no error with the path with myDBName.
+    pgdb_folder = file_path + myDBName.replace('/', '_').lower() + 'cyc/'
 
     return pgdb_folder, species_name
 
