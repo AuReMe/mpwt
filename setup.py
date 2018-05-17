@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as readme_file:
+with open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding='utf-8') as readme_file:
       readme = readme_file.read()
 
 setup(name='mpwt',
@@ -11,6 +11,7 @@ setup(name='mpwt',
       version='0.1.1a1',
       url='https://gitlab.inria.fr/abelcour/mpwt',
       author='A. Belcour',
+      author_email='arnaud.belcour@gmail.com',
       classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
