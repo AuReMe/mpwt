@@ -29,11 +29,17 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
 def run():
+    from cleaning_pwt import cleaning
     parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
-    parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.",default=None)
+    parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
+    parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
 
     parser_args = parser.parse_args(sys.argv[1:])
+
+    if parser_args.clean:
+        cleaning()
+
     multiprocess_pwt(parser_args.folder, parser_args.output)
 
 def multiprocess_pwt(folder,output_folder=None):
