@@ -18,7 +18,7 @@ Using pip
 	pip install mpwt
 
 Use
-~~~
+---
 
 Python script allowing to run pathway-Tools in multiprocess. To do this the script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.  
 
@@ -33,7 +33,7 @@ Python script allowing to run pathway-Tools in multiprocess. To do this the scri
 
 Pathway-Tools will run on each genbank file. It will create an output folder containing all the result files from the PathoLogic inference for each species.
 
-Used in [Pathway-Tools Multiprocessing Docker](https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker).
+Used in `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker>`__.
 
 
 .. code:: python
