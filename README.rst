@@ -14,6 +14,7 @@ Using pip
 ~~~~~~~~~
 
 .. code:: sh
+
 	pip install mpwt
 
 Using docker
@@ -27,6 +28,7 @@ Use
 Python script allowing to run pathway-Tools in multiprocess. To do this the script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.  
 
 .. code-block:: text
+
     Folder_input
     ├── Folder_for_species_1
     │   └── Genbank_species_1
@@ -41,6 +43,7 @@ Pathway-Tools will run on each genbank file. It will create an output folder con
 Used in `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker>`__.
 
 .. code:: python
+
     import mpwt
 
     folder_input = "path/to/folder/input"
