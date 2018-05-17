@@ -34,9 +34,9 @@ def run():
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.",default=None)
 
     parser_args = parser.parse_args(sys.argv[1:])
-    main(parser_args.folder, parser_args.output)
+    multiprocess_pwt(parser_args.folder, parser_args.output)
 
-def main(folder,output_folder=None):
+def multiprocess_pwt(folder,output_folder=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
@@ -298,3 +298,6 @@ def move(genbank_path, pgdb_folder, output_folder):
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
     shutil.move(pgdb_folder[0], output_folder_path)
+
+if __name__ == '__main__':
+    run()
