@@ -54,6 +54,8 @@ def multiprocess_pwt(folder,output_folder=None):
         pwt_run(genbank_path)
     print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
+    print('~~~~~~~~~~Check inference~~~~~~~~~~')
+    check_pwt(folder)
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
@@ -180,6 +182,55 @@ def create_dats_and_lisp(run_folder):
         file.write("(select-organism :org-id '" + myDBName + ")")
         file.write('\n')
         file.write("(create-flat-files-for-current-kb)")
+
+def check_pwt(genbank_folder):
+    """
+    Check PathoLogic's log.
+    """
+    failed_inferences = []
+    passed_inferences = []
+
+    with open('log_error.txt', 'w') as output_file:
+        for species in os.listdir(genbank_folder):
+            patho_log = genbank_folder + '/' + species + '/pathologic.log'
+
+            output_file.write('------------ Species: ')
+            output_file.write(species)
+            output_file.write('\n')
+
+            fatal_error_index = None
+
+            with open(patho_log, 'r') as input_file:
+                for index, line in enumerate(input_file):
+                    if 'fatal error' in line:
+                        fatal_error_index = index
+                        output_file.write(line)
+                        failed_inferences.append(species)
+                    if fatal_error_index is not None:
+                        if index > fatal_error_index:
+                            output_file.write(line)
+                    if 'Build done.' in  line:
+                        output_file.write(line)
+                        output_file.write(next(input_file))
+                        passed_inferences.append(species)
+            output_file.write('------------\n\n')
+
+    with open('log_error.txt','r') as contents:
+        save = contents.read()
+    with open('log_error.txt', 'w') as output_file:
+            output_file.write('Inference statistics:\n')
+            if len(failed_inferences) > 0:
+                print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
+                output_file.write('Build done: ' + str(len(passed_inferences)))
+                output_file.write('\tSpecies: ' + ', '.join(passed_inferences)+'\n')
+            if len(failed_inferences) > 0:
+                print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
+                output_file.write('Build failed: ' + str(len(failed_inferences)))
+                output_file.write('\tSpecies: ' + ', '.join(failed_inferences)+'\n\n')
+            output_file.write(save)
+    
+    if len(failed_inferences) > 0:
+        sys.exit("Stop the inference.")
 
 def create_metadata(run_folder):
     """

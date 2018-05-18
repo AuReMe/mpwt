@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding='utf-8
 setup(name='mpwt',
       description='Multiprocessing for Pathway-Tools',
       long_description=readme,
-      version='0.1.2a1',
+      version='0.1.3a1',
       url='https://gitlab.inria.fr/abelcour/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
@@ -22,9 +22,6 @@ setup(name='mpwt',
         # Audience
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-
-        # License
-        'License :: OSI Approved :: GNU Affero General Public License v3',
 
         # Environnement, OS, languages
         'Programming Language :: Python :: 3'
