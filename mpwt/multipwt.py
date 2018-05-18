@@ -219,7 +219,7 @@ def check_pwt(genbank_folder):
         save = contents.read()
     with open('log_error.txt', 'w') as output_file:
             output_file.write('Inference statistics:\n')
-            if len(failed_inferences) > 0:
+            if len(passed_inferences) > 0:
                 print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
                 output_file.write('Build done: ' + str(len(passed_inferences)))
                 output_file.write('\tSpecies: ' + ', '.join(passed_inferences)+'\n')
