@@ -18,7 +18,6 @@ Folder_input
 import argparse
 import csv
 import datetime
-import docopt
 import getpass
 import os
 import shutil
@@ -39,6 +38,8 @@ def run():
 
     if parser_args.clean:
         cleaning()
+        if len(sys.argv) == 1:
+            sys.exit()
 
     multiprocess_pwt(parser_args.folder, parser_args.output)
 
