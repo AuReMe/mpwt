@@ -37,7 +37,7 @@ Use
 Input data
 ~~~~~~~~~~
 
-Python script allowing to run Pathway-Tools in multiprocess. To do this the script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.
+The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.
 
 .. code-block:: text
 

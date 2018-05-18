@@ -38,7 +38,7 @@ def run():
 
     if parser_args.clean:
         cleaning()
-        if len(sys.argv) == 1:
+        if len(sys.argv) == 2:
             sys.exit()
 
     multiprocess_pwt(parser_args.folder, parser_args.output)
@@ -344,19 +344,12 @@ def move(genbank_path, pgdb_folder, output_folder):
     """
     if output_folder is None:
         output_folder_path = genbank_path + 'output/'
-        if not os.path.exists(output_folder_path):
-            os.makedirs(output_folder_path)
-        # Give access to the file for user outside the container.
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder_path])
-
     else:
         output_folder_path = output_folder + '/' + pgdb_folder[1] + '_output/'
-        if not os.path.exists(output_folder_path):
-            os.makedirs(output_folder_path)
-        # Give access to the file for user outside the container.
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
-    shutil.move(pgdb_folder[0], output_folder_path)
+    shutil.copytree(pgdb_folder[0], output_folder_path)
+    # Give access to the file for user outside the container.
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder_path])
 
 if __name__ == '__main__':
     run()
