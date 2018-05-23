@@ -192,29 +192,42 @@ def check_pwt(genbank_folder):
     passed_inferences = []
 
     with open('log_error.txt', 'w') as output_file:
-        for species in os.listdir(genbank_folder):
-            patho_log = genbank_folder + '/' + species + '/pathologic.log'
+        with open('resume_inference.tsv', 'w') as csvfile:
+            writer = csv.writer(csvfile, delimiter='\t', lineterminator='\n')
+            writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
+            for species in os.listdir(genbank_folder):
+                patho_log = genbank_folder + '/' + species + '/pathologic.log'
 
-            output_file.write('------------ Species: ')
-            output_file.write(species)
-            output_file.write('\n')
+                output_file.write('------------ Species: ')
+                output_file.write(species)
+                output_file.write('\n')
 
-            fatal_error_index = None
+                fatal_error_index = None
 
-            with open(patho_log, 'r') as input_file:
-                for index, line in enumerate(input_file):
-                    if 'fatal error' in line:
-                        fatal_error_index = index
-                        output_file.write(line)
-                        failed_inferences.append(species)
-                    if fatal_error_index is not None:
-                        if index > fatal_error_index:
+                with open(patho_log, 'r') as input_file:
+                    for index, line in enumerate(input_file):
+                        if 'fatal error' in line:
+                            fatal_error_index = index
                             output_file.write(line)
-                    if 'Build done.' in  line:
-                        output_file.write(line)
-                        output_file.write(next(input_file))
-                        passed_inferences.append(species)
-            output_file.write('------------\n\n')
+                            writer.writerow([species, 'ERROR', '', '', '', ''])
+                            failed_inferences.append(species)
+                        if fatal_error_index is not None:
+                            if index > fatal_error_index:
+                                output_file.write(line)
+                        if 'Build done.' in  line:
+                            output_file.write(line)
+                            resume_inference_line = next(input_file)
+                            output_file.write(resume_inference_line)
+                            gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
+                            protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
+                            pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
+                            reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
+                            compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
+                            writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+
+                            passed_inferences.append(species)
+
+                output_file.write('------------\n\n')
 
     with open('log_error.txt','r') as contents:
         save = contents.read()
