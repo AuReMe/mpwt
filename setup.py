@@ -9,7 +9,7 @@ def readme():
 setup(name='mpwt',
       description='Multiprocessing for Pathway-Tools',
       long_description=readme(),
-      version='0.1.6a1',
+      version='0.1.6.1a1',
       url='https://gitlab.inria.fr/abelcour/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
@@ -26,11 +26,13 @@ setup(name='mpwt',
 
         # Environnement, OS, languages
         'Programming Language :: Python :: 3'
+        'Programming Language :: Python :: 2'
       ],
       packages=['mpwt'],
       install_requires=[
             'biopython',
       ],
+      python_requires='>=2.7,>=3.0.*',
       entry_points={
           'console_scripts': [
               'mpwt = mpwt.__main__:main'

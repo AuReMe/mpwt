@@ -74,7 +74,7 @@ folder_input: folder containing sub-folders with Genbank file inside.
 folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional
 If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
 
-1. cleaning()
+2. cleaning()
 
 Delete all the previous PGDB and the metadata files.
 
