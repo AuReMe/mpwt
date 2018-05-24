@@ -25,7 +25,7 @@ setup(name='mpwt',
         'Intended Audience :: Developers',
 
         # Environnement, OS, languages
-        'Programming Language :: Python :: 3'
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2'
       ],
       packages=['mpwt'],

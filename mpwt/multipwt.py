@@ -159,7 +159,7 @@ def create_dats_and_lisp(run_folder):
     lisp_file = run_folder + "script.lisp"
 
     # The name of the PGDB will be the name of the species.
-    myDBName = species_name.replace(' ', '_').replace('/', '_')
+    myDBName = gbk_name.split('.')[0]
 
     # Create the organism-params dat file.
     with open(organism_dat, 'w') as csvfile:
@@ -358,7 +358,7 @@ def move(genbank_path, pgdb_folder, output_folder):
     if output_folder is None:
         output_folder_path = genbank_path + 'output/'
     else:
-        output_folder_path = output_folder + '/' + pgdb_folder[1] + '_output/'
+        output_folder_path = output_folder + '/' + pgdb_folder[1] + '/'
 
     shutil.copytree(pgdb_folder[0], output_folder_path)
     # Give access to the file for user outside the container.
