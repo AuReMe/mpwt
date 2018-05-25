@@ -42,9 +42,9 @@ def run():
         if len(sys.argv) == 2:
             sys.exit()
 
-    multiprocess_pwt(parser_args.folder, parser_args.output)
+    multiprocess_pwt(parser_args.folder, parser_args.output, parser_args.dat)
 
-def multiprocess_pwt(folder,output_folder=None):
+def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
     if output_folder is not None:
@@ -71,7 +71,7 @@ def multiprocess_pwt(folder,output_folder=None):
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
         move(genbank_path, pgdb_folders[genbank_path], output_folder)
-    if parser_args.dat:
+    if dat_checking is not None:
         for genbank_path in pgdb_folders:
             keep_dat(genbank_path, output_folder)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
