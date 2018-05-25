@@ -33,6 +33,7 @@ def run():
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
     parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
+    parser.add_argument("dat", nargs='?', help = "Arguments to clean ptools-local folder.")
 
     parser_args = parser.parse_args(sys.argv[1:])
 
@@ -58,7 +59,7 @@ def multiprocess_pwt(folder,output_folder=None):
     print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
     print('~~~~~~~~~~Check inference~~~~~~~~~~')
-    check_pwt(folder)
+    check_pwt(genbank_paths)
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
@@ -70,6 +71,9 @@ def multiprocess_pwt(folder,output_folder=None):
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
         move(genbank_path, pgdb_folders[genbank_path], output_folder)
+    if parser_args.dat:
+        for genbank_path in pgdb_folders:
+            keep_dat(genbank_path, output_folder)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
@@ -198,7 +202,7 @@ def create_dats_and_lisp(run_folder):
         file.write('\n')
         file.write("(create-flat-files-for-current-kb)")
 
-def check_pwt(genbank_folder):
+def check_pwt(genbank_paths):
     """
     Check PathoLogic's log.
     """
@@ -209,11 +213,11 @@ def check_pwt(genbank_folder):
         with open('resume_inference.tsv', 'w') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t', lineterminator='\n')
             writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
-            for species in os.listdir(genbank_folder):
-                patho_log = genbank_folder + '/' + species + '/pathologic.log'
+            for genbank_path in genbank_paths:
+                patho_log = genbank_path + '/pathologic.log'
 
                 output_file.write('------------ Species: ')
-                output_file.write(species)
+                output_file.write(genbank_path)
                 output_file.write('\n')
 
                 fatal_error_index = None
@@ -223,8 +227,8 @@ def check_pwt(genbank_folder):
                         if 'fatal error' in line:
                             fatal_error_index = index
                             output_file.write(line)
-                            writer.writerow([species, 'ERROR', '', '', '', ''])
-                            failed_inferences.append(species)
+                            writer.writerow([genbank_path, 'ERROR', '', '', '', ''])
+                            failed_inferences.append(genbank_path)
                         if fatal_error_index is not None:
                             if index > fatal_error_index:
                                 output_file.write(line)
@@ -237,9 +241,9 @@ def check_pwt(genbank_folder):
                             pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                            writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+                            writer.writerow([genbank_path, gene_number, protein_number, pathway_number, reaction_number, compound_number])
 
-                            passed_inferences.append(species)
+                            passed_inferences.append(genbank_path)
 
                 output_file.write('------------\n\n')
 
@@ -377,6 +381,23 @@ def move(genbank_path, pgdb_folder, output_folder):
     shutil.copytree(pgdb_folder[0], output_folder_path)
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder_path])
+
+def keep_dat(genbank_path, output_folder):
+    if output_folder is None:
+        output_dat_path = genbank_path + 'output/1.0/data'
+        for pgdb_file in os.listdir(output_dat_path):
+            if 'dat' not in pgdb_file:
+                os.remove(output_dat_path+'/'+pgdb_file)
+        output_species = genbank_path + '/output/'
+        shutil.copytree(output_dat_path, output_species)
+    else:
+        for species in os.listdir(output_folder):
+            output_dat_path = output_folder + '/' + species + '/1.0/data'
+            for pgdb_file in os.listdir(output_dat_path):
+                if 'dat' not in pgdb_file:
+                    os.remove(output_dat_path+'/'+pgdb_file)
+            output_species = output_folder + '/' + species +'/'
+            shutil.copytree(output_dat_path, output_species)
 
 if __name__ == '__main__':
     run()
