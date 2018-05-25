@@ -46,6 +46,8 @@ def run():
 def multiprocess_pwt(folder,output_folder=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
+    if output_folder is not None:
+        run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
         sys.exit("No folder containing genbank file. In " + folder + " you must have sub-folders containing Genbank file.")
@@ -69,6 +71,18 @@ def multiprocess_pwt(folder,output_folder=None):
     for genbank_path in pgdb_folders:
         move(genbank_path, pgdb_folders[genbank_path], output_folder)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
+
+def check_existing_pgdb(run_ids, output_folder):
+    """
+    Check output folder for already existing PGDB, don't create them.
+    """
+    already_present_pgdbs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
+
+    new_run_ids = set(run_ids) - set(already_present_pgdbs)
+
+    new_run_ids = list(new_run_ids)
+
+    return new_run_ids
 
 def pwt_run(run_folder):
     """
