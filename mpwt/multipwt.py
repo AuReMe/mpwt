@@ -28,21 +28,29 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
 def run():
-    from mpwt.cleaning_pwt import cleaning
+    from mpwt.cleaning_pwt import cleaning, cleaning_input
+
     parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
+    parser.add_argument("-d", "--dat", dest = "check_dat", help = "Arguments to clean ptools-local folder.", action='store_true', default=None)
     parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
-    parser.add_argument("dat", nargs='?', help = "Arguments to clean ptools-local folder.")
 
     parser_args = parser.parse_args(sys.argv[1:])
 
+    input_folder = parser_args.folder
+    output_folder = parser_args.output
+    dat_check = parser_args.check_dat
+
     if parser_args.clean:
+        print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
         cleaning()
+        if input_folder:
+            cleaning_input(input_folder, output_folder)
         if len(sys.argv) == 2:
             sys.exit()
 
-    multiprocess_pwt(parser_args.folder, parser_args.output, parser_args.dat)
+    multiprocess_pwt(input_folder, output_folder, dat_check)
 
 def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     # Run folder contains sub-folders containing GBK file
@@ -72,8 +80,9 @@ def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     for genbank_path in pgdb_folders:
         move(genbank_path, pgdb_folders[genbank_path], output_folder)
     if dat_checking is not None:
+        print('~~~~~~~~~~Dat extraction~~~~~~~~~~')
         for genbank_path in pgdb_folders:
-            keep_dat(genbank_path, output_folder)
+            keep_dat(genbank_path, output_folder, run_ids)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
@@ -85,6 +94,9 @@ def check_existing_pgdb(run_ids, output_folder):
     new_run_ids = set(run_ids) - set(already_present_pgdbs)
 
     new_run_ids = list(new_run_ids)
+
+    if len(new_run_ids) == 0:
+        sys.exit("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
 
     return new_run_ids
 
@@ -349,7 +361,7 @@ def create_metadata(run_folder):
     pgdb_folder = file_path + myDBName.replace('/', '_').lower() + 'cyc/'
     species_name = species_name.replace('/', '_')
 
-    return pgdb_folder, species_name
+    return pgdb_folder, myDBName
 
 def run_pwt(genbank_path):
     """
@@ -383,7 +395,7 @@ def move(genbank_path, pgdb_folder, output_folder):
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder_path])
 
-def keep_dat(genbank_path, output_folder):
+def keep_dat(genbank_path, output_folder, run_ids):
     if output_folder is None:
         output_dat_path = genbank_path + 'output/1.0/data'
         for pgdb_file in os.listdir(output_dat_path):
@@ -392,13 +404,14 @@ def keep_dat(genbank_path, output_folder):
         output_species = genbank_path + '/output/'
         shutil.copytree(output_dat_path, output_species)
     else:
-        for species in os.listdir(output_folder):
+        for species in run_ids:
             output_dat_path = output_folder + '/' + species + '/1.0/data'
-            for pgdb_file in os.listdir(output_dat_path):
-                if 'dat' not in pgdb_file:
-                    os.remove(output_dat_path+'/'+pgdb_file)
             output_species = output_folder + '/' + species +'/'
-            shutil.copytree(output_dat_path, output_species)
+            for pgdb_file in os.listdir(output_dat_path):
+                if '.dat' in pgdb_file:
+                    shutil.move(output_dat_path+'/'+pgdb_file, output_species)
+            os.remove(output_species + 'default-version')
+            shutil.rmtree(output_species + '1.0/')
 
 if __name__ == '__main__':
     run()

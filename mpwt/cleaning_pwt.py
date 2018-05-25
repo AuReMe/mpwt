@@ -5,6 +5,8 @@ import os
 import shutil
 import subprocess
 
+from mpwt.multipwt import check_existing_pgdb
+
 def cleaning():
     """
     Clean Pathway-Tools PGDB's folder.
@@ -34,3 +36,15 @@ def cleaning():
         pgdb_folder_path = file_path + pgdb_folder
         shutil.rmtree(pgdb_folder_path)
         print(pgdb_folder + ' has been removed.')
+
+def cleaning_input(folder, output_folder=None):
+    run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
+    if output_folder is not None:
+        run_ids = check_existing_pgdb(run_ids, output_folder)
+    genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
+    for genbank_path in genbank_paths:
+        os.remove(genbank_path + 'script.lisp')
+        os.remove(genbank_path + 'pathologic.log')
+        os.remove(genbank_path + 'genetic-elements.dat')
+        os.remove(genbank_path + 'organism-params.dat')
+        print('Remove temporary datas.')
