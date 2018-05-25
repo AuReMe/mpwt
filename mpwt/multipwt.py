@@ -140,10 +140,10 @@ def create_dats_and_lisp(run_folder):
     (create-flat-files-for-current-kb)
     """
     # Look for a Genbank file in the run folder.
-    for file in os.listdir(run_folder):
-        if file.endswith(".gbk") or file.endswith(".gb") or file.endswith(".gbff"):
-            gbk_file = run_folder + file
-            gbk_name = file
+    for input_file in os.listdir(run_folder):
+        if input_file.endswith(".gbk") or input_file.endswith(".gb") or input_file.endswith(".gbff"):
+            gbk_file = run_folder + input_file
+            gbk_name = input_file
 
     # Check if a Genbank file have been found.
     try:
@@ -286,9 +286,10 @@ def create_metadata(run_folder):
     NIL)
 
     """
-    for file in os.listdir(run_folder):
-        if file.endswith(".gbk") or file.endswith(".gb") or file.endswith(".gbff"):
-            gbk_file = run_folder + '/' + file
+    for input_file in os.listdir(run_folder):
+        if input_file.endswith(".gbk") or input_file.endswith(".gb") or input_file.endswith(".gbff"):
+            gbk_file = run_folder + '/' + input_file
+            gbk_name = input_file
 
     taxon_id = ""
     species_name = ""
@@ -311,7 +312,7 @@ def create_metadata(run_folder):
             raise KeyError('No taxon ID in the Genbank. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.')               
 
     # The name of the PGDB will be the name of the species.
-    myDBName = species_name.replace(' ', '_')
+    myDBName = gbk_name.split('.')[0]
 
     pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
     pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
