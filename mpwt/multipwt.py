@@ -385,6 +385,9 @@ def run_pwt_dat(genbank_path):
     p.communicate(input=b'none')
 
 def remove_non_dat(pgbd_data_folder):
+    """
+    Delete all files that are not .dat files in PGDB dbname/1.0/data folder.
+    """
     for pgdb_file in os.listdir(pgbd_data_folder):
         if '.dat' not in pgdb_file:
             os.remove(pgbd_data_folder+'/'+pgdb_file)
