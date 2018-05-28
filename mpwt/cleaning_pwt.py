@@ -43,8 +43,16 @@ def cleaning_input(folder, output_folder=None):
         run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
     for genbank_path in genbank_paths:
-        os.remove(genbank_path + 'script.lisp')
-        os.remove(genbank_path + 'pathologic.log')
-        os.remove(genbank_path + 'genetic-elements.dat')
-        os.remove(genbank_path + 'organism-params.dat')
+        listp_script = genbank_path + 'script.lisp'
+        patho_log = genbank_path + 'pathologic.log'
+        genetic_dat = genbank_path + 'genetic-elements.dat'
+        organism_dat = genbank_path + 'organism-params.dat'
+        if os.path.exists(listp_script)
+            os.remove(listp_script)
+        if os.path.exists(patho_log)
+            os.remove(patho_log)
+        if os.path.exists(genetic_dat)
+            os.remove(genetic_dat)
+        if os.path.exists(organism_dat)
+            os.remove(organism_dat)
         print('Remove temporary datas.')

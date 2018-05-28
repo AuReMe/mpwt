@@ -9,7 +9,7 @@ def readme():
 setup(name='mpwt',
       description='Multiprocessing for Pathway-Tools',
       long_description=readme(),
-      version='0.2.4a1',
+      version='0.2.7a1',
       url='https://gitlab.inria.fr/abelcour/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',

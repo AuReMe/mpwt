@@ -56,6 +56,9 @@ def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
     if output_folder is not None:
+        if os.path.exists(output_folder) == False:
+            print('No output directory, it will be created.')
+            os.mkdir(output_folder)
         run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
@@ -71,14 +74,14 @@ def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
-        pgdb_folder = create_metadata(genbank_path)
-        pgdb_folders[genbank_path] = pgdb_folder
+        pgdb_id_folder = create_metadata(genbank_path)
+        pgdb_folders[genbank_path] = pgdb_id_folder
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
-        move_pgdb(genbank_path, pgdb_folders[genbank_path], run_ids, output_folder, dat_checking, 'move')
+        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_checking, 'move')
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
@@ -272,6 +275,9 @@ def check_pwt(genbank_paths):
     if len(failed_inferences) > 0:
         sys.exit("Stop the inference.")
 
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'log_error.txt'])
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'resume_inference.tsv'])
+
 def create_metadata(run_folder):
     """
     Create the PGDB-METADATA.ocelot file required for the creation of the dat files by Pathway-Tools (with run_pwt_dat).
@@ -355,9 +361,9 @@ def create_metadata(run_folder):
 
     # Replace all / by _ to ensure that there is no error with the path with myDBName.
     pgdb_folder = file_path + myDBName.replace('/', '_').lower() + 'cyc/'
-    species_name = species_name.replace('/', '_')
+    pgdb_id_folder = (myDBName, pgdb_folder)
 
-    return pgdb_folder
+    return pgdb_id_folder
 
 def run_pwt(genbank_path):
     """
@@ -384,40 +390,37 @@ def remove_non_dat(pgbd_data_folder):
             os.remove(pgbd_data_folder+'/'+pgdb_file)
 
 
-def move_pgdb(genbank_path, pgdb_folder, run_ids, output_folder, only_dat, move_copy):
+def move_pgdb(genbank_path, pgdb_folder, output_folder, only_dat, move_copy):
     """
     Move the result files inside the shared folder containing the input data.
     """
+    pgdb_folder_dbname = pgdb_folder[0]
+    pgdb_folder_path = pgdb_folder[1]
+
+    output_dat_path = pgdb_folder_path + '/1.0/data'
+
     if output_folder is None:
-        output_dat_path = pgdb_folder + '/1.0/data'
         output_species = genbank_path + '/output/'
-        if only_dat == True:
-            remove_non_dat(output_dat_path)
-        for pgdb_file in os.listdir(output_dat_path):
-            if move_copy == 'move':
-                if os.path.exists(output_species) == False:
-                    os.mkdir(output_species)
-                shutil.move(output_dat_path+'/'+pgdb_file, output_species+pgdb_file)
-            if move_copy == 'copy':
-                shutil.copytree(output_dat_path+'/'+pgdb_file, output_species)
     else:
-        for species in run_ids:
-            output_dat_path = output_folder + '/' + species + '/1.0/data'
-            if only_dat == True:
-                remove_non_dat(output_dat_path)
-            output_species = output_folder + '/' + species +'/'
-            for pgdb_file in os.listdir(output_dat_path):
-                if move_copy == 'move':
-                    if os.path.exists(output_species) == False:
-                        os.mkdir(output_species)
-                    shutil.move(output_dat_path+'/'+pgdb_file, output_species+pgdb_file)
-                if move_copy == 'copy':
-                    shutil.copytree(output_dat_path+'/'+pgdb_file, output_species)
-            os.remove(output_species + 'default-version')
-            shutil.rmtree(output_species + '1.0/')
+        output_species = output_folder + '/' + pgdb_folder_dbname +'/'
+
+    if only_dat == True:
+        remove_non_dat(output_dat_path)
+        pgdb_folder_path = output_dat_path
+
+    if move_copy == 'move':
+        for pgdb_file in os.listdir(pgdb_folder_path):
+            if os.path.exists(output_species) == False:
+                os.mkdir(output_species)
+            shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
+        shutil.rmtree(pgdb_folder_path)
+    elif move_copy == 'copy':
+        shutil.copytree(pgdb_folder_path+'/'+pgdb_file, output_species)
 
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
+    if output_folder is not None:
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
 if __name__ == '__main__':
     run()
