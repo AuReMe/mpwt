@@ -33,14 +33,14 @@ def run():
     parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
-    parser.add_argument("-d", "--dat", dest = "check_dat", help = "Arguments to clean ptools-local folder.", action='store_true', default=None)
+    parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
     parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
 
     parser_args = parser.parse_args(sys.argv[1:])
 
     input_folder = parser_args.folder
     output_folder = parser_args.output
-    dat_check = parser_args.check_dat
+    dat_extraction = parser_args.extract_dat
 
     if parser_args.clean:
         print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
@@ -50,19 +50,19 @@ def run():
         if len(sys.argv) == 2:
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_check)
+    multiprocess_pwt(input_folder, output_folder, dat_extraction)
 
-def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
+def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None):
     # Run folder contains sub-folders containing GBK file
-    run_ids = [folder_id for folder_id in next(os.walk(folder))[1]]
+    run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
     if output_folder is not None:
         if os.path.exists(output_folder) == False:
             print('No output directory, it will be created.')
             os.mkdir(output_folder)
         run_ids = check_existing_pgdb(run_ids, output_folder)
-    genbank_paths = [folder + "/" + run_id + "/" for run_id in run_ids]
+    genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
-        sys.exit("No folder containing genbank file. In " + folder + " you must have sub-folders containing Genbank file.")
+        sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
     p = Pool(processes=cpu_count())
     print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
     for genbank_path in genbank_paths:
@@ -81,7 +81,7 @@ def multiprocess_pwt(folder,output_folder=None,dat_checking=None):
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
-        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_checking, 'move')
+        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, 'move')
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
@@ -393,7 +393,7 @@ def remove_non_dat(pgbd_data_folder):
             os.remove(pgbd_data_folder+'/'+pgdb_file)
 
 
-def move_pgdb(genbank_path, pgdb_folder, output_folder, only_dat, move_copy):
+def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, move_copy):
     """
     Move the result files inside the shared folder containing the input data.
     """
@@ -407,7 +407,7 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, only_dat, move_copy):
     else:
         output_species = output_folder + '/' + pgdb_folder_dbname +'/'
 
-    if only_dat == True:
+    if dat_extraction == True:
         remove_non_dat(output_dat_path)
         pgdb_folder_path = output_dat_path
 
