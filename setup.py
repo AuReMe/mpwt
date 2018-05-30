@@ -1,15 +1,16 @@
 import os
 
+from io import open
 from setuptools import setup
 
-def readme():
-    with open('README.rst') as f:
-        return f.read()
+setup_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
 
 setup(name='mpwt',
       description='Multiprocessing for Pathway-Tools',
-      long_description=readme(),
-      version='0.2.8a1',
+      long_description=long_description,
+      version='0.2.8.1a1',
       url='https://gitlab.inria.fr/abelcour/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
