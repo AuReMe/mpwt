@@ -34,6 +34,7 @@ def run():
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
     parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
+    parser.add_argument("-r", "--reduce", dest = "reduce_size", help = "Will delete files in ptools-local to reduce size of results.", action='store_true', default=None)
     parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
 
     parser_args = parser.parse_args(sys.argv[1:])
@@ -41,6 +42,7 @@ def run():
     input_folder = parser_args.folder
     output_folder = parser_args.output
     dat_extraction = parser_args.extract_dat
+    size_reduction = parser_args.reduce_size
 
     if parser_args.clean:
         print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
@@ -50,9 +52,9 @@ def run():
         if len(sys.argv) == 2:
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_extraction)
+    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction)
 
-def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None):
+def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
     if output_folder is not None:
@@ -81,7 +83,7 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None):
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
-        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, 'move')
+        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
     print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
@@ -384,16 +386,7 @@ def run_pwt_dat(genbank_path):
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
     p.communicate(input=b'none')
 
-def remove_non_dat(pgbd_data_folder):
-    """
-    Delete all files that are not .dat files in PGDB dbname/1.0/data folder.
-    """
-    for pgdb_file in os.listdir(pgbd_data_folder):
-        if '.dat' not in pgdb_file:
-            os.remove(pgbd_data_folder+'/'+pgdb_file)
-
-
-def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, move_copy):
+def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
     """
     Move the result files inside the shared folder containing the input data.
     """
@@ -408,17 +401,24 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, move_cop
         output_species = output_folder + '/' + pgdb_folder_dbname +'/'
 
     if dat_extraction == True:
-        remove_non_dat(output_dat_path)
         pgdb_folder_path = output_dat_path
 
-    if move_copy == 'move':
+    if size_reduction is True:
         for pgdb_file in os.listdir(pgdb_folder_path):
             if os.path.exists(output_species) == False:
                 os.mkdir(output_species)
-            shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
+            if dat_extraction == True:
+                if '.dat' in pgdb_file:
+                    shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
+            elif dat_extraction is None:
+                shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
         shutil.rmtree(pgdb_folder_path)
-    elif move_copy == 'copy':
-        shutil.copytree(pgdb_folder_path+'/'+pgdb_file, output_species)
+    else:
+        shutil.copytree(pgdb_folder_path, output_species)
+        if dat_extraction == True:
+            for pgdb_file in os.listdir(output_species):
+                if '.dat' not in pgdb_file:
+                    os.remove(output_species+'/'+pgdb_file)
 
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
