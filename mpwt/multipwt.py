@@ -373,7 +373,8 @@ def run_pwt(genbank_path):
     """
     cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s" %genbank_path
     print(cmd_pwt)
-    subprocess.call(cmd_pwt, shell=True)
+    FNULL = open(os.devnull, 'w')
+    subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
 def run_pwt_dat(genbank_path):
     """
@@ -383,7 +384,8 @@ def run_pwt_dat(genbank_path):
     """
     cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
     print(cmd_dat)
-    p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE)
+    FNULL = open(os.devnull, 'w')
+    p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
     p.communicate(input=b'none')
 
 def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
