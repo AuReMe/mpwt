@@ -81,6 +81,9 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
     print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
     print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+    print('~~~~~~~~~~Check .dat creation~~~~~~~~~~')
+    for genbank_path in pgdb_folders:
+        check_dat(pgdb_folders[genbank_path])
     print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
         move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
@@ -279,6 +282,29 @@ def check_pwt(genbank_paths):
 
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'log_error.txt'])
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'resume_inference.tsv'])
+
+def check_dat(pgdb_folder):
+    pgdb_folder_dbname = pgdb_folder[0]
+
+    dat_files = ["classes.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "genes.dat", "pathways.dat", "promoters.dat", "protein-features.dat",
+                "proteins.dat", "protligandcplxes.dat", "pubs.dat", "reactions.dat", "regulation.dat", "regulons.dat", "rnas.dat", "species.dat", "terminators.dat", "transunits.dat"]
+
+    pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
+    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
+    pathway_tools_file = open(pathway_tools_path, 'r')
+    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
+    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
+    pathway_tools_file.close()
+
+    dats_path = ptools_local_path + '/pgdbs/user/' + pgdb_folder_dbname + 'cyc/1.0/data'
+
+    dat_checks = []
+    for dat_file in dat_files:
+        dat_file_path = dats_path + '/' + dat_file
+        if os.path.exists(dat_file_path):
+            dat_checks.append(dat_file_path)
+
+    print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
 
 def create_metadata(run_folder):
     """
