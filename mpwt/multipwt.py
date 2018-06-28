@@ -156,10 +156,8 @@ def create_dats_and_lisp(run_folder):
     (create-flat-files-for-current-kb)
     """
     # Look for a Genbank file in the run folder.
-    for input_file in os.listdir(run_folder):
-        if input_file.endswith(".gbk") or input_file.endswith(".gb") or input_file.endswith(".gbff"):
-            gbk_file = run_folder + input_file
-            gbk_name = input_file
+    gbk_file = run_folder + run_folder.split('/')[-2] + ".gbk"
+    gbk_name = run_folder.split('/')[-2] + ".gbk"
 
     # Check if a Genbank file have been found.
     try:
@@ -328,10 +326,8 @@ def create_metadata(run_folder):
     NIL)
 
     """
-    for input_file in os.listdir(run_folder):
-        if input_file.endswith(".gbk") or input_file.endswith(".gb") or input_file.endswith(".gbff"):
-            gbk_file = run_folder + '/' + input_file
-            gbk_name = input_file
+    gbk_file = run_folder + run_folder.split('/')[-2] + ".gbk"
+    gbk_name = run_folder.split('/')[-2] + ".gbk"
 
     taxon_id = ""
     species_name = ""
