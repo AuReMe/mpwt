@@ -52,7 +52,7 @@ def run():
         cleaning(verbose)
         if input_folder:
             cleaning_input(input_folder, output_folder, verbose)
-        if len(sys.argv) == 2:
+        if len(sys.argv) == 2 or (len(sys.argv) == 3 and verbose):
             sys.exit()
 
     multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
