@@ -35,7 +35,8 @@ def run():
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
     parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
     parser.add_argument("-r", "--reduce", dest = "reduce_size", help = "Will delete files in ptools-local to reduce size of results.", action='store_true', default=None)
-    parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder.")
+    parser.add_argument("-v", "--verbose", dest = "verbose", help = "mpwt will be more verbose.", action='store_true', default=None)
+    parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder, before any other operations.")
 
     parser_args = parser.parse_args(sys.argv[1:])
 
@@ -43,51 +44,62 @@ def run():
     output_folder = parser_args.output
     dat_extraction = parser_args.extract_dat
     size_reduction = parser_args.reduce_size
+    verbose = parser_args.verbose
 
     if parser_args.clean:
-        print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
-        cleaning()
+        if verbose:
+            print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
+        cleaning(verbose)
         if input_folder:
-            cleaning_input(input_folder, output_folder)
+            cleaning_input(input_folder, output_folder, verbose)
         if len(sys.argv) == 2:
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction)
+    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
 
-def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None):
+def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None,verbose=None):
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-    if output_folder is not None:
+    if output_folder:
         if os.path.exists(output_folder) == False:
-            print('No output directory, it will be created.')
+            if verbose:
+                print('No output directory, it will be created.')
             os.mkdir(output_folder)
         run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
         sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
     p = Pool(processes=cpu_count())
-    print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
+    if verbose:
+        print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
     for genbank_path in genbank_paths:
-        pwt_run(genbank_path)
-    print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
+        pwt_run(genbank_path, verbose)
+    if verbose:
+        print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
-    print('~~~~~~~~~~Check inference~~~~~~~~~~')
-    check_pwt(genbank_paths)
-    print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
+    if verbose:
+        print('~~~~~~~~~~Check inference~~~~~~~~~~')
+    check_pwt(genbank_paths, verbose)
+    if verbose:
+        print('~~~~~~~~~~Creation of the PGDB-METADATA.ocelot file~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
         pgdb_id_folder = create_metadata(genbank_path)
         pgdb_folders[genbank_path] = pgdb_id_folder
-    print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
+    if verbose:
+        print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
     p.map(run_pwt_dat, genbank_paths)
-    print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
-    print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+    if verbose:
+        print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+        print('~~~~~~~~~~Moving result files~~~~~~~~~~')
     for genbank_path in pgdb_folders:
         move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
-    print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+    if verbose:
+        print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
     for genbank_path in pgdb_folders:
-        check_dat(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction)
-    print('~~~~~~~~~~The script have finished! Thank you for using it.')
+        check_dat(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, verbose)
+    if verbose:
+        print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 def check_existing_pgdb(run_ids, output_folder):
     """
@@ -104,17 +116,20 @@ def check_existing_pgdb(run_ids, output_folder):
 
     return new_run_ids
 
-def pwt_run(run_folder):
+def pwt_run(run_folder, verbose):
     """
     Check if files needed by Pathway-Tools are available, if not create them.
     """
     required_files = set(['organism-params.dat','genetic-elements.dat','script.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
-    print("Checking for pathwaytools inputs:")
+    if verbose:
+        print("Checking for pathwaytools inputs:")
     if required_files.issubset(files_in):
-        print("OK")
+        if verbose:
+            print("OK")
     else:
-        print("%s missing" %"; ".join(required_files.difference(files_in)))
+        if verbose:
+            print("%s missing" %"; ".join(required_files.difference(files_in)))
         create_dats_and_lisp(run_folder)
 
 def create_dats_and_lisp(run_folder):
@@ -216,7 +231,7 @@ def create_dats_and_lisp(run_folder):
         file.write('\n')
         file.write("(create-flat-files-for-current-kb)")
 
-def check_pwt(genbank_paths):
+def check_pwt(genbank_paths, verbose):
     """
     Check PathoLogic's log.
     """
@@ -243,7 +258,7 @@ def check_pwt(genbank_paths):
                             output_file.write(line)
                             writer.writerow([genbank_path, 'ERROR', '', '', '', ''])
                             failed_inferences.append(genbank_path)
-                        if fatal_error_index is not None:
+                        if fatal_error_index:
                             if index > fatal_error_index:
                                 output_file.write(line)
                         if 'Build done.' in  line:
@@ -266,11 +281,13 @@ def check_pwt(genbank_paths):
     with open('log_error.txt', 'w') as output_file:
             output_file.write('Inference statistics:\n')
             if len(passed_inferences) > 0:
-                print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
+                if verbose:
+                    print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
                 output_file.write('Build done: ' + str(len(passed_inferences)))
                 output_file.write('\tSpecies: ' + ', '.join(passed_inferences)+'\n')
             if len(failed_inferences) > 0:
-                print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
+                if verbose:
+                    print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
                 output_file.write('Build failed: ' + str(len(failed_inferences)))
                 output_file.write('\tSpecies: ' + ', '.join(failed_inferences)+'\n\n')
             output_file.write(save)
@@ -396,7 +413,7 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
 
     output_dat_path = pgdb_folder_path + '/1.0/data'
 
-    if output_folder is None:
+    if not output_folder:
         output_species = genbank_path + '/output/'
     else:
         output_species = output_folder + '/' + pgdb_folder_dbname +'/'
@@ -411,7 +428,7 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
             if dat_extraction == True:
                 if '.dat' in pgdb_file:
                     shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
-            elif dat_extraction is None:
+            elif not dat_extraction:
                 shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
         shutil.rmtree(pgdb_folder_path)
     else:
@@ -423,19 +440,19 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
 
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
-    if output_folder is not None:
+    if output_folder:
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
-def check_dat(genbank_path, pgdb_folder, output_folder, dat_extraction):
+def check_dat(genbank_path, pgdb_folder, output_folder, dat_extraction, verbose):
     pgdb_folder_dbname = pgdb_folder[0]
 
-    if output_folder is None:
-        if dat_extraction is None:
+    if not output_folder:
+        if not dat_extraction:
             dats_path = genbank_path + '/output/1.0/data/'
         else:
             dats_path = genbank_path + '/output/'
     else:
-        if dat_extraction is None:
+        if not dat_extraction:
             dats_path = output_folder + '/' + pgdb_folder_dbname +'/1.0/data/'
         else:
             dats_path = output_folder + '/' + pgdb_folder_dbname +'/'
@@ -448,8 +465,8 @@ def check_dat(genbank_path, pgdb_folder, output_folder, dat_extraction):
         dat_file_path = dats_path + '/' + dat_file
         if os.path.exists(dat_file_path):
             dat_checks.append(dat_file_path)
-
-    print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
+    if verbose:
+        print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
 
 if __name__ == '__main__':
     run()

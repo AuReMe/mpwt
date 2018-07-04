@@ -7,7 +7,7 @@ import subprocess
 
 from mpwt.multipwt import check_existing_pgdb
 
-def cleaning():
+def cleaning(verbose=None):
     """
     Clean Pathway-Tools PGDB's folder.
     The script will delete folders and files in ptools-local/pgdbs/user.
@@ -25,21 +25,24 @@ def cleaning():
     pgdb_metadata_path = file_path + 'PGDB-METADATA.ocelot'
     if os.path.isfile(pgdb_metadata_path):
         os.remove(pgdb_metadata_path)
-        print('PGDB-METADATA.ocelot has been removed.')
+        if verbose:
+            print('PGDB-METADATA.ocelot has been removed.')
 
     pgdb_counter_path = file_path + 'PGDB-counter.dat'
     if os.path.isfile(pgdb_counter_path):
         os.remove(pgdb_counter_path)
-        print('PGDB-counter.dat has been removed.')
+        if verbose:
+            print('PGDB-counter.dat has been removed.')
 
     for pgdb_folder in os.listdir(file_path):
         pgdb_folder_path = file_path + pgdb_folder
         shutil.rmtree(pgdb_folder_path)
-        print(pgdb_folder + ' has been removed.')
+        if verbose:
+            print(pgdb_folder + ' has been removed.')
 
-def cleaning_input(input_folder, output_folder=None):
+def cleaning_input(input_folder, output_folder=None, verbose=None):
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-    if output_folder is not None:
+    if output_folder:
         run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     for genbank_path in genbank_paths:
@@ -55,4 +58,5 @@ def cleaning_input(input_folder, output_folder=None):
             os.remove(genetic_dat)
         if os.path.exists(organism_dat):
             os.remove(organism_dat)
-        print('Remove temporary datas.')
+        if verbose:
+            print('Remove temporary datas.')
