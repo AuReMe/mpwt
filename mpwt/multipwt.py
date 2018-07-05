@@ -58,6 +58,9 @@ def run():
     multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
 
 def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None,verbose=None):
+    global verbose_multiprocess
+    verbose_multiprocess = verbose
+
     # Run folder contains sub-folders containing GBK file
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
     if output_folder:
@@ -388,7 +391,8 @@ def run_pwt(genbank_path):
     Create PGDB using files created during 'create_dats_and_lisp'.
     """
     cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s" %genbank_path
-    print(cmd_pwt)
+    if verbose_multiprocess:
+        print(cmd_pwt)
     FNULL = open(os.devnull, 'w')
     subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
@@ -399,7 +403,8 @@ def run_pwt_dat(genbank_path):
     If this proposition is not closed the script can't continue.
     """
     cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
-    print(cmd_dat)
+    if verbose_multiprocess:
+        print(cmd_dat)
     FNULL = open(os.devnull, 'w')
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
     p.communicate(input=b'none')
