@@ -7,11 +7,9 @@ import subprocess
 
 from mpwt.multipwt import check_existing_pgdb
 
-def cleaning(verbose=None):
+def ptools_path():
     """
-    Clean Pathway-Tools PGDB's folder.
-    The script will delete folders and files in ptools-local/pgdbs/user.
-
+    Find the path of ptools using Pathway-Tools file.
     """
     pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
     pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
@@ -19,8 +17,17 @@ def cleaning(verbose=None):
     pathway_tools_file = open(pathway_tools_path, 'r')   
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
     ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
-    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
     pathway_tools_file.close()
+
+    return ptools_local_path
+
+def cleaning(verbose=None):
+    """
+    Clean Pathway-Tools PGDB's folder.
+    The script will delete folders and files in ptools-local/pgdbs/user.
+    """
+    ptools_local_path = ptools_path()
+    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
 
     pgdb_metadata_path = file_path + 'PGDB-METADATA.ocelot'
     if os.path.isfile(pgdb_metadata_path):

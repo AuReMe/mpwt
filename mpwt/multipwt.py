@@ -38,7 +38,7 @@ def run():
     parser.add_argument("-v", "--verbose", dest = "verbose", help = "mpwt will be more verbose.", action='store_true', default=None)
     parser.add_argument("clean", nargs='?', help = "Arguments to clean ptools-local folder, before any other operations.")
 
-    parser_args = parser.parse_args(sys.argv[1:])
+    parser_args = parser.parse_args()
 
     input_folder = parser_args.folder
     output_folder = parser_args.output
