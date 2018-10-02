@@ -249,10 +249,11 @@ def check_pwt(genbank_paths):
             writer = csv.writer(csvfile, delimiter='\t', lineterminator='\n')
             writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
             for genbank_path in genbank_paths:
+                species = genbank_path.split('/')[-2]
                 patho_log = genbank_path + '/pathologic.log'
 
                 output_file.write('------------ Species: ')
-                output_file.write(genbank_path)
+                output_file.write(species)
                 output_file.write('\n')
 
                 fatal_error_index = None
@@ -262,8 +263,8 @@ def check_pwt(genbank_paths):
                         if 'fatal error' in line:
                             fatal_error_index = index
                             output_file.write(line)
-                            writer.writerow([genbank_path, 'ERROR', '', '', '', ''])
-                            failed_inferences.append(genbank_path)
+                            writer.writerow([species, 'ERROR', '', '', '', ''])
+                            failed_inferences.append(species)
                         if fatal_error_index:
                             if index > fatal_error_index:
                                 output_file.write(line)
@@ -276,7 +277,6 @@ def check_pwt(genbank_paths):
                             pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                            species = genbank_path.split('/')[1]
                             writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
 
                             passed_inferences.append(species)
@@ -290,13 +290,13 @@ def check_pwt(genbank_paths):
             if len(passed_inferences) > 0:
                 if global_verbose:
                     print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
-                output_file.write('Build done: ' + str(len(passed_inferences)))
-                output_file.write('\tSpecies: ' + ', '.join(passed_inferences)+'\n')
+                output_file.write('Build done: ' + str(len(passed_inferences)) + '\n')
+                output_file.write('Species: ' + ', '.join(passed_inferences) +  '\n\n')
             if len(failed_inferences) > 0:
                 if global_verbose:
                     print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
-                output_file.write('Build failed: ' + str(len(failed_inferences)))
-                output_file.write('\tSpecies: ' + ', '.join(failed_inferences)+'\n\n')
+                output_file.write('Build failed: ' + str(len(failed_inferences)) + '\n')
+                output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
             output_file.write(save)
     
     if len(failed_inferences) > 0:

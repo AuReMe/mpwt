@@ -52,15 +52,19 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
 
 Pathway-Tools will run on each genbank file. It will create an output folder containing all the result files from the PathoLogic inference for each species.
 
-Command Example
-~~~~~~~~~~~~~~~
+Command Line Example
+~~~~~~~~~~~~~~~~~~~~
 
-.. code::
+mpwt is usable as a command line.
+
+.. code:: sh
 
     mpwt -f path/to/folder/input -o path/to/folder/output
 
 Python Example
 ~~~~~~~~~~~~~~
+
+mpwt can be used in a python script with an import:
 
 .. code:: python
 
@@ -84,6 +88,11 @@ If you don't enter an argument, results will be stored in a folder named output 
 2. cleaning()
 
 Delete all the previous PGDB and the metadata files.
+
+This can also be used with a command line argument:
+
+.. code:: sh
+    mwpt clean
 
 3. ptools_path()
 
