@@ -78,12 +78,18 @@ mpwt can be used in a python script with an import:
 Useful functions
 ~~~~~~~~~~~~~~~~
 
-1. multiprocess_pwt(folder_input, folder_output)
+1. multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
 folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional
 If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
+
+dat_extraction: True or nothing. If True, mpwt will only return dat files of the PGDB.
+
+size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
+
+verbose: True or nothing. If true, mpwt will be verbose.
 
 2. cleaning()
 
@@ -92,6 +98,7 @@ Delete all the previous PGDB and the metadata files.
 This can also be used with a command line argument:
 
 .. code:: sh
+
     mwpt clean
 
 3. ptools_path()
