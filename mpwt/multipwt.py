@@ -276,9 +276,10 @@ def check_pwt(genbank_paths):
                             pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                            writer.writerow([genbank_path, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+                            species = genbank_path.split('/')[1]
+                            writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
 
-                            passed_inferences.append(genbank_path)
+                            passed_inferences.append(species)
 
                 output_file.write('------------\n\n')
 

@@ -42,18 +42,25 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
 .. code-block:: text
 
     Folder_input
-    ├── Folder_for_species_1
-    │   └── Genbank_species_1
-    ├── Folder_for_species_2
-    │   └── Genbank_species_2
-    ├── Folder_for_species_3
-    │   └── Genbank_species_3
-    │
+    ├── species_1
+    │   └── species_1.gbk
+    ├── species_2
+    │   └── species_2.gbk
+    ├── species_3
+    │   └── species_3.gbk
+    ..
 
 Pathway-Tools will run on each genbank file. It will create an output folder containing all the result files from the PathoLogic inference for each species.
 
-Example
-~~~~~~~
+Command Example
+~~~~~~~~~~~~~~~
+
+.. code::
+
+    mpwt -f path/to/folder/input -o path/to/folder/output
+
+Python Example
+~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -77,6 +84,10 @@ If you don't enter an argument, results will be stored in a folder named output 
 2. cleaning()
 
 Delete all the previous PGDB and the metadata files.
+
+3. ptools_path()
+
+Return the path to ptools-local.
 
 Errors
 ~~~~~~
