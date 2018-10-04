@@ -5,21 +5,7 @@ import os
 import shutil
 import subprocess
 
-from mpwt.multipwt import check_existing_pgdb
-
-def ptools_path():
-    """
-    Find the path of ptools using Pathway-Tools file.
-    """
-    pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
-    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
-
-    pathway_tools_file = open(pathway_tools_path, 'r')   
-    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
-    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
-    pathway_tools_file.close()
-
-    return ptools_local_path
+from mpwt.multipwt import check_existing_pgdb, ptools_path
 
 def cleaning(verbose=None):
     """
@@ -53,12 +39,12 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
         run_ids = check_existing_pgdb(run_ids, output_folder)
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     for genbank_path in genbank_paths:
-        listp_script = genbank_path + 'script.lisp'
+        lisp_script = genbank_path + 'script.lisp'
         patho_log = genbank_path + 'pathologic.log'
         genetic_dat = genbank_path + 'genetic-elements.dat'
         organism_dat = genbank_path + 'organism-params.dat'
-        if os.path.exists(listp_script):
-            os.remove(listp_script)
+        if os.path.exists(lisp_script):
+            os.remove(lisp_script)
         if os.path.exists(patho_log):
             os.remove(patho_log)
         if os.path.exists(genetic_dat):
@@ -66,4 +52,5 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
         if os.path.exists(organism_dat):
             os.remove(organism_dat)
         if verbose:
-            print('Remove temporary datas.')
+            species = genbank_path.split('/')[-2]
+            print('Remove ' + species + ' temporary datas.')

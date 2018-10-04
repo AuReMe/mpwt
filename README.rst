@@ -114,7 +114,13 @@ This can also be used with a command line argument:
 
 .. code:: sh
 
-    mwpt clean
+    mpwt clean
+
+If you use clean and the argument -f input_folder, it will delete input files ('script.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
+
+.. code:: sh
+
+    mpwt clean -f input_folder
 
 3. ptools_path()
 
