@@ -38,6 +38,7 @@ Input data
 ~~~~~~~~~~
 
 The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.
+Genbank files must have the same name as the folder in which they are located and also finished with a .gbk.
 
 .. code-block:: text
 
@@ -50,7 +51,9 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     │   └── species_3.gbk
     ..
 
-Pathway-Tools will run on each genbank file. It will create an output folder containing all the result files from the PathoLogic inference for each species.
+Pathway-Tools will run on each genbank file.
+It will create an output folder inside the folder containing all the result files from the PathoLogic inference for each species.
+You can also choose another output folder.
 
 Command Line Example
 ~~~~~~~~~~~~~~~~~~~~
@@ -59,7 +62,17 @@ mpwt is usable as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -o path/to/folder/output
+    mpwt -f path/to/folder/input [-o] path/to/folder/output [-d] [-v]
+
+Optional argument are identified by [].
+
+-f input folder as described in Input data.
+
+-o output folder containing PGDB data or dat files (see -d arguments).
+
+-d will extract only dat files and move them inside the output folder.
+
+-v verbose.
 
 Python Example
 ~~~~~~~~~~~~~~
@@ -73,16 +86,11 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output)
-
-Useful functions
-~~~~~~~~~~~~~~~~
-
-1. multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
-folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional
+folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional.
 If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
 
 dat_extraction: True or nothing. If True, mpwt will only return dat files of the PGDB.
@@ -90,6 +98,13 @@ dat_extraction: True or nothing. If True, mpwt will only return dat files of the
 size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
 
 verbose: True or nothing. If true, mpwt will be verbose.
+
+Useful functions
+~~~~~~~~~~~~~~~~
+
+1. multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
+
+Run the multiprocess Pathway-Tools on input folder.
 
 2. cleaning()
 
@@ -113,6 +128,9 @@ If you encounter errors (and it is highly possible) there is some tips that can 
 For error during PathoLogic inference, a log is created where you launch the command.
 The log contains the summary of the build and the error for each species.
 There is also a pathologic.log in each sub-folders.
+
+If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
+For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
 For others errors, currently nothing is made to help you.
 Maybe in the future.
