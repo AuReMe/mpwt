@@ -55,6 +55,59 @@ Pathway-Tools will run on each genbank file.
 It will create an output folder inside the folder containing all the result files from the PathoLogic inference for each species.
 You can also choose another output folder.
 
+Genbank file example:
+
+.. code-block:: text
+
+    LOCUS       scaffold1         XXXXXX bp    DNA     linear   INV DD-MMM-YYYY
+    DEFINITION  My species genbank.
+    ACCESSION   scaffold1
+    VERSION     scaffold1
+    KEYWORDS    Key words.
+    SOURCE      Source
+    ORGANISM  Species name
+                Taxonomy; Of; My; Species; With;
+                The; Genus.
+    FEATURES             Location/Qualifiers
+        source          1..XXXXXX
+                        /scaffold="scaffold1"
+                        /db_xref="taxon:taxonid"
+        gene            START..STOP
+                        /locus_tag="gene1"
+        mRNA            START..STOP
+                        /locus_tag="gene1"
+        CDS             START..STOP
+                        /locus_tag="gene1"
+                        /db_xref="InterPro:IPRXXXXXX"
+                        /EC_number="X.X.X.X"
+                        /translation="AMINOAACIDSSEQUENCE"
+
+Input files created by mpwt
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Three input files are created by mpwt. Informations are extracted from the genbank file.
+myDBName corresponds to the name of the folder and the genbank file.
+taxonid corresponds to the taxonid in the db_xref of the source feature in the genbank.
+species_name is extracted from the genbank file.
+
+.. code-block:: text
+
+    organism-params.dat:
+    ID  myDBName
+    STORAGE FILE
+    NCBI-TAXON-ID   taxonid
+    NAME    species_name
+
+    genetic-elements.dats:
+    NAME    
+    ANNOT-FILE  gbk_pathname
+    //
+
+    script.lisp:
+    (in-package :ecocyc)
+    (select-organism :org-id 'myDBName)
+    (create-flat-files-for-current-kb)
+
 Command Line Example
 ~~~~~~~~~~~~~~~~~~~~
 

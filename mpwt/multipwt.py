@@ -4,15 +4,7 @@
 """
 Description:
 From genbank file this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at last it will generate dat files for AuReMe.
-The script takes a folder name as argument. The folder structure expected is:
-Folder_input
-├── Folder_for_species_1
-│   └── Genbank_species_1
-├── Folder_for_species_2
-│   └── Genbank_species_2
-├── Folder_for_species_3
-│   └── Genbank_species_3
-│
+The script takes a folder name as argument.
 """
 
 import argparse
@@ -151,22 +143,6 @@ def create_dats_and_lisp(run_folder):
     Read Genbank file and create Pathway Tools needed file.
     Create also a lisp file to create dat files from Pathway tools results.
     The name of the PGDB created by Pathway Tools will be the name of the species with '_' instead of space.
-
-    Genbank example:
-
-    LOCUS       scaffold1         XXXXXX bp    DNA     linear   INV DD-MMM-YYYY
-    DEFINITION  My species genbank.
-    ACCESSION   scaffold1
-    VERSION     scaffold1
-    KEYWORDS    Key words.
-    SOURCE      Source
-    ORGANISM  Species name
-                Taxonomy; Of; My; Species; With;
-                The; Genus.
-    FEATURES             Location/Qualifiers
-        source          1..XXXXXX
-                        /scaffold="scaffold1"
-                        /db_xref="taxon:taxonid"
 
     Create organism-params.dat:
     ID  myDBName
