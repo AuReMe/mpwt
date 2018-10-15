@@ -84,18 +84,22 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
     for genbank_path in genbank_paths:
         pgdb_id_folder = extract_pgdb_pathname(genbank_path)
         pgdb_folders[genbank_path] = pgdb_id_folder
-    if verbose:
-        print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-    p.map(run_pwt_dat, genbank_paths)
+    if dat_extraction:
+        if verbose:
+            print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
+        p.map(run_pwt_dat, genbank_paths)
+        if verbose:
+            print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+        for genbank_path in pgdb_folders:
+            check_dat(pgdb_folders[genbank_path])
     if verbose:
         print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
-        print('~~~~~~~~~~Moving result files~~~~~~~~~~')
-    for genbank_path in pgdb_folders:
-        move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
-    if verbose:
-        print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
-    for genbank_path in pgdb_folders:
-        check_dat(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction)
+    if output_folder:
+        if verbose:
+            print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+        for genbank_path in pgdb_folders:
+            move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
+
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
@@ -187,7 +191,7 @@ def create_dats_and_lisp(run_folder):
 
         # Take the source feature of the first record.
         # This feature contains the taxon ID in the db_xref qualifier.
-        src_feature = [f for f in first_seq_record.features if f.type == "source"][0]
+        src_feature = [feature for feature in first_seq_record.features if feature.type == "source"][0]
         try:
             taxon_id = src_feature.qualifiers['db_xref'][0].replace('taxon:', '')
         except KeyError:
@@ -344,6 +348,28 @@ def run_pwt_dat(genbank_path):
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
     p.communicate(input=b'none')
 
+def check_dat(pgdb_folder):
+    """
+    Check dats creation.
+    Is it really useful?
+    """
+    ptools_local_path = ptools_path()
+    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
+    pgdb_folder_dbname = pgdb_folder[0] + 'cyc'
+    dats_path = file_path + pgdb_folder_dbname +'/1.0/data/'
+
+    dat_files = ["classes.dat", "compound-links.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "gene-links.dat", "genes.dat", "pathway-links.dat",
+                "pathways.dat", "promoters.dat", "protein-features.dat", "protein-links.dat", "proteins.dat", "protligandcplxes.dat", "pubs.dat",
+                "reaction-links.dat", "reactions.dat", "regulation.dat", "regulons.dat", "rnas.dat", "species.dat", "terminators.dat", "transunits.dat"]
+
+    dat_checks = []
+    for dat_file in dat_files:
+        dat_file_path = dats_path + '/' + dat_file
+        if os.path.exists(dat_file_path):
+            dat_checks.append(dat_file_path)
+    if global_verbose:
+        print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
+
 def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
     """
     Move the result files inside the shared folder containing the input data.
@@ -351,15 +377,10 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
     pgdb_folder_dbname = pgdb_folder[0]
     pgdb_folder_path = pgdb_folder[1]
 
-    output_dat_path = pgdb_folder_path + '/1.0/data'
-
-    if not output_folder:
-        output_species = genbank_path + '/output/'
-    else:
-        output_species = output_folder + '/' + pgdb_folder_dbname +'/'
+    output_species = output_folder + '/' + pgdb_folder_dbname +'/'
 
     if dat_extraction == True:
-        pgdb_folder_path = output_dat_path
+        pgdb_folder_path = pgdb_folder_path + '/1.0/data'
 
     if size_reduction is True:
         for pgdb_file in os.listdir(pgdb_folder_path):
@@ -380,33 +401,8 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
 
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
-    if output_folder:
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
-def check_dat(genbank_path, pgdb_folder, output_folder, dat_extraction):
-    pgdb_folder_dbname = pgdb_folder[0]
-
-    if not output_folder:
-        if not dat_extraction:
-            dats_path = genbank_path + '/output/1.0/data/'
-        else:
-            dats_path = genbank_path + '/output/'
-    else:
-        if not dat_extraction:
-            dats_path = output_folder + '/' + pgdb_folder_dbname +'/1.0/data/'
-        else:
-            dats_path = output_folder + '/' + pgdb_folder_dbname +'/'
-
-    dat_files = ["classes.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "genes.dat", "pathways.dat", "promoters.dat", "protein-features.dat",
-                "proteins.dat", "protligandcplxes.dat", "pubs.dat", "reactions.dat", "regulation.dat", "regulons.dat", "rnas.dat", "species.dat", "terminators.dat", "transunits.dat"]
-
-    dat_checks = []
-    for dat_file in dat_files:
-        dat_file_path = dats_path + '/' + dat_file
-        if os.path.exists(dat_file_path):
-            dat_checks.append(dat_file_path)
-    if global_verbose:
-        print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
 if __name__ == '__main__':
     run()
