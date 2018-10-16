@@ -195,15 +195,25 @@ This can also be used with a command line argument:
 
 .. code:: sh
 
-    mpwt clean
+    mpwt --clean
 
 If you use clean and the argument -f input_folder, it will delete input files ('script.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
 
 .. code:: sh
 
-    mpwt clean -f input_folder
+    mpwt --clean -f input_folder
 
-3. ptools_path()
+2. delete_pgdb(pgdb_name)
+
+With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
+
+And as a command line:
+
+.. code:: sh
+
+    mpwt --delete mydbcyc1,mydbcyc2
+
+4. ptools_path()
 
 Return the path to ptools-local.
 

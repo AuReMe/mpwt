@@ -33,7 +33,21 @@ def cleaning(verbose=None):
         if verbose:
             print(pgdb_folder + ' has been removed.')
 
+def delete_pgdb(pgdb_name):
+    """
+    Remove a specific PGDB.
+    """
+    ptools_local_path = ptools_path()
+    pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
+
+    shutil.rmtree(pgdb_path)
+
+    print(pgdb_name + ' (at ' + pgdb_path + ') has been removed.')
+
 def cleaning_input(input_folder, output_folder=None, verbose=None):
+    """
+    Remove script.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
+    """
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
     if output_folder:
         if os.path.exists(output_folder) == False:
