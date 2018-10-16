@@ -115,7 +115,7 @@ mpwt is usable as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o] path/to/folder/output [-d] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [-d] [-v]
 
 Optional argument are identified by [].
 
@@ -123,9 +123,37 @@ Optional argument are identified by [].
 
 -o output folder containing PGDB data or dat files (see -d arguments).
 
--d will extract only dat files and move them inside the output folder.
+-d will create dat files and only move them inside the output folder.
 
 -v verbose.
+
+Possible uses of mpwt:
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input
+
+Create PGDBs of studied organisms inside ptools-local.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input -d
+
+Create PGDBs of studied organisms inside ptools-local and create dat files.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input -o path/to/folder/output
+
+Create PGDBs of studied organisms inside ptools-local.
+Then extract the files inside the output folder.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input -o path/to/folder/output -d
+
+Create PGDBs of studied organisms inside ptools-local and create dat files.
+Then extract the dat files inside the output folder.
 
 Python Example
 ~~~~~~~~~~~~~~
