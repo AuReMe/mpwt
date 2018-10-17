@@ -71,6 +71,8 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
                 print('No output directory, it will be created.')
             os.mkdir(output_folder)
     run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
+    if not run_ids:
+        return
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
         sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
@@ -129,7 +131,8 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
         new_run_ids = list(new_run_ids)
 
     if len(new_run_ids) == 0:
-        sys.exit("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
+        print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
+        return None
 
     return new_run_ids
 

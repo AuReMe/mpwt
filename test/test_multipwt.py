@@ -2,31 +2,27 @@
 # -*- coding: utf-8 -*-
 
 """
-Test for mpwt data using gebank file from Buchnera aphidicola str. APS (Acyrthosiphon pisum).
+Description:
+Test mpwt on a genbank file containing E. coli genes implied in the TCA cycle.
 """
 
-import gzip
 import mpwt
-import os
-import shutil
-import urllib.request
 
-def test_on_genome():
-    os.makedirs('test_data/baphidicola')
+def test_multiprocess_pwt():
+    mpwt.multiprocess_pwt('test', 'test_output', dat_extraction=True, size_reduction=False, verbose=True)
 
-    gbk_url = 'ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/009/605/GCA_000009605.1_ASM960v1/GCA_000009605.1_ASM960v1_genomic.gbff.gz'
-    compressed_file_pathname = 'test_data/baphidicola/baphidicola.gbk.gz'
-    gbk_file_pathname = 'test_data/baphidicola/baphidicola.gbk'
-    run_folder = 'test_data'
-    # Retrieve Buchnera aphidicola genome.
-    urllib.request.urlretrieve(gbk_url, compressed_file_pathname)
+    pathway_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
 
-    # Extract Buchnera aphidicola genome.
-    with gzip.open(compressed_file_pathname, 'rb') as compressed_file:
-        with open(gbk_file_pathname, 'wb') as gbk_file:
-            shutil.copyfileobj(compressed_file, gbk_file)
+    tca_reactions = ["RXN-14971", "MALATE-DEH-RXN", "ISOCITDEH-RXN", "MALATE-DEHYDROGENASE-ACCEPTOR-RXN",
+                    "ACONITATEDEHYDR-RXN", "CITSYN-RXN", "ACONITATEHYDR-RXN", "2OXOGLUTARATEDEH-RXN", "SUCCCOASYN-RXN", "FUMHYDR-RXN"]
+    reactions = []
+    with open(pathway_pathname) as pathway_file:
+        for line in pathway_file:
+            if 'REACTION-LIST' in line:
+                reaction = line.split(' - ')[1].strip()
 
-    os.remove(compressed_file_pathname)
+                reactions.append(reaction)
 
-    # Run mpwt on genome.
-    mpwt.multiprocess_pwt(run_folder, output_folder=None, dat_extraction=True, verbose=True)
+    assert set(tca_reactions).issubset(set(reactions))
+
+test_multiprocess_pwt()
