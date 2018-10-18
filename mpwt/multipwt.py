@@ -198,7 +198,7 @@ def create_dats_and_lisp(run_folder):
     species_name = ""
 
     # Take the species name and the taxon id from the genbank file.
-    with open(gbk_file, "rU") as gbk:
+    with open(gbk_file, "r") as gbk:
         # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
         first_seq_record = next(SeqIO.parse(gbk, "genbank"))
         try:

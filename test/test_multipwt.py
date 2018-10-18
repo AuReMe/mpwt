@@ -9,7 +9,7 @@ Test mpwt on a genbank file containing E. coli genes implied in the TCA cycle.
 import mpwt
 
 def test_create_dats_and_lisp():
-    mpwt.multipwt.create_dats_and_lisp('test', verbose=False)
+    mpwt.multipwt.create_dats_and_lisp('test/tca_cycle_ecoli/')
 
     genetic_pathname = 'test/tca_cycle_ecoli/genetic-elements.dat'
     organism_pathname = 'test/tca_cycle_ecoli/organism-params.dat'
@@ -20,15 +20,15 @@ def test_create_dats_and_lisp():
     lisp_string_expected = '''(in-package :ecocyc)\n(select-organism :org-id 'tca_cycle_ecoli)\n(create-flat-files-for-current-kb)'''
 
     with open(genetic_pathname, 'r') as genetic_file:
-        genetic_string_found = open(genetic_file, 'r').read()
+        genetic_string_found = genetic_file.read()
         assert genetic_string_found == genetic_string_expected
 
     with open(organism_pathname, 'r') as organism_file:
-        organism_string_found = open(organism_file, 'r').read()
+        organism_string_found = organism_file.read()
         assert organism_string_found == organism_string_expected
 
     with open(lisp_pathname, 'r') as lisp_file:
-        lisp_string_found = open(lisp_file, 'r').read()
+        lisp_string_found = lisp_file.read()
         assert lisp_string_found == lisp_string_expected
 
 def test_multiprocess_pwt():
