@@ -33,6 +33,13 @@ def run():
 
     parser_args = parser.parse_args()
 
+    # Print help and exit if no arguments.
+    argument_number = len(sys.argv[1:])
+    if argument_number == 0:
+        parser.print_help()
+        parser.exit()
+
+    # Delete PGDB if use of --delete argument.
     pgdb_to_deletes = parser_args.delete
     if pgdb_to_deletes:
         for pgdb_to_delete in pgdb_to_deletes.split(','):
@@ -51,7 +58,7 @@ def run():
         cleaning(verbose)
         if input_folder:
             cleaning_input(input_folder, output_folder, verbose)
-        if len(sys.argv) == 2 or (len(sys.argv) == 3 and verbose):
+        if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
     multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
