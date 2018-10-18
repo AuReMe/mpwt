@@ -22,14 +22,14 @@ from multiprocessing import Pool, cpu_count
 def run():
     from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
 
-    parser = argparse.ArgumentParser(usage="python pathway_tools_multiprocess.py -f FOLDER")
+    parser = argparse.ArgumentParser(usage="mpwt -f FOLDER [-o FOLDER] [-d] [-r ] [-v] [--clean] [--delete STRING]")
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
     parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
     parser.add_argument("-r", "--reduce", dest = "reduce_size", help = "Will delete files in ptools-local to reduce size of results.", action='store_true', default=None)
     parser.add_argument("-v", "--verbose", dest = "verbose", help = "mpwt will be more verbose.", action='store_true', default=None)
-    parser.add_argument("--delete", dest = "delete", metavar = "STRING", help = "Give a PGDB name and it will delete it (if multiple separe them with a ',').", default=None)
-    parser.add_argument("-c", "--clean", dest = "clean", help = "Arguments to clean ptools-local folder, before any other operations.", action='store_true', default=None)
+    parser.add_argument("--delete", dest = "delete", metavar = "STRING", help = "Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc .", default=None)
+    parser.add_argument("--clean", dest = "clean", help = "Arguments to clean ptools-local folder, before any other operations.", action='store_true', default=None)
 
     parser_args = parser.parse_args()
 
