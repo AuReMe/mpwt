@@ -217,7 +217,7 @@ def create_dats_and_lisp(run_folder):
     lisp_file = run_folder + "script.lisp"
 
     # The name of the PGDB will be the name of the species.
-    myDBName = gbk_name.split('.')[0]
+    myDBName = os.path.splitext(gbk_name)[0]
 
     # Create the organism-params dat file.
     with open(organism_dat, 'w') as csvfile:
@@ -331,7 +331,7 @@ def extract_pgdb_pathname(run_folder):
     gbk_name = run_folder.split('/')[-2] + ".gbk"
 
     # The name of the PGDB will be the name of the species.
-    myDBName = gbk_name.split('.')[0]
+    myDBName = os.path.splitext(gbk_name)[0]
 
     ptools_local_path = ptools_path()
     file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
