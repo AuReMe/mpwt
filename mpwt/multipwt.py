@@ -129,13 +129,12 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
         new_run_ids = list(new_run_ids)
 
     else:
-        already_present_pgdbs = []
+        new_run_ids = []
         for species_folder in os.listdir(input_folder):
-            if os.path.isdir("{0}".format(input_folder + '/' + species_folder + '/output')):
-                already_present_pgdbs.append(species_folder)
-
-        new_run_ids = set(run_ids) - set(already_present_pgdbs)
-        new_run_ids = list(new_run_ids)
+            if '.' in species_folder:
+                print('Error: . in genbank name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                return None
+            new_run_ids.append(species_folder)
 
     if len(new_run_ids) == 0:
         print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
@@ -182,12 +181,12 @@ def create_dats_and_lisp(run_folder):
     (create-flat-files-for-current-kb)
     """
     # Look for a Genbank file in the run folder.
-    gbk_file = run_folder + run_folder.split('/')[-2] + ".gbk"
+    gbk_pathname = run_folder + run_folder.split('/')[-2] + ".gbk"
     gbk_name = run_folder.split('/')[-2] + ".gbk"
 
     # Check if a Genbank file have been found.
     try:
-        gbk_file
+        gbk_pathname
     except NameError:
         raise NameError('Missing Genbank file. Check if you have a Genbank file and if it ends with .gbk or .gb or .gbff')
 
@@ -198,7 +197,7 @@ def create_dats_and_lisp(run_folder):
     species_name = ""
 
     # Take the species name and the taxon id from the genbank file.
-    with open(gbk_file, "r") as gbk:
+    with open(gbk_pathname, "r") as gbk:
         # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
         first_seq_record = next(SeqIO.parse(gbk, "genbank"))
         try:
@@ -328,17 +327,14 @@ def extract_pgdb_pathname(run_folder):
     """
     Extract PGDB ID folder and path.
     """
-    gbk_name = run_folder.split('/')[-2] + ".gbk"
-
-    # The name of the PGDB will be the name of the species.
-    myDBName = os.path.splitext(gbk_name)[0]
+    gbk_name = run_folder.split('/')[-2]
 
     ptools_local_path = ptools_path()
-    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
+    file_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
 
-    # Replace all / by _ to ensure that there is no error with the path with myDBName.
-    pgdb_folder = file_path + myDBName.replace('/', '_').lower() + 'cyc/'
-    pgdb_id_folder = (myDBName, pgdb_folder)
+    # Replace all / by _ to ensure that there is no error with the path with gbk_name.
+    pgdb_folder = file_path + gbk_name.replace('/', '_').lower() + 'cyc/'
+    pgdb_id_folder = (gbk_name, pgdb_folder)
 
     return pgdb_id_folder
 
