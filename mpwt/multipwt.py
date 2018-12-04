@@ -351,7 +351,7 @@ def run_pwt(genbank_path):
     """
     Create PGDB using files created during 'create_dats_and_lisp'.
     """
-    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -patho %s" %genbank_path
+    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho %s" %genbank_path
     if global_verbose:
         print(cmd_pwt)
     FNULL = open(os.devnull, 'w')
@@ -363,7 +363,7 @@ def run_pwt_dat(genbank_path):
     Add an input to the subprocess call to close the Navigator Window opening proposition ('Enter name of X-window server to connect to (of the form HOST:N.M):').
     If this proposition is not closed the script can't continue.
     """
-    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
+    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
     if global_verbose:
         print(cmd_dat)
     FNULL = open(os.devnull, 'w')
