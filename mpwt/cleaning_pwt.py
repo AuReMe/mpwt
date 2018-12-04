@@ -29,9 +29,10 @@ def cleaning(verbose=None):
 
     for pgdb_folder in os.listdir(file_path):
         pgdb_folder_path = file_path + pgdb_folder
-        shutil.rmtree(pgdb_folder_path)
-        if verbose:
-            print(pgdb_folder + ' has been removed.')
+        if os.path.isdir(pgdb_folder_path):
+            shutil.rmtree(pgdb_folder_path)
+            if verbose:
+                print(pgdb_folder + ' has been removed.')
 
 def delete_pgdb(pgdb_name):
     """
@@ -39,10 +40,11 @@ def delete_pgdb(pgdb_name):
     """
     ptools_local_path = ptools_path()
     pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
-
-    shutil.rmtree(pgdb_path)
-
-    print(pgdb_name + ' (at ' + pgdb_path + ') has been removed.')
+    if os.path.isdir(pgdb_path):
+        shutil.rmtree(pgdb_path)
+        print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
+    else:
+        print(pgdb_path + " not a folder.")
 
 def cleaning_input(input_folder, output_folder=None, verbose=None):
     """
@@ -57,18 +59,19 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
         run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     for genbank_path in genbank_paths:
-        lisp_script = genbank_path + 'script.lisp'
-        patho_log = genbank_path + 'pathologic.log'
-        genetic_dat = genbank_path + 'genetic-elements.dat'
-        organism_dat = genbank_path + 'organism-params.dat'
-        if os.path.exists(lisp_script):
-            os.remove(lisp_script)
-        if os.path.exists(patho_log):
-            os.remove(patho_log)
-        if os.path.exists(genetic_dat):
-            os.remove(genetic_dat)
-        if os.path.exists(organism_dat):
-            os.remove(organism_dat)
-        if verbose:
-            species = genbank_path.split('/')[-2]
-            print('Remove ' + species + ' temporary datas.')
+        if os.path.isdir(genbank_path):
+            lisp_script = genbank_path + 'script.lisp'
+            patho_log = genbank_path + 'pathologic.log'
+            genetic_dat = genbank_path + 'genetic-elements.dat'
+            organism_dat = genbank_path + 'organism-params.dat'
+            if os.path.exists(lisp_script):
+                os.remove(lisp_script)
+            if os.path.exists(patho_log):
+                os.remove(patho_log)
+            if os.path.exists(genetic_dat):
+                os.remove(genetic_dat)
+            if os.path.exists(organism_dat):
+                os.remove(organism_dat)
+            if verbose:
+                species = genbank_path.split('/')[-2]
+                print('Remove ' + species + ' temporary datas.')
