@@ -51,13 +51,18 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
     Remove script.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
     """
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
+
     if output_folder:
         if os.path.exists(output_folder) == False:
             if verbose:
                 print('No output directory, it will be created.')
             os.mkdir(output_folder)
         run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
+        if not run_ids:
+            return
+
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
+
     for genbank_path in genbank_paths:
         if os.path.isdir(genbank_path):
             lisp_script = genbank_path + 'script.lisp'

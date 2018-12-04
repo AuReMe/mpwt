@@ -339,10 +339,10 @@ def extract_pgdb_pathname(run_folder):
     gbk_name = run_folder.split('/')[-2]
 
     ptools_local_path = ptools_path()
-    file_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
+    pgdb_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
 
     # Replace all / by _ to ensure that there is no error with the path with gbk_name.
-    pgdb_folder = file_path + gbk_name.replace('/', '_').lower() + 'cyc/'
+    pgdb_folder = pgdb_path + gbk_name.replace('/', '_').lower() + 'cyc/'
     pgdb_id_folder = (gbk_name, pgdb_folder)
 
     return pgdb_id_folder
@@ -375,10 +375,9 @@ def check_dat(pgdb_folder):
     Check dats creation.
     Is it really useful?
     """
-    ptools_local_path = ptools_path()
-    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
-    pgdb_folder_dbname = pgdb_folder[0] + 'cyc'
-    dats_path = file_path + pgdb_folder_dbname +'/1.0/data/'
+    pgdb_folder_dbname = pgdb_folder[0].lower() + 'cyc'
+
+    dats_path = pgdb_folder[1] +'/1.0/data/'
 
     dat_files = ["classes.dat", "compound-links.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "gene-links.dat", "genes.dat", "pathway-links.dat",
                 "pathways.dat", "promoters.dat", "protein-features.dat", "protein-links.dat", "proteins.dat", "protligandcplxes.dat", "pubs.dat",
@@ -390,7 +389,9 @@ def check_dat(pgdb_folder):
         if os.path.exists(dat_file_path):
             dat_checks.append(dat_file_path)
     if global_verbose:
-        print(pgdb_folder_dbname + ': ' + str(len(dat_checks)) + " on " + str(len(dat_files)) + " dat files create.")
+        expected_dat_number = str(len(dat_files))
+        found_dat_number = str(len(dat_checks))
+        print('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
 def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
     """
