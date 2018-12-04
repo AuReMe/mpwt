@@ -149,7 +149,8 @@ def pwt_run(run_folder):
     required_files = set(['organism-params.dat','genetic-elements.dat','script.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
     if global_verbose:
-        print("Checking for pathwaytools inputs:")
+        species_folder = run_folder.split('/')[-2]
+        print("Checking Pathway-Tools species_folder inputs for {0}:".format(species_folder))
     if required_files.issubset(files_in):
         if global_verbose:
             print("OK")
@@ -165,7 +166,7 @@ def create_dats_and_lisp(run_folder):
     The name of the PGDB created by Pathway Tools will be the name of the species with '_' instead of space.
 
     Create organism-params.dat:
-    ID  myDBName
+    ID  pgdb_id
     STORAGE FILE
     NCBI-TAXON-ID   taxon_id
     NAME    species_name
@@ -177,12 +178,14 @@ def create_dats_and_lisp(run_folder):
 
     Create script.lisp:
     (in-package :ecocyc)
-    (select-organism :org-id 'myDBName)
+    (select-organism :org-id 'pgdb_id)
     (create-flat-files-for-current-kb)
     """
     # Look for a Genbank file in the run folder.
-    gbk_pathname = run_folder + run_folder.split('/')[-2] + ".gbk"
-    gbk_name = run_folder.split('/')[-2] + ".gbk"
+    # PGDB ID corresponds to the name of the species folder.
+    pgdb_id = run_folder.split('/')[-2]
+    gbk_pathname = run_folder + pgdb_id + ".gbk"
+    gbk_name = pgdb_id + ".gbk"
 
     # Check if a Genbank file have been found.
     try:
@@ -215,13 +218,10 @@ def create_dats_and_lisp(run_folder):
 
     lisp_file = run_folder + "script.lisp"
 
-    # The name of the PGDB will be the name of the species.
-    myDBName = os.path.splitext(gbk_name)[0]
-
     # Create the organism-params dat file.
     with open(organism_dat, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter='\t', lineterminator='\n')
-        writer.writerow(['ID', myDBName])
+        writer.writerow(['ID', pgdb_id])
         writer.writerow(['STORAGE', "FILE"])
         writer.writerow(['NCBI-TAXON-ID', taxon_id])
         writer.writerow(['NAME', species_name])
@@ -237,9 +237,11 @@ def create_dats_and_lisp(run_folder):
     with open(lisp_file, 'w') as file:
         file.write("(in-package :ecocyc)")
         file.write('\n')
-        file.write("(select-organism :org-id '" + myDBName + ")")
+        file.write("(select-organism :org-id '" + pgdb_id + ")")
         file.write('\n')
         file.write("(create-flat-files-for-current-kb)")
+
+    print('Inputs file created for {0}.'.format(pgdb_id))
 
 def check_pwt(genbank_paths):
     """
