@@ -83,23 +83,28 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
     if len(genbank_paths) == 0:
         sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
+
     p = Pool(processes=cpu_count())
+
     if verbose:
         print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
     for genbank_path in genbank_paths:
         pwt_run(genbank_path)
+
     if verbose:
         print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
     p.map(run_pwt, genbank_paths)
     if verbose:
         print('~~~~~~~~~~Check inference~~~~~~~~~~')
     check_pwt(genbank_paths)
+
     if verbose:
         print('~~~~~~~~~~Extraction of PGDB Pathname~~~~~~~~~~')
     pgdb_folders = {}
     for genbank_path in genbank_paths:
         pgdb_id_folder = extract_pgdb_pathname(genbank_path)
         pgdb_folders[genbank_path] = pgdb_id_folder
+
     if dat_extraction:
         if verbose:
             print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
@@ -108,13 +113,14 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
             print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
         for genbank_path in pgdb_folders:
             check_dat(pgdb_folders[genbank_path])
+
     if verbose:
         print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
     if output_folder:
         if verbose:
             print('~~~~~~~~~~Moving result files~~~~~~~~~~')
         for genbank_path in pgdb_folders:
-            move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction,size_reduction)
+            move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, size_reduction)
 
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
@@ -246,6 +252,7 @@ def create_dats_and_lisp(run_folder):
 def check_pwt(genbank_paths):
     """
     Check PathoLogic's log.
+    Create two log files (log_error.txt which contains Pathway-Tools log and resume_inference which contains summary of network).
     """
     failed_inferences = []
     passed_inferences = []
