@@ -360,13 +360,20 @@ def extract_pgdb_pathname(run_folder):
 def run_pwt(genbank_path):
     """
     Create PGDB using files created during 'create_dats_and_lisp'.
+    With verbose run check_output to retrieve the output of subprocess (and show when Pathway-Tools has been killed).
+    Otherwise send the output to the null device.
     """
     cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho %s" %genbank_path
     if global_verbose:
         print(cmd_pwt)
-    FNULL = open(os.devnull, 'w')
-    subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
+        cmd_output = subprocess.check_output(cmd_pwt, shell=True).decode('utf-8')
+        if 'Killed' in cmd_output:
+            print('Command {0} has been Killed (maybe RAM error).'.format(genbank_path))
+
+    else:
+        FNULL = open(os.devnull, 'w')
+        subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
 def run_pwt_dat(genbank_path):
     """

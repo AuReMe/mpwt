@@ -7,6 +7,7 @@ import subprocess
 
 from mpwt.multipwt import check_existing_pgdb, ptools_path
 
+
 def cleaning(verbose=None):
     """
     Clean Pathway-Tools PGDB's folder.
@@ -34,6 +35,7 @@ def cleaning(verbose=None):
             if verbose:
                 print(pgdb_folder + ' has been removed.')
 
+
 def delete_pgdb(pgdb_name):
     """
     Remove a specific PGDB.
@@ -45,6 +47,7 @@ def delete_pgdb(pgdb_name):
         print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
     else:
         print(pgdb_path + " not a folder.")
+
 
 def cleaning_input(input_folder, output_folder=None, verbose=None):
     """
