@@ -19,6 +19,7 @@ import sys
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
+
 def run():
     from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
 
@@ -62,6 +63,7 @@ def run():
             sys.exit()
 
     multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
+
 
 def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None,verbose=None):
     # Use a second verbose variable because a formal parameter can't be a global variable.
@@ -125,6 +127,7 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
 
+
 def check_existing_pgdb(run_ids, input_folder, output_folder):
     """
     Check output folder for already existing PGDB, don't create them.
@@ -136,9 +139,10 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
 
     else:
         new_run_ids = []
+        invalid_characters = ['.', '/']
         for species_folder in os.listdir(input_folder):
-            if '.' in species_folder:
-                print('Error: . in genbank name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+            if any(char in invalid_characters for char in species_folder):
+                print('Error: . or / in genbank name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None
             new_run_ids.append(species_folder)
 
@@ -147,6 +151,7 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
         return None
 
     return new_run_ids
+
 
 def pwt_run(run_folder):
     """
@@ -164,6 +169,7 @@ def pwt_run(run_folder):
         if global_verbose:
             print("%s missing" %"; ".join(required_files.difference(files_in)))
         create_dats_and_lisp(run_folder)
+
 
 def create_dats_and_lisp(run_folder):
     """
@@ -249,6 +255,7 @@ def create_dats_and_lisp(run_folder):
 
     print('Inputs file created for {0}.'.format(pgdb_id))
 
+
 def check_pwt(genbank_paths):
     """
     Check PathoLogic's log.
@@ -318,6 +325,7 @@ def check_pwt(genbank_paths):
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'log_error.txt'])
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'resume_inference.tsv'])
 
+
 def ptools_path():
     """
     Find the path of ptools using Pathway-Tools file.
@@ -332,6 +340,7 @@ def ptools_path():
 
     return ptools_local_path
 
+
 def extract_pgdb_pathname(run_folder):
     """
     Extract PGDB ID folder and path.
@@ -342,10 +351,11 @@ def extract_pgdb_pathname(run_folder):
     pgdb_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
 
     # Replace all / by _ to ensure that there is no error with the path with gbk_name.
-    pgdb_folder = pgdb_path + gbk_name.replace('/', '_').lower() + 'cyc/'
+    pgdb_folder = pgdb_path + gbk_name.lower() + 'cyc/'
     pgdb_id_folder = (gbk_name, pgdb_folder)
 
     return pgdb_id_folder
+
 
 def run_pwt(genbank_path):
     """
@@ -356,6 +366,7 @@ def run_pwt(genbank_path):
         print(cmd_pwt)
     FNULL = open(os.devnull, 'w')
     subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+
 
 def run_pwt_dat(genbank_path):
     """
@@ -369,6 +380,7 @@ def run_pwt_dat(genbank_path):
     FNULL = open(os.devnull, 'w')
     p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
     p.communicate(input=b'none')
+
 
 def check_dat(pgdb_folder):
     """
@@ -392,6 +404,7 @@ def check_dat(pgdb_folder):
         expected_dat_number = str(len(dat_files))
         found_dat_number = str(len(dat_checks))
         print('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+
 
 def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
     """
@@ -426,6 +439,7 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
 
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
+
 
 if __name__ == '__main__':
     run()
