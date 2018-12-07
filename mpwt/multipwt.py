@@ -64,7 +64,7 @@ def run():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose, number_cpu)
+    multiprocess_pwt(input_folder, output_folder, dat_extraction, size_reduction, number_cpu, verbose)
 
 
 def multiprocess_pwt(input_folder, output_folder=None, dat_extraction=None, size_reduction=None, number_cpu=None, verbose=None):
@@ -90,7 +90,7 @@ def multiprocess_pwt(input_folder, output_folder=None, dat_extraction=None, size
 
     # Use the number of cpu entered by the user or all the cpu available.
     if number_cpu:
-        number_cpu_to_use = number_cpu
+        number_cpu_to_use = int(number_cpu)
     else:
         number_cpu_to_use = cpu_count()
     p = Pool(processes=number_cpu_to_use)
@@ -138,10 +138,11 @@ def multiprocess_pwt(input_folder, output_folder=None, dat_extraction=None, size
 def check_existing_pgdb(run_ids, input_folder, output_folder):
     """
     Check output folder for already existing PGDB, don't create them.
+    Check if PGDBs are already in ptools-local folder.
     """
     if output_folder:
-        already_present_pgdbs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
-        new_run_ids = set(run_ids) - set(already_present_pgdbs)
+        already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
+        new_run_ids = set(run_ids) - set(already_present_outputs)
         new_run_ids = list(new_run_ids)
 
     else:
@@ -153,6 +154,14 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
                 return None
             new_run_ids.append(species_folder)
 
+    ptools_local_path = ptools_path() + '/pgdbs/user/'
+    already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
+    if already_present_pgdbs != []:
+        for pgdb in already_present_pgdbs:
+            print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
+        new_run_ids = set(map(lambda x:x.lower(),new_run_ids)) - set(already_present_pgdbs)
+        new_run_ids = list(new_run_ids)
+
     if len(new_run_ids) == 0:
         print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
         return None
@@ -163,6 +172,7 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
 def pwt_run(run_folder):
     """
     Check if files needed by Pathway-Tools are available, if not create them.
+    Check if there is a pathologic.log from a previous run. If yes, delete it.
     """
     required_files = set(['organism-params.dat','genetic-elements.dat','script.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
@@ -172,6 +182,8 @@ def pwt_run(run_folder):
     if required_files.issubset(files_in):
         if global_verbose:
             print("OK")
+    if "pathologic.log" in files_in:
+        os.remove(run_folder + "pathologic.log")
     else:
         if global_verbose:
             print("%s missing" %"; ".join(required_files.difference(files_in)))
@@ -381,6 +393,7 @@ def run_pwt(genbank_path):
     else:
         FNULL = open(os.devnull, 'w')
         subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+
 
 def run_pwt_dat(genbank_path):
     """
