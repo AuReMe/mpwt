@@ -23,9 +23,10 @@ from multiprocessing import Pool, cpu_count
 def run():
     from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
 
-    parser = argparse.ArgumentParser(usage="mpwt -f FOLDER [-o FOLDER] [-d] [-r ] [-v] [--clean] [--delete STRING]")
+    parser = argparse.ArgumentParser(usage="mpwt -f FOLDER [-o FOLDER] [-c INT] [-d] [-r ] [-v] [--clean] [--delete STRING]")
     parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
     parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
+    parser.add_argument("-c", "--cpu", dest = "cpu_number", metavar = "INT", help = "Number of cpu used by the multiprocess.", default=None)
     parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
     parser.add_argument("-r", "--reduce", dest = "reduce_size", help = "Will delete files in ptools-local to reduce size of results.", action='store_true', default=None)
     parser.add_argument("-v", "--verbose", dest = "verbose", help = "mpwt will be more verbose.", action='store_true', default=None)
@@ -51,6 +52,7 @@ def run():
     output_folder = parser_args.output
     dat_extraction = parser_args.extract_dat
     size_reduction = parser_args.reduce_size
+    number_cpu = parser_args.cpu_number
     verbose = parser_args.verbose
 
     if parser_args.clean:
@@ -62,10 +64,10 @@ def run():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose)
+    multiprocess_pwt(input_folder, output_folder, dat_extraction,size_reduction,verbose, number_cpu)
 
 
-def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_reduction=None,verbose=None):
+def multiprocess_pwt(input_folder, output_folder=None, dat_extraction=None, size_reduction=None, number_cpu=None, verbose=None):
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
@@ -86,7 +88,12 @@ def multiprocess_pwt(input_folder,output_folder=None,dat_extraction=None,size_re
     if len(genbank_paths) == 0:
         sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
 
-    p = Pool(processes=cpu_count())
+    # Use the number of cpu entered by the user or all the cpu available.
+    if number_cpu:
+        number_cpu_to_use = number_cpu
+    else:
+        number_cpu_to_use = cpu_count()
+    p = Pool(processes=number_cpu_to_use)
 
     if verbose:
         print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')

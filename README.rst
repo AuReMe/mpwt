@@ -119,13 +119,21 @@ mpwt is usable as a command line.
 
 Optional argument are identified by [].
 
--f input folder as described in Input data.
+-f --folder input folder as described in Input data.
 
--o output folder containing PGDB data or dat files (see -d arguments).
+-o --output output folder containing PGDB data or dat files (see -d arguments).
 
--d will create dat files and only move them inside the output folder.
+-d --dat will create dat files and only move them inside the output folder.
 
--v verbose.
+-c --cpu the number of cpu used for the multiprocessing.
+
+-r --reduce delete files in ptools-local to reduce size of results.
+
+-v --verbose print some information about the processing of mpwt.
+
+--delete delete a specific PGDB inside the ptools-local folder.
+
+--clean clean ptools-local folder, before any other operations.
 
 Possible uses of mpwt:
 
@@ -167,12 +175,14 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=10, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
 folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional.
 If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
+
+number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
 
 dat_extraction: True or nothing. If True, mpwt will only return dat files of the PGDB.
 
