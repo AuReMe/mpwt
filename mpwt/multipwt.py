@@ -179,11 +179,13 @@ def pwt_run(run_folder):
     if global_verbose:
         species_folder = run_folder.split('/')[-2]
         print("Checking Pathway-Tools species_folder inputs for {0}:".format(species_folder))
+
+    if "pathologic.log" in files_in:
+        os.remove(run_folder + "pathologic.log")
+
     if required_files.issubset(files_in):
         if global_verbose:
             print("OK")
-    if "pathologic.log" in files_in:
-        os.remove(run_folder + "pathologic.log")
     else:
         if global_verbose:
             print("%s missing" %"; ".join(required_files.difference(files_in)))
