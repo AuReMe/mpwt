@@ -384,17 +384,14 @@ def run_pwt(genbank_path):
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway-Tools has been killed).
     Otherwise send the output to the null device.
     """
-    cmd_pwt = "pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho %s" %genbank_path
+    cmd_pwt = ['pathway-tools', '-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile', '-patho', genbank_path]
     if global_verbose:
-        print(cmd_pwt)
+        print(' '.join(cmd_pwt))
 
-        cmd_output = subprocess.check_output(cmd_pwt, shell=True).decode('utf-8')
-        if 'Killed' in cmd_output:
-            print('Command {0} has been Killed (maybe RAM error).'.format(genbank_path))
+    patho_subprocess = subprocess.Popen(cmd_pwt, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    patho_out, patho_err = patho_subprocess.communicate(input=b'(exit)')
 
-    else:
-        FNULL = open(os.devnull, 'w')
-        subprocess.call(cmd_pwt, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    pwt_error(genbank_path, patho_out.decode("utf-8") , patho_err.decode("utf-8") )
 
 
 def run_pwt_dat(genbank_path):
@@ -403,12 +400,33 @@ def run_pwt_dat(genbank_path):
     Add an input to the subprocess call to close the Navigator Window opening proposition ('Enter name of X-window server to connect to (of the form HOST:N.M):').
     If this proposition is not closed the script can't continue.
     """
-    cmd_dat = "pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -load %s/script.lisp" %genbank_path
+    lisp_path = genbank_path + '/script.lisp'
+    cmd_dat = ['pathway-tools', '-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile', '-load', lisp_path]
     if global_verbose:
-        print(cmd_dat)
-    FNULL = open(os.devnull, 'w')
-    p = subprocess.Popen(cmd_dat, shell=True, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
-    p.communicate(input=b'none')
+        print(' '.join(cmd_dat))
+
+    load_dat_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    load_out, load_err = load_dat_subprocess.communicate(input=b'(exit)')
+
+    pwt_error(genbank_path, load_out, load_err)
+
+
+def pwt_error(genbank_path, subprocess_stdout, subprocess_stderr):
+    if global_verbose:
+        if subprocess_stderr != '':
+            print('Error for {0}'.format(genbank_path))
+            print('An error occurred :' + subprocess_stderr)
+
+        error = "Error:"
+        index_error = None
+        for index, line in enumerate(subprocess_stdout.split('\n')):
+            if error in line:
+                index_error = index
+        if index_error:
+            print('----------------------------------------')
+            print('Error for {0}'.format(genbank_path))
+            print('\n'.join(subprocess_stdout.split('\n')[index_error:]))
+            print('----------------------------------------')
 
 
 def check_dat(pgdb_folder):

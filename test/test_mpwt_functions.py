@@ -35,6 +35,8 @@ def test_create_dats_and_lisp():
 
 
 def test_check_existing_pgdb():
+    mpwt.delete_pgdb('fatty_acid_beta_oxydation_icyc')
+    mpwt.delete_pgdb('tca_cycle_ecolicyc')
     run_ids = mpwt.multipwt.check_existing_pgdb(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'], 'test', None)
     assert sorted(run_ids) == sorted(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'])
 
