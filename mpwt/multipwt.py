@@ -413,7 +413,7 @@ def run_pwt(genbank_path):
     patho_out, patho_err = patho_subprocess.communicate(input=b'(exit)')
     pwt_error(genbank_path, patho_out.decode("utf-8") , patho_err.decode("utf-8") )
     """
-    cmd_output = subprocess.check_output(cmd_pwt, shell=True).decode('utf-8')
+    cmd_output = subprocess.check_output(cmd_pwt).decode('utf-8')
 
 def run_pwt_dat(genbank_path):
     """
