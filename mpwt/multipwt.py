@@ -378,21 +378,42 @@ def extract_pgdb_pathname(run_folder):
     return pgdb_id_folder
 
 
+def pwt_error(genbank_path, subprocess_stdout, subprocess_stderr):
+    if global_verbose:
+        if subprocess_stderr != '':
+            print('Error for {0}'.format(genbank_path))
+            print('An error occurred :' + subprocess_stderr)
+
+        errors = ['Error:', 'Killed', 'Exiting']
+        index_error = None
+        for index, line in enumerate(subprocess_stdout.split('\n')):
+            if any(error in line for error in errors):
+                index_error = index
+        if index_error:
+            print('----------------------------------------')
+            print('Error for {0}'.format(genbank_path))
+            print('\n'.join(subprocess_stdout.split('\n')[index_error:]))
+            print('----------------------------------------')
+
+
 def run_pwt(genbank_path):
     """
     Create PGDB using files created during 'create_dats_and_lisp'.
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway-Tools has been killed).
     Otherwise send the output to the null device.
     """
-    cmd_pwt = ['pathway-tools', '-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile', '-patho', genbank_path]
+    cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
+    cmd_pwt = ['pathway-tools', *cmd_options, '-patho', genbank_path]
+
     if global_verbose:
         print(' '.join(cmd_pwt))
-
-    patho_subprocess = subprocess.Popen(cmd_pwt, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    """
+    patho_subprocess = subprocess.check_output(cmd_pwt)
+    print(patho_subprocess.decode('utf-8'))
     patho_out, patho_err = patho_subprocess.communicate(input=b'(exit)')
-
     pwt_error(genbank_path, patho_out.decode("utf-8") , patho_err.decode("utf-8") )
-
+    """
+    cmd_output = subprocess.check_output(cmd_pwt, shell=True).decode('utf-8')
 
 def run_pwt_dat(genbank_path):
     """
@@ -401,32 +422,14 @@ def run_pwt_dat(genbank_path):
     If this proposition is not closed the script can't continue.
     """
     lisp_path = genbank_path + '/script.lisp'
-    cmd_dat = ['pathway-tools', '-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile', '-load', lisp_path]
+    cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
+    cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
+
     if global_verbose:
         print(' '.join(cmd_dat))
 
-    load_dat_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    load_out, load_err = load_dat_subprocess.communicate(input=b'(exit)')
-
-    pwt_error(genbank_path, load_out, load_err)
-
-
-def pwt_error(genbank_path, subprocess_stdout, subprocess_stderr):
-    if global_verbose:
-        if subprocess_stderr != '':
-            print('Error for {0}'.format(genbank_path))
-            print('An error occurred :' + subprocess_stderr)
-
-        error = "Error:"
-        index_error = None
-        for index, line in enumerate(subprocess_stdout.split('\n')):
-            if error in line:
-                index_error = index
-        if index_error:
-            print('----------------------------------------')
-            print('Error for {0}'.format(genbank_path))
-            print('\n'.join(subprocess_stdout.split('\n')[index_error:]))
-            print('----------------------------------------')
+    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    load_subprocess.communicate(input=b'(exit)')
 
 
 def check_dat(pgdb_folder):
