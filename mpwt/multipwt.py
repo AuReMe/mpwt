@@ -159,8 +159,9 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     if already_present_pgdbs != []:
         for pgdb in already_present_pgdbs:
             print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
-        new_run_ids = set(map(lambda x:x.lower(),new_run_ids)) - set(already_present_pgdbs)
-        new_run_ids = list(new_run_ids)
+        lower_run_ids = dict(zip(map(lambda x:x.lower(),new_run_ids), new_run_ids))
+        wo_ptools_run_ids = set(map(lambda x:x.lower(),new_run_ids)) - set(already_present_pgdbs)
+        new_run_ids = [lower_run_ids[run_id] for run_id in wo_ptools_run_ids]
 
     if len(new_run_ids) == 0:
         print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
@@ -413,7 +414,10 @@ def run_pwt(genbank_path):
     patho_out, patho_err = patho_subprocess.communicate(input=b'(exit)')
     pwt_error(genbank_path, patho_out.decode("utf-8") , patho_err.decode("utf-8") )
     """
-    cmd_output = subprocess.check_output(cmd_pwt).decode('utf-8')
+    try:
+        subprocess.check_output(cmd_pwt)
+    except subprocess.CalledProcessError as subprocess_error:
+        print(subprocess_error.output)
 
 def run_pwt_dat(genbank_path):
     """
@@ -428,7 +432,9 @@ def run_pwt_dat(genbank_path):
     if global_verbose:
         print(' '.join(cmd_dat))
 
-    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    FNULL = open(os.devnull, 'w')
+
+    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
     load_subprocess.communicate(input=b'(exit)')
 
 
