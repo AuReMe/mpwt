@@ -5,11 +5,31 @@
 Description:
 From genbank file this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at last it will generate dat files for AuReMe.
 The script takes a folder name as argument.
+
+usage:
+    mpwt -f=DIR [-o=DIR] [--cpu=INT] [-r] [-v] [--clean]
+    mpwt -f=DIR --patho [-o=DIR]
+    mpwt -f=DIR --dat [-o=DIR]
+    mpwt --clean [-v]
+    mpwt --delete=STR
+
+options:
+    -h --help     Show help.
+    -f=DIR     Folder containing sub-folders with Genbank file.
+    -o=DIR    Output folder path. Will create a output folder in this folder.
+    --patho    Will run an inference of Pathologic on the input files.
+    --dat    Will extract only dat files from Pathway-Tools results.
+    --clean    Clean ptools-local folder, before any other operations.
+    --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
+    -r    Will delete files in ptools-local to reduce size of results.
+    --cpu=INT     Number of cpu to use for the multiprocessing.
+    -v     Verbose.
+
 """
 
-import argparse
 import csv
 import datetime
+import docopt
 import getpass
 import os
 import shutil
@@ -23,39 +43,26 @@ from multiprocessing import Pool, cpu_count
 def run():
     from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
 
-    parser = argparse.ArgumentParser(usage="mpwt -f FOLDER [-o FOLDER] [-c INT] [-d] [-r ] [-v] [--clean] [--delete STRING]")
-    parser.add_argument("-f", "--folder", dest = "folder", metavar = "FOLDER", help = "Folder containing sub-folders with Genbank file.")
-    parser.add_argument("-o", "--output", dest = "output", metavar = "FOLDER", help = "Output folder path. Will create a output folder in this folder.", default=None)
-    parser.add_argument("-c", "--cpu", dest = "cpu_number", metavar = "INT", help = "Number of cpu used by the multiprocess.", default=None)
-    parser.add_argument("-d", "--dat", dest = "extract_dat", help = "Will extract only dat files from Pathway-Tools results.", action='store_true', default=None)
-    parser.add_argument("-r", "--reduce", dest = "reduce_size", help = "Will delete files in ptools-local to reduce size of results.", action='store_true', default=None)
-    parser.add_argument("-v", "--verbose", dest = "verbose", help = "mpwt will be more verbose.", action='store_true', default=None)
-    parser.add_argument("--delete", dest = "delete", metavar = "STRING", help = "Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc .", default=None)
-    parser.add_argument("--clean", dest = "clean", help = "Arguments to clean ptools-local folder, before any other operations.", action='store_true', default=None)
+    args = docopt.docopt(__doc__)
 
-    parser_args = parser.parse_args()
-
-    # Print help and exit if no arguments.
     argument_number = len(sys.argv[1:])
-    if argument_number == 0:
-        parser.print_help()
-        parser.exit()
 
     # Delete PGDB if use of --delete argument.
-    pgdb_to_deletes = parser_args.delete
+    pgdb_to_deletes = args['--delete']
     if pgdb_to_deletes:
         for pgdb_to_delete in pgdb_to_deletes.split(','):
             delete_pgdb(pgdb_to_delete)
         return
 
-    input_folder = parser_args.folder
-    output_folder = parser_args.output
-    dat_extraction = parser_args.extract_dat
-    size_reduction = parser_args.reduce_size
-    number_cpu = parser_args.cpu_number
-    verbose = parser_args.verbose
+    input_folder = args['-f']
+    output_folder = args['-o']
+    patho_inference = args['--patho']
+    dat_extraction = args['--dat']
+    size_reduction = args['-r']
+    number_cpu = args['--cpu']
+    verbose = args['-v']
 
-    if parser_args.clean:
+    if args['--clean']:
         if verbose:
             print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
         cleaning(verbose)
@@ -64,10 +71,10 @@ def run():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, dat_extraction, size_reduction, number_cpu, verbose)
+    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, verbose)
 
 
-def multiprocess_pwt(input_folder, output_folder=None, dat_extraction=None, size_reduction=None, number_cpu=None, verbose=None):
+def multiprocess_pwt(input_folder, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, verbose=None):
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
@@ -408,12 +415,7 @@ def run_pwt(genbank_path):
 
     if global_verbose:
         print(' '.join(cmd_pwt))
-    """
-    patho_subprocess = subprocess.check_output(cmd_pwt)
-    print(patho_subprocess.decode('utf-8'))
-    patho_out, patho_err = patho_subprocess.communicate(input=b'(exit)')
-    pwt_error(genbank_path, patho_out.decode("utf-8") , patho_err.decode("utf-8") )
-    """
+
     try:
         subprocess.check_output(cmd_pwt)
     except subprocess.CalledProcessError as subprocess_error:
@@ -434,7 +436,7 @@ def run_pwt_dat(genbank_path):
 
     FNULL = open(os.devnull, 'w')
 
-    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=FNULL, stderr=subprocess.STDOUT)
+    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=FNULL, stderr=FNULL)
     load_subprocess.communicate(input=b'(exit)')
 
 
