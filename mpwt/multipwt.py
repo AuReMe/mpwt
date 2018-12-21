@@ -135,8 +135,10 @@ def multiprocess_pwt(input_folder, output_folder=None, patho_inference=None, dat
     if output_folder:
         if verbose:
             print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+        move_datas = []
         for genbank_path in pgdb_folders:
-            move_pgdb(genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, size_reduction)
+            move_datas.append([genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, size_reduction])
+        p.map(run_move, move_datas)
 
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
@@ -462,6 +464,15 @@ def check_dat(pgdb_folder):
         expected_dat_number = str(len(dat_files))
         found_dat_number = str(len(dat_checks))
         print('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+
+
+def run_move(move_data):
+    genbank_path = move_data[0]
+    pgdb_folder = move_data[1]
+    output_folder = move_data[2]
+    dat_extraction = move_data[3]
+    size_reduction = move_data[4]
+    move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction)
 
 
 def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
