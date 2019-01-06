@@ -12,7 +12,7 @@ setup(name='mpwt',
       long_description=long_description,
       version='0.3.7.3a1',
       url='https://github.com/AuReMe/mpwt',
-      author='A. Belcour',
+      author='Arnaud Belcour',
       author_email='arnaud.belcour@gmail.com',
       classifiers=[
         # How mature is this project? Common values are
@@ -32,6 +32,7 @@ setup(name='mpwt',
       packages=['mpwt'],
       install_requires=[
             'biopython',
+            'docopt',
       ],
       entry_points={
           'console_scripts': [
