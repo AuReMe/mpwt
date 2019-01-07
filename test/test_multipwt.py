@@ -15,7 +15,7 @@ import shutil
 def test_multiprocess_pwt():
     mpwt.cleaning()
     mpwt.cleaning_input('test')
-    mpwt.multiprocess_pwt('test', 'test_output', dat_extraction=True, size_reduction=False, verbose=True)
+    mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_extraction=True, size_reduction=False, verbose=True)
 
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
 

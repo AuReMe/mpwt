@@ -123,7 +123,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             check_pwt(genbank_paths)
 
     # Create path for lisp if there is no folder given.
-    if dat_extraction:
+    if dat_extraction and not input_folder:
         genbank_paths = create_lisp_script_PGDB()
 
     if verbose:
@@ -141,9 +141,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
         for genbank_path in pgdb_folders:
             check_dat(pgdb_folders[genbank_path])
-        if dat_extraction:
+        if dat_extraction and not input_folder:
             ptools_local_path = ptools_path()
-            shutil.rmtree(ptools_path + '/tmp')
+            shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
         print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
@@ -317,13 +317,13 @@ def create_lisp_script_PGDB():
     """
     ptools_local_path = ptools_path()
     pgdb_folder = ptools_local_path + '/pgdbs/user/'
-    tmp_folder = ptools_path + '/tmp/'
+    tmp_folder = ptools_local_path + '/tmp/'
 
     if not os.path.exists(tmp_folder):
         os.mkdir(tmp_folder)
 
     lisp_folders = []
-    for species_pgdb in os.lisdr(pgdb_folder):
+    for species_pgdb in os.listdir(pgdb_folder):
         pgdb_id = species_pgdb[:-3]
         os.mkdir(tmp_folder + pgdb_id)
         lisp_pathname = tmp_folder + pgdb_id + '/' + "dat_extraction.lisp"
