@@ -117,7 +117,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if patho_inference:
             if verbose:
                 print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-            p.map(run_pwt, genbank_paths)
+            error_status = p.map(run_pwt, genbank_paths)
+            if error_status:
+                sys.exit('Error during inference. Process stopped.')
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
             check_pwt(genbank_paths)
@@ -181,10 +183,12 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     ptools_local_path = ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
+        lower_case_new_run_ids = map(lambda x:x.lower(),new_run_ids)
         for pgdb in already_present_pgdbs:
-            print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
-        lower_run_ids = dict(zip(map(lambda x:x.lower(),new_run_ids), new_run_ids))
-        wo_ptools_run_ids = set(map(lambda x:x.lower(),new_run_ids)) - set(already_present_pgdbs)
+            if pgdb in lower_case_new_run_ids:
+                print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
+        lower_run_ids = dict(zip(lower_case_new_run_ids, new_run_ids))
+        wo_ptools_run_ids = set(lower_case_new_run_ids) - set(already_present_pgdbs)
         new_run_ids = [lower_run_ids[run_id] for run_id in wo_ptools_run_ids]
 
     if len(new_run_ids) == 0:
@@ -434,22 +438,16 @@ def extract_pgdb_pathname(run_folder):
     return pgdb_id_folder
 
 
-def pwt_error(genbank_path, subprocess_stdout, subprocess_stderr):
-    if global_verbose:
-        if subprocess_stderr != '':
-            print('Error for {0}'.format(genbank_path))
-            print('An error occurred :' + subprocess_stderr)
+def pwt_error(genbank_path, subprocess_returncode, subprocess_stdout, subprocess_stderr):
+    print('Error with subprocess, return code: ' + str(subprocess_returncode))
+    if subprocess_stderr:
+        print('Error for {0}'.format(genbank_path))
+        print('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-        errors = ['Error:', 'Killed', 'Exiting']
-        index_error = None
-        for index, line in enumerate(subprocess_stdout.split('\n')):
-            if any(error in line for error in errors):
-                index_error = index
-        if index_error:
-            print('----------------------------------------')
-            print('Error for {0}'.format(genbank_path))
-            print('\n'.join(subprocess_stdout.split('\n')[index_error:]))
-            print('----------------------------------------')
+    print('----------------------------------------')
+    print('Error for {0}'.format(genbank_path))
+    print(subprocess_stdout)
+    print('----------------------------------------')
 
 
 def run_pwt(genbank_path):
@@ -466,10 +464,15 @@ def run_pwt(genbank_path):
     if global_verbose:
         print(' '.join(cmd_pwt))
 
+    error_status = None
+
     try:
         subprocess.check_output(cmd_pwt)
     except subprocess.CalledProcessError as subprocess_error:
-        print(subprocess_error.output)
+        pwt_error(genbank_path, subprocess_error.returncode, subprocess_error.output.decode('utf-8'), subprocess_error.stderr)
+        error_status = True
+
+    return error_status
 
 
 def run_pwt_dat(genbank_path):
