@@ -118,7 +118,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             if verbose:
                 print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
             error_status = p.map(run_pwt, genbank_paths)
-            if error_status:
+            if any(error_status):
                 sys.exit('Error during inference. Process stopped.')
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
@@ -439,15 +439,19 @@ def extract_pgdb_pathname(run_folder):
 
 
 def pwt_error(genbank_path, subprocess_returncode, subprocess_stdout, subprocess_stderr):
-    print('Error with subprocess, return code: ' + str(subprocess_returncode))
+    """
+    Print error messages when there is a subprocess error during PathoLogic run.
+    """
+    print('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    species_name = genbank_path.split('/')[-2]
+    print('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
-        print('Error for {0}'.format(genbank_path))
         print('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    print('----------------------------------------')
-    print('Error for {0}'.format(genbank_path))
-    print(subprocess_stdout)
-    print('----------------------------------------')
+    print('\t', '=== Pathway-Tools log ===')
+    for line in subprocess_stdout:
+        print('\t', line, end='')
+    print('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
 
 def run_pwt(genbank_path):
@@ -465,12 +469,33 @@ def run_pwt(genbank_path):
         print(' '.join(cmd_pwt))
 
     error_status = None
-
     try:
-        subprocess.check_output(cmd_pwt)
+        patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
+        # Check internal error of Pathway-Tools (Error with Genbank).
+        patho_lines = []
+        errors = ['Restart actions (select using :continue):', 'Error']
+        for patho_line in iter(patho_subprocess.stdout.readline, ""):
+            patho_line = patho_line.decode('utf-8')
+            if any(error in patho_line for error in errors):
+                print('Error possibly with the genbank file.')
+                error_status = True
+                patho_subprocess.kill()
+
+            patho_lines.append(patho_line)
+            patho_subprocess.poll()
+            return_code = patho_subprocess.returncode
+            if return_code or return_code == 0:
+                if return_code == 0:
+                    patho_subprocess.stdout.close()
+                    return error_status
+                elif return_code != 0:
+                    raise subprocess.CalledProcessError(return_code, cmd_pwt)
+
     except subprocess.CalledProcessError as subprocess_error:
-        pwt_error(genbank_path, subprocess_error.returncode, subprocess_error.output.decode('utf-8'), subprocess_error.stderr)
+        # Check error with subprocess (when process is killed).
+        pwt_error(genbank_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr)
         error_status = True
+    patho_subprocess.stdout.close()
 
     return error_status
 
