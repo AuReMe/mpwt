@@ -84,7 +84,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
-    global global_verbose
+    global global_output_folder, global_dat_extraction, global_size_reduction, global_verbose
+    global_output_folder = output_folder
+    global_dat_extraction = dat_extraction
+    global_size_reduction = size_reduction
     global_verbose = verbose
 
     # Use the number of cpu entered by the user or all the cpu available.
@@ -154,8 +157,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             print('~~~~~~~~~~Moving result files~~~~~~~~~~')
         move_datas = []
         for genbank_path in pgdb_folders:
-            move_datas.append([genbank_path, pgdb_folders[genbank_path], output_folder, dat_extraction, size_reduction])
-        p.map(run_move, move_datas)
+            move_datas.append(pgdb_folders[genbank_path])
+        p.map(run_move_pgdb, move_datas)
 
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
@@ -519,15 +522,14 @@ def run_pwt_dat(genbank_path):
         print(' '.join(cmd_dat))
 
     error_status = None
-    dat_creation_ends = ['Opening Navigator window.']
+    dat_creation_end = 'Opening Navigator window.'
     load_lines = []
 
     try:
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
         for load_line in iter(load_subprocess.stdout.readline, ""):
             load_line = load_line.decode('utf-8')
-            if any(dat_creation_end in load_line for dat_creation_end in dat_creation_ends):
-                print('End of creation of dat file.')
+            if dat_creation_end in load_line:
                 load_subprocess.stdout.close()
                 load_subprocess.kill()
                 return
@@ -570,40 +572,35 @@ def check_dat(pgdb_folder):
         print('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
 
-def run_move(move_data):
-    genbank_path = move_data[0]
-    pgdb_folder = move_data[1]
-    output_folder = move_data[2]
-    dat_extraction = move_data[3]
-    size_reduction = move_data[4]
-    move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction)
-
-
-def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_reduction):
+def run_move_pgdb(pgdb_folders):
     """
     Move the result files inside the shared folder containing the input data.
+    pgdb_folder_dbname: ID of the species.
+    pgdb_folder_path: path to the PGDB of the species (in ptools-local).
     """
-    pgdb_folder_dbname = pgdb_folder[0]
-    pgdb_folder_path = pgdb_folder[1]
+    pgdb_folder_dbname = pgdb_folders[0]
+    pgdb_folder_path = pgdb_folders[1]
 
-    output_species = output_folder + '/' + pgdb_folder_dbname +'/'
+    output_species = global_output_folder + '/' + pgdb_folder_dbname +'/'
 
-    if dat_extraction:
+    if global_dat_extraction:
         pgdb_folder_path = pgdb_folder_path + '/1.0/data'
 
-    if size_reduction:
+    if global_size_reduction:
         for pgdb_file in os.listdir(pgdb_folder_path):
+            file_to_move_pathname = pgdb_folder_path + '/' + pgdb_file
+            output_file_pathname = output_species + pgdb_file
             if os.path.exists(output_species) == False:
                 os.mkdir(output_species)
-            if dat_extraction:
+            if global_dat_extraction:
                 if '.dat' in pgdb_file:
-                    shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
-            elif not dat_extraction:
-                shutil.move(pgdb_folder_path+'/'+pgdb_file, output_species+pgdb_file)
+                    shutil.move(file_to_move_pathname, output_file_pathname)
+            elif not global_dat_extraction:
+                shutil.move(file_to_move_pathname, output_file_pathname)
         shutil.rmtree(pgdb_folder_path)
     else:
         shutil.copytree(pgdb_folder_path, output_species)
-        if dat_extraction:
+        if global_dat_extraction:
             for pgdb_file in os.listdir(output_species):
                 if '.dat' not in pgdb_file:
                     os.remove(output_species+'/'+pgdb_file)
@@ -611,7 +608,7 @@ def move_pgdb(genbank_path, pgdb_folder, output_folder, dat_extraction, size_red
     # Give access to the file for user outside the container.
     subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
 
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
+    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', global_output_folder])
 
 
 if __name__ == '__main__':
