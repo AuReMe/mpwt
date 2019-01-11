@@ -115,21 +115,23 @@ mpwt is usable as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [-d] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--cpu INT] [-r] [--clean] [-v]
 
 Optional argument are identified by [].
 
 -f --folder input folder as described in Input data.
 
--o --output output folder containing PGDB data or dat files (see -d arguments).
+-o --output output folder containing PGDB data or dat files (see --dat arguments).
 
--d --dat will create dat files and only move them inside the output folder.
+--patho will launch PathoLogic inference on input folder.
 
--c --cpu the number of cpu used for the multiprocessing.
+--dat will create dat files and only move them inside the output folder.
 
--r --reduce delete files in ptools-local to reduce size of results.
+--cpu the number of cpu used for the multiprocessing.
 
--v --verbose print some information about the processing of mpwt.
+-r delete files in ptools-local to reduce size of results.
+
+-v print some information about the processing of mpwt.
 
 --delete delete a specific PGDB inside the ptools-local folder.
 
@@ -139,29 +141,36 @@ Possible uses of mpwt:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input
+    mpwt -f path/to/folder/input --patho
 
 Create PGDBs of studied organisms inside ptools-local.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -d
+    mpwt -f path/to/folder/input --patho --dat
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -o path/to/folder/output
+    mpwt -f path/to/folder/input --patho -o path/to/folder/output
 
 Create PGDBs of studied organisms inside ptools-local.
 Then extract the files inside the output folder.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -o path/to/folder/output -d
+    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 Then extract the dat files inside the output folder.
+
+.. code:: sh
+
+    mpwt --dat -o path/to/folder/output
+
+Create dat files for the PGDB inside ptools-local.
+And move them inside the output folder.
 
 Python Example
 ~~~~~~~~~~~~~~
@@ -175,25 +184,27 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=10, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
 folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional.
-If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
+If you don't enter an argument, results will be inside the ptools-local folder.
 
-number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
+patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
 
-dat_extraction: True or nothing. If True, mpwt will only return dat files of the PGDB.
+dat_extraction: True or nothing. If True, mpwt will create dat files of the PGDBs.
 
 size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
+
+number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
 
 verbose: True or nothing. If true, mpwt will be verbose.
 
 Useful functions
 ~~~~~~~~~~~~~~~~
 
-1. multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
+1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
 Run the multiprocess Pathway-Tools on input folder.
 
@@ -207,7 +218,7 @@ This can also be used with a command line argument:
 
     mpwt --clean
 
-If you use clean and the argument -f input_folder, it will delete input files ('script.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
+If you use clean and the argument -f input_folder, it will delete input files ('dat_extraction.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
 
 .. code:: sh
 
