@@ -328,11 +328,13 @@ def create_lisp_script_PGDB():
 
     lisp_folders = []
     for species_pgdb in os.listdir(pgdb_folder):
-        pgdb_id = species_pgdb[:-3]
-        os.mkdir(tmp_folder + pgdb_id)
-        lisp_pathname = tmp_folder + pgdb_id + '/' + "dat_extraction.lisp"
-        create_dat_extraction_script(pgdb_id, lisp_pathname)
-        lisp_folders.append(tmp_folder + pgdb_id)
+        if os.path.isdir(pgdb_folder + species_pgdb):
+            pgdb_id = species_pgdb[:-3]
+            pgdb_pathname = tmp_folder + pgdb_id + '/'
+            os.mkdir(tmp_folder + pgdb_id)
+            lisp_pathname = pgdb_pathname + "dat_extraction.lisp"
+            create_dat_extraction_script(pgdb_id, lisp_pathname)
+            lisp_folders.append(pgdb_pathname)
 
     return lisp_folders
 
@@ -469,11 +471,12 @@ def run_pwt(genbank_path):
         print(' '.join(cmd_pwt))
 
     error_status = None
+    errors = ['Restart actions (select using :continue):', 'Error']
+    patho_lines = []
+
     try:
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
         # Check internal error of Pathway-Tools (Error with Genbank).
-        patho_lines = []
-        errors = ['Restart actions (select using :continue):', 'Error']
         for patho_line in iter(patho_subprocess.stdout.readline, ""):
             patho_line = patho_line.decode('utf-8')
             if any(error in patho_line for error in errors):
@@ -503,8 +506,8 @@ def run_pwt(genbank_path):
 def run_pwt_dat(genbank_path):
     """
     Create dat file using a lisp script created during 'create_dats_and_lisp'.
-    Add an input to the subprocess call to close the Navigator Window opening proposition ('Enter name of X-window server to connect to (of the form HOST:N.M):').
-    If this proposition is not closed the script can't continue.
+    Kill the subprocess when the command reach the Navigator Window opening proposition.
+    If this proposition is not closed, the script can't continue.
     Command used:
     pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -load
     """
@@ -515,10 +518,33 @@ def run_pwt_dat(genbank_path):
     if global_verbose:
         print(' '.join(cmd_dat))
 
-    FNULL = open(os.devnull, 'w')
+    error_status = None
+    dat_creation_ends = ['Opening Navigator window.']
+    load_lines = []
 
-    load_subprocess = subprocess.Popen(cmd_dat, stdin=subprocess.PIPE, stdout=FNULL, stderr=FNULL)
-    load_subprocess.communicate(input=b'(exit)')
+    try:
+        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
+        for load_line in iter(load_subprocess.stdout.readline, ""):
+            load_line = load_line.decode('utf-8')
+            if any(dat_creation_end in load_line for dat_creation_end in dat_creation_ends):
+                print('End of creation of dat file.')
+                load_subprocess.stdout.close()
+                load_subprocess.kill()
+                return
+
+            load_lines.append(load_line)
+            load_subprocess.poll()
+            return_code = load_subprocess.returncode
+            if return_code:
+                raise subprocess.CalledProcessError(return_code, cmd_dat)
+
+    except subprocess.CalledProcessError as subprocess_error:
+        # Check error with subprocess (when process is killed).
+        pwt_error(genbank_path, subprocess_error.returncode, load_lines, load_subprocess.stderr)
+        error_status = True
+    load_subprocess.stdout.close()
+
+    return error_status
 
 
 def check_dat(pgdb_folder):
