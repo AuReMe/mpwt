@@ -103,7 +103,7 @@ species_name is extracted from the genbank file.
     ANNOT-FILE  gbk_pathname
     //
 
-    script.lisp:
+    dat_extraction.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
     (create-flat-files-for-current-kb)

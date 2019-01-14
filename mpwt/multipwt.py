@@ -7,7 +7,7 @@ From genbank file this script will create Pathway-Tools input data, then run Pat
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--cpu=INT] [-r] [-v] [--clean]
+    mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
     mpwt --dat [-f=DIR] [-o=DIR] [-v]
     mpwt --clean [-v]
     mpwt --delete=STR
@@ -22,6 +22,7 @@ options:
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local to reduce size of results.
     --cpu=INT     Number of cpu to use for the multiprocessing.
+    --log=FOLDER     Create PathoLogic log files inside the given folder.
     -v     Verbose.
 
 """
@@ -62,6 +63,7 @@ def run_mpwt():
     dat_extraction = args['--dat']
     size_reduction = args['-r']
     number_cpu = args['--cpu']
+    patho_log = args['--log']
     verbose = args['-v']
 
     if args['--clean']:
@@ -73,10 +75,10 @@ def run_mpwt():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, verbose)
+    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, patho_log, verbose)
 
 
-def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, verbose=None):
+def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -125,7 +127,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 sys.exit('Error during inference. Process stopped.')
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
-            check_pwt(genbank_paths)
+            check_pwt(genbank_paths, patho_log)
 
     # Create path for lisp if there is no folder given.
     if dat_extraction and not input_folder:
@@ -342,74 +344,102 @@ def create_lisp_script_PGDB():
     return lisp_folders
 
 
-def check_pwt(genbank_paths):
+def check_pwt(genbank_paths, patho_log_folder):
     """
     Check PathoLogic's log.
     Create two log files (log_error.txt which contains Pathway-Tools log and resume_inference which contains summary of network).
     """
+    if patho_log_folder:
+        if os.path.exists(patho_log_folder) == False:
+            print('No log directory, it will be created.')
+            os.mkdir(patho_log_folder)
+
+        patho_error_pathname = patho_log_folder + '/log_error.txt'
+        patho_resume_pathname = patho_log_folder + '/resume_inference.tsv'
+
+        patho_error_file = open(patho_error_pathname, 'w')
+        patho_resume_file = open(patho_resume_pathname, 'w')
+        patho_resume_writer = csv.writer(patho_resume_file, delimiter='\t', lineterminator='\n')
+        patho_resume_writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
+
     failed_inferences = []
     passed_inferences = []
 
-    with open('log_error.txt', 'w') as output_file:
-        with open('resume_inference.tsv', 'w') as csvfile:
-            writer = csv.writer(csvfile, delimiter='\t', lineterminator='\n')
-            writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
-            for genbank_path in genbank_paths:
-                species = genbank_path.split('/')[-2]
-                patho_log = genbank_path + '/pathologic.log'
+    for genbank_path in genbank_paths:
+        species = genbank_path.split('/')[-2]
+        patho_log = genbank_path + '/pathologic.log'
 
-                output_file.write('------------ Species: ')
-                output_file.write(species)
-                output_file.write('\n')
+        if patho_log_folder:
+            patho_error_file.write('------------ Species: ')
+            patho_error_file.write(species)
+            patho_error_file.write('\n')
 
-                fatal_error_index = None
+        fatal_error_index = None
 
-                with open(patho_log, 'r') as input_file:
-                    for index, line in enumerate(input_file):
-                        if 'fatal error' in line:
-                            fatal_error_index = index
-                            output_file.write(line)
-                            writer.writerow([species, 'ERROR', '', '', '', ''])
-                            failed_inferences.append(species)
-                        if fatal_error_index:
-                            if index > fatal_error_index:
-                                output_file.write(line)
-                        if 'Build done.' in  line:
-                            output_file.write(line)
-                            resume_inference_line = next(input_file)
-                            output_file.write(resume_inference_line)
-                            gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
-                            protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
-                            pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
-                            reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
-                            compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                            writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+        with open(patho_log, 'r') as input_file:
+            for index, line in enumerate(input_file):
+                if 'fatal error' in line:
+                    fatal_error_index = index
+                    failed_inferences.append(species)
+                    if patho_log_folder:
+                        patho_error_file.write(line)
+                        patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
 
-                            passed_inferences.append(species)
+                if fatal_error_index:
+                    if index > fatal_error_index:
+                        if patho_log_folder:
+                            patho_error_file.write(line)
 
-                output_file.write('------------\n\n')
+                if 'Build done.' in  line:
+                    if patho_log_folder:
+                        patho_error_file.write(line)
+                        resume_inference_line = next(input_file)
+                        patho_error_file.write(resume_inference_line)
+                        gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
+                        protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
+                        pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
+                        reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
+                        compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
+                        patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
 
-    with open('log_error.txt','r') as contents:
-        save = contents.read()
-    with open('log_error.txt', 'w') as output_file:
-            output_file.write('Inference statistics:\n')
-            if len(passed_inferences) > 0:
-                if global_verbose:
-                    print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')   
-                output_file.write('Build done: ' + str(len(passed_inferences)) + '\n')
-                output_file.write('Species: ' + ', '.join(passed_inferences) +  '\n\n')
-            if len(failed_inferences) > 0:
-                if global_verbose:
-                    print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
-                output_file.write('Build failed: ' + str(len(failed_inferences)) + '\n')
-                output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
-            output_file.write(save)
-    
+                    passed_inferences.append(species)
+
+        if patho_log_folder:
+            patho_error_file.write('------------\n\n')
+
+    if patho_log_folder:
+        patho_error_file.close()
+        patho_resume_file.close()
+        with open(patho_error_pathname,'r') as contents:
+            save = contents.read()
+        with open(patho_error_pathname, 'w') as output_file:
+                output_file.write('Inference statistics:\n')
+                if len(passed_inferences) > 0:
+                    if global_verbose:
+                        print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')
+                    output_file.write('Build done: ' + str(len(passed_inferences)) + '\n')
+                    output_file.write('Species: ' + ', '.join(passed_inferences) +  '\n\n')
+                if len(failed_inferences) > 0:
+                    if global_verbose:
+                        print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
+                    output_file.write('Build failed: ' + str(len(failed_inferences)) + '\n')
+                    output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
+                output_file.write(save)
+    else:
+        if len(passed_inferences) > 0:
+            if global_verbose:
+                print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')
+        if len(failed_inferences) > 0:
+            if global_verbose:
+                print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
+
     if len(failed_inferences) > 0:
         sys.exit("Stop the inference.")
 
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'log_error.txt'])
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', 'resume_inference.tsv'])
+    if patho_log_folder:
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_error_pathname])
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_resume_pathname])
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_log_folder])
 
 
 def ptools_path():

@@ -43,8 +43,6 @@ def test_multiprocess_pwt():
 
     assert set(fabo_reactions).issubset(set(expected_fabo_reactions))
 
-    os.remove('log_error.txt')
     mpwt.cleaning_input('test')
-    os.remove('resume_inference.tsv')
     shutil.rmtree('test_output')
     shutil.rmtree('__pycache__')
