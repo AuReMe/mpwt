@@ -161,6 +161,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         for genbank_path in pgdb_folders:
             move_datas.append(pgdb_folders[genbank_path])
         p.map(run_move_pgdb, move_datas)
+        # Give access to the file for user outside the container.
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
 
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
@@ -277,9 +279,13 @@ def create_dats_and_lisp(run_folder):
 
         # Take the source feature of the first record.
         # This feature contains the taxon ID in the db_xref qualifier.
-        src_feature = [feature for feature in first_seq_record.features if feature.type == "source"][0]
+        src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
         try:
-            taxon_id = src_feature.qualifiers['db_xref'][0].replace('taxon:', '')
+            for src_feature in src_features:
+                src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                for src_dbxref_qualifier in src_dbxref_qualifiers:
+                    if 'taxon:' in src_dbxref_qualifier:
+                        taxon_id = src_dbxref_qualifier.replace('taxon:', '')
         except KeyError:
             raise KeyError('No taxon ID in the Genbank. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.')               
 
@@ -634,11 +640,6 @@ def run_move_pgdb(pgdb_folders):
             for pgdb_file in os.listdir(output_species):
                 if '.dat' not in pgdb_file:
                     os.remove(output_species+'/'+pgdb_file)
-
-    # Give access to the file for user outside the container.
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_species])
-
-    subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', global_output_folder])
 
 
 if __name__ == '__main__':

@@ -115,13 +115,13 @@ mpwt is usable as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--cpu INT] [-r] [--clean] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
 
 Optional argument are identified by [].
 
--f --folder input folder as described in Input data.
+-f input folder as described in Input data.
 
--o --output output folder containing PGDB data or dat files (see --dat arguments).
+-o output folder containing PGDB data or dat files (see --dat arguments).
 
 --patho will launch PathoLogic inference on input folder.
 
@@ -130,6 +130,8 @@ Optional argument are identified by [].
 --cpu the number of cpu used for the multiprocessing.
 
 -r delete files in ptools-local to reduce size of results.
+
+--log folder where log files for PathoLogic inference will be store.
 
 -v print some information about the processing of mpwt.
 
