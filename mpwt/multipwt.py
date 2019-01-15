@@ -123,11 +123,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             if verbose:
                 print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
             error_status = p.map(run_pwt, genbank_paths)
-            if any(error_status):
-                sys.exit('Error during inference. Process stopped.')
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
             check_pwt(genbank_paths, patho_log)
+            if any(error_status):
+                sys.exit('Error during inference. Process stopped. Look at the command log. Also you look at the log files, if you have used --log argument.')
 
     # Create path for lisp if there is no folder given.
     if dat_extraction and not input_folder:
@@ -382,33 +382,39 @@ def check_pwt(genbank_paths, patho_log_folder):
 
         fatal_error_index = None
 
-        with open(patho_log, 'r') as input_file:
-            for index, line in enumerate(input_file):
-                if 'fatal error' in line:
-                    fatal_error_index = index
-                    failed_inferences.append(species)
-                    if patho_log_folder:
-                        patho_error_file.write(line)
-                        patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
-
-                if fatal_error_index:
-                    if index > fatal_error_index:
+        if os.path.exists(patho_log):
+            with open(patho_log, 'r') as input_file:
+                for index, line in enumerate(input_file):
+                    if 'fatal error' in line:
+                        fatal_error_index = index
+                        failed_inferences.append(species)
                         if patho_log_folder:
                             patho_error_file.write(line)
+                            patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
 
-                if 'Build done.' in  line:
-                    if patho_log_folder:
-                        patho_error_file.write(line)
-                        resume_inference_line = next(input_file)
-                        patho_error_file.write(resume_inference_line)
-                        gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
-                        protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
-                        pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
-                        reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
-                        compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                        patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+                    if fatal_error_index:
+                        if index > fatal_error_index:
+                            if patho_log_folder:
+                                patho_error_file.write(line)
 
-                    passed_inferences.append(species)
+                    if 'Build done.' in  line:
+                        if patho_log_folder:
+                            patho_error_file.write(line)
+                            resume_inference_line = next(input_file)
+                            patho_error_file.write(resume_inference_line)
+                            gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
+                            protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
+                            pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
+                            reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
+                            compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
+                            patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+
+                        passed_inferences.append(species)
+        else:
+            if patho_log_folder:
+                patho_error_file.write('No pathologic log, an error occured before PathoLogic run.\n')
+                patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
+            print('No pathologic log for {0}, an error occured before PathoLogic run.'.format(species))
 
         if patho_log_folder:
             patho_error_file.write('------------\n\n')
