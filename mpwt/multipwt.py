@@ -178,6 +178,10 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
         new_run_ids = set(run_ids) - set(already_present_outputs)
         new_run_ids = list(new_run_ids)
 
+        if len(new_run_ids) == 0:
+            print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
+            return None
+
     else:
         new_run_ids = []
         invalid_characters = ['.', '/']
@@ -190,17 +194,16 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     ptools_local_path = ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
-        lower_case_new_run_ids = map(lambda x:x.lower(),new_run_ids)
+        lower_case_new_run_ids = map(lambda x:x.lower(), new_run_ids)
         for pgdb in already_present_pgdbs:
             if pgdb in lower_case_new_run_ids:
                 print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
         lower_run_ids = dict(zip(lower_case_new_run_ids, new_run_ids))
         wo_ptools_run_ids = set(lower_case_new_run_ids) - set(already_present_pgdbs)
         new_run_ids = [lower_run_ids[run_id] for run_id in wo_ptools_run_ids]
-
-    if len(new_run_ids) == 0:
-        print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
-        return None
+        if len(new_run_ids) == 0:
+            print("All PGDBs are already present in ptools-local. Remove them if you want a new inference, or use mpwt --dat only to create dat files from them.")
+            return None
 
     return new_run_ids
 
@@ -532,6 +535,8 @@ def run_pwt(genbank_path):
             patho_lines.append(patho_line)
             patho_subprocess.poll()
             return_code = patho_subprocess.returncode
+            # Check if Pathway-Tools has been killed with returncode.
+            # Also check if Pathway-Tools has finished PathoLogic inference (returncode 0).
             if return_code or return_code == 0:
                 if return_code == 0:
                     patho_subprocess.stdout.close()
