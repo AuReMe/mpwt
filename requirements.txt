@@ -1,2 +1,2 @@
-biopython
-docopt
+biopython==1.73
+docopt==0.6.2

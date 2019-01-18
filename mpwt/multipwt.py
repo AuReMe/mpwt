@@ -194,7 +194,7 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     ptools_local_path = ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
-        lower_case_new_run_ids = map(lambda x:x.lower(), new_run_ids)
+        lower_case_new_run_ids = list(map(lambda x:x.lower(), new_run_ids))
         for pgdb in already_present_pgdbs:
             if pgdb in lower_case_new_run_ids:
                 print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
@@ -570,6 +570,7 @@ def run_pwt_dat(genbank_path):
 
     error_status = None
     dat_creation_end = 'Opening Navigator window.'
+    load_errors = ['Error: Organism']
     load_lines = []
 
     try:
@@ -580,6 +581,9 @@ def run_pwt_dat(genbank_path):
                 load_subprocess.stdout.close()
                 load_subprocess.kill()
                 return
+            if any(error in load_line for error in load_errors):
+                error_status = True
+                load_subprocess.kill()
 
             load_lines.append(load_line)
             load_subprocess.poll()
