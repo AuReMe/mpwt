@@ -18,6 +18,8 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
+mpwt works only on Python 3 and it has been tested on Python 3.6.
+
 You must have an environment where Pathway-Tools is installed. Pathway-Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 

@@ -40,132 +40,19 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 
 
-def run_mpwt():
+def ptools_path():
     """
-    Function used with a mpwt call in the terminal.
+    Find the path of ptools using Pathway-Tools file.
     """
-    from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
+    pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
+    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
 
-    args = docopt.docopt(__doc__)
+    pathway_tools_file = open(pathway_tools_path, 'r')
+    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
+    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
+    pathway_tools_file.close()
 
-    argument_number = len(sys.argv[1:])
-
-    # Delete PGDB if use of --delete argument.
-    pgdb_to_deletes = args['--delete']
-    if pgdb_to_deletes:
-        for pgdb_to_delete in pgdb_to_deletes.split(','):
-            delete_pgdb(pgdb_to_delete)
-        return
-
-    input_folder = args['-f']
-    output_folder = args['-o']
-    patho_inference = args['--patho']
-    dat_extraction = args['--dat']
-    size_reduction = args['-r']
-    number_cpu = args['--cpu']
-    patho_log = args['--log']
-    verbose = args['-v']
-
-    if args['--clean']:
-        if verbose:
-            print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
-        cleaning(verbose)
-        if input_folder:
-            cleaning_input(input_folder, output_folder, verbose)
-        if argument_number == 1 or (argument_number == 2 and verbose):
-            sys.exit()
-
-    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, patho_log, verbose)
-
-
-def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
-    """
-    Function managing all the workflow (from the creatin of the input files to the results).
-    Use it when you import mpwt in a script.
-    """
-    # Use a second verbose variable because a formal parameter can't be a global variable.
-    # So if we want to use mpwt as a python import with this function we need to set a new global variable.
-    # With this variable it is possible to set vervose in multiprocess function.
-    global global_output_folder, global_dat_extraction, global_size_reduction, global_verbose
-    global_output_folder = output_folder
-    global_dat_extraction = dat_extraction
-    global_size_reduction = size_reduction
-    global_verbose = verbose
-
-    # Use the number of cpu entered by the user or all the cpu available.
-    if number_cpu:
-        number_cpu_to_use = int(number_cpu)
-    else:
-        number_cpu_to_use = cpu_count()
-    p = Pool(processes=number_cpu_to_use)
-
-    # Run folder contains sub-folders containing GBK file
-    if input_folder:
-        run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-        if output_folder:
-            if os.path.exists(output_folder) == False:
-                if verbose:
-                    print('No output directory, it will be created.')
-                os.mkdir(output_folder)
-        run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
-        if not run_ids:
-            return
-        genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
-        if len(genbank_paths) == 0:
-            sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
-
-        if verbose:
-            print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
-        for genbank_path in genbank_paths:
-            pwt_run(genbank_path)
-
-        if patho_inference:
-            if verbose:
-                print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-            error_status = p.map(run_pwt, genbank_paths)
-            if verbose:
-                print('~~~~~~~~~~Check inference~~~~~~~~~~')
-            check_pwt(genbank_paths, patho_log)
-            if any(error_status):
-                sys.exit('Error during inference. Process stopped. Look at the command log. Also you look at the log files, if you have used --log argument.')
-
-    # Create path for lisp if there is no folder given.
-    if dat_extraction and not input_folder:
-        genbank_paths = create_lisp_script_PGDB()
-
-    if verbose:
-        print('~~~~~~~~~~Extraction of PGDB Pathname~~~~~~~~~~')
-    pgdb_folders = {}
-    for genbank_path in genbank_paths:
-        pgdb_id_folder = extract_pgdb_pathname(genbank_path)
-        pgdb_folders[genbank_path] = pgdb_id_folder
-
-    if (input_folder and dat_extraction) or dat_extraction:
-        if verbose:
-            print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-        p.map(run_pwt_dat, genbank_paths)
-        if verbose:
-            print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
-        for genbank_path in pgdb_folders:
-            check_dat(pgdb_folders[genbank_path])
-        if dat_extraction and not input_folder:
-            ptools_local_path = ptools_path()
-            shutil.rmtree(ptools_local_path + '/tmp')
-
-    if verbose:
-        print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
-    if output_folder:
-        if verbose:
-            print('~~~~~~~~~~Moving result files~~~~~~~~~~')
-        move_datas = []
-        for genbank_path in pgdb_folders:
-            move_datas.append(pgdb_folders[genbank_path])
-        p.map(run_move_pgdb, move_datas)
-        # Give access to the file for user outside the container.
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
-
-    if verbose:
-        print('~~~~~~~~~~The script have finished! Thank you for using it.')
+    return ptools_local_path
 
 
 def check_existing_pgdb(run_ids, input_folder, output_folder):
@@ -229,6 +116,19 @@ def pwt_run(run_folder):
         if global_verbose:
             print("%s missing" %"; ".join(required_files.difference(files_in)))
         create_dats_and_lisp(run_folder)
+
+
+def create_dat_extraction_script(pgdb_id, lisp_pathname):
+    """
+    Input: a PGDB ID and an output path.
+    Create a lisp script allowing dat extraction.
+    """
+    with open(lisp_pathname, 'w') as lisp_file:
+        lisp_file.write("(in-package :ecocyc)")
+        lisp_file.write('\n')
+        lisp_file.write("(select-organism :org-id '" + pgdb_id + ")")
+        lisp_file.write('\n')
+        lisp_file.write("(create-flat-files-for-current-kb)")
 
 
 def create_dats_and_lisp(run_folder):
@@ -313,19 +213,6 @@ def create_dats_and_lisp(run_folder):
     create_dat_extraction_script(pgdb_id, lisp_pathname)
 
     print('Inputs file created for {0}.'.format(pgdb_id))
-
-
-def create_dat_extraction_script(pgdb_id, lisp_pathname):
-    """
-    Input: a PGDB ID and an output path.
-    Create a lisp script allowing dat extraction.
-    """
-    with open(lisp_pathname, 'w') as lisp_file:
-        lisp_file.write("(in-package :ecocyc)")
-        lisp_file.write('\n')
-        lisp_file.write("(select-organism :org-id '" + pgdb_id + ")")
-        lisp_file.write('\n')
-        lisp_file.write("(create-flat-files-for-current-kb)")
 
 
 def create_lisp_script_PGDB():
@@ -455,21 +342,6 @@ def check_pwt(genbank_paths, patho_log_folder):
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_error_pathname])
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_resume_pathname])
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_log_folder])
-
-
-def ptools_path():
-    """
-    Find the path of ptools using Pathway-Tools file.
-    """
-    pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
-    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
-
-    pathway_tools_file = open(pathway_tools_path, 'r')
-    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
-    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
-    pathway_tools_file.close()
-
-    return ptools_local_path
 
 
 def extract_pgdb_pathname(run_folder):
@@ -655,6 +527,134 @@ def run_move_pgdb(pgdb_folders):
             for pgdb_file in os.listdir(output_species):
                 if '.dat' not in pgdb_file:
                     os.remove(output_species+'/'+pgdb_file)
+
+
+def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
+    """
+    Function managing all the workflow (from the creatin of the input files to the results).
+    Use it when you import mpwt in a script.
+    """
+    # Use a second verbose variable because a formal parameter can't be a global variable.
+    # So if we want to use mpwt as a python import with this function we need to set a new global variable.
+    # With this variable it is possible to set vervose in multiprocess function.
+    global global_output_folder, global_dat_extraction, global_size_reduction, global_verbose
+    global_output_folder = output_folder
+    global_dat_extraction = dat_extraction
+    global_size_reduction = size_reduction
+    global_verbose = verbose
+
+    # Use the number of cpu entered by the user or all the cpu available.
+    if number_cpu:
+        number_cpu_to_use = int(number_cpu)
+    else:
+        number_cpu_to_use = cpu_count()
+    p = Pool(processes=number_cpu_to_use)
+
+    # Run folder contains sub-folders containing GBK file
+    if input_folder:
+        run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
+        if output_folder:
+            if os.path.exists(output_folder) == False:
+                if verbose:
+                    print('No output directory, it will be created.')
+                os.mkdir(output_folder)
+        run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
+        if not run_ids:
+            return
+        genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
+        if len(genbank_paths) == 0:
+            sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
+
+        if verbose:
+            print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
+        for genbank_path in genbank_paths:
+            pwt_run(genbank_path)
+
+        if patho_inference:
+            if verbose:
+                print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
+            error_status = p.map(run_pwt, genbank_paths)
+            if verbose:
+                print('~~~~~~~~~~Check inference~~~~~~~~~~')
+            check_pwt(genbank_paths, patho_log)
+            if any(error_status):
+                sys.exit('Error during inference. Process stopped. Look at the command log. Also you look at the log files, if you have used --log argument.')
+
+    # Create path for lisp if there is no folder given.
+    if dat_extraction and not input_folder:
+        genbank_paths = create_lisp_script_PGDB()
+
+    if verbose:
+        print('~~~~~~~~~~Extraction of PGDB Pathname~~~~~~~~~~')
+    pgdb_folders = {}
+    for genbank_path in genbank_paths:
+        pgdb_id_folder = extract_pgdb_pathname(genbank_path)
+        pgdb_folders[genbank_path] = pgdb_id_folder
+
+    if (input_folder and dat_extraction) or dat_extraction:
+        if verbose:
+            print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
+        p.map(run_pwt_dat, genbank_paths)
+        if verbose:
+            print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+        for genbank_path in pgdb_folders:
+            check_dat(pgdb_folders[genbank_path])
+        if dat_extraction and not input_folder:
+            ptools_local_path = ptools_path()
+            shutil.rmtree(ptools_local_path + '/tmp')
+
+    if verbose:
+        print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+    if output_folder:
+        if verbose:
+            print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+        move_datas = []
+        for genbank_path in pgdb_folders:
+            move_datas.append(pgdb_folders[genbank_path])
+        p.map(run_move_pgdb, move_datas)
+        # Give access to the file for user outside the container.
+        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
+
+    if verbose:
+        print('~~~~~~~~~~The script have finished! Thank you for using it.')
+
+
+def run_mpwt():
+    """
+    Function used with a mpwt call in the terminal.
+    """
+    from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
+
+    args = docopt.docopt(__doc__)
+
+    argument_number = len(sys.argv[1:])
+
+    # Delete PGDB if use of --delete argument.
+    pgdb_to_deletes = args['--delete']
+    if pgdb_to_deletes:
+        for pgdb_to_delete in pgdb_to_deletes.split(','):
+            delete_pgdb(pgdb_to_delete)
+        return
+
+    input_folder = args['-f']
+    output_folder = args['-o']
+    patho_inference = args['--patho']
+    dat_extraction = args['--dat']
+    size_reduction = args['-r']
+    number_cpu = args['--cpu']
+    patho_log = args['--log']
+    verbose = args['-v']
+
+    if args['--clean']:
+        if verbose:
+            print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
+        cleaning(verbose)
+        if input_folder:
+            cleaning_input(input_folder, output_folder, verbose)
+        if argument_number == 1 or (argument_number == 2 and verbose):
+            sys.exit()
+
+    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, patho_log, verbose)
 
 
 if __name__ == '__main__':
