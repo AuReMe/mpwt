@@ -543,12 +543,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     global_size_reduction = size_reduction
     global_verbose = verbose
 
-    # Use the number of cpu entered by the user or all the cpu available.
+    # Use the number of cpu given by the user or all the cpu available.
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
         number_cpu_to_use = cpu_count()
-    p = Pool(processes=number_cpu_to_use)
+    mpwt_pool = Pool(processes=number_cpu_to_use)
 
     # Run folder contains sub-folders containing GBK file
     if input_folder:
@@ -573,7 +573,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if patho_inference:
             if verbose:
                 print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-            error_status = p.map(run_pwt, genbank_paths)
+            error_status = mpwt_pool.map(run_pwt, genbank_paths)
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
             check_pwt(genbank_paths, patho_log)
@@ -594,7 +594,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if (input_folder and dat_extraction) or dat_extraction:
         if verbose:
             print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-        p.map(run_pwt_dat, genbank_paths)
+        mpwt_pool.map(run_pwt_dat, genbank_paths)
         if verbose:
             print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
         for genbank_path in pgdb_folders:
@@ -611,9 +611,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         move_datas = []
         for genbank_path in pgdb_folders:
             move_datas.append(pgdb_folders[genbank_path])
-        p.map(run_move_pgdb, move_datas)
+        mpwt_pool.map(run_move_pgdb, move_datas)
         # Give access to the file for user outside the container.
         subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
+
+    mpwt_pool.close()
+    mpwt_pool.join()
 
     if verbose:
         print('~~~~~~~~~~The script have finished! Thank you for using it.')
