@@ -1,5 +1,3 @@
-import sys
-
 from mpwt.multipwt import run_mpwt
 
 def main(args=None):
