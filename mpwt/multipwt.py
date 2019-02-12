@@ -31,6 +31,7 @@ import csv
 import datetime
 import docopt
 import getpass
+import gffutils
 import os
 import shutil
 import subprocess
@@ -156,14 +157,10 @@ def create_dats_and_lisp(run_folder):
     # Look for a Genbank file in the run folder.
     # PGDB ID corresponds to the name of the species folder.
     pgdb_id = run_folder.split('/')[-2]
-    gbk_pathname = run_folder + pgdb_id + ".gbk"
     gbk_name = pgdb_id + ".gbk"
-
-    # Check if a Genbank file have been found.
-    try:
-        gbk_pathname
-    except NameError:
-        raise NameError('Missing Genbank file. Check if you have a Genbank file and if it ends with .gbk or .gb or .gbff')
+    gbk_pathname = run_folder + gbk_name
+    gff_name = pgdb_id + ".gff"
+    gff_pathname = run_folder + gff_name
 
     organism_dat = run_folder + 'organism-params.dat'
     genetic_dat = run_folder + 'genetic-elements.dat'
@@ -171,26 +168,39 @@ def create_dats_and_lisp(run_folder):
     taxon_id = ""
     species_name = ""
 
-    # Take the species name and the taxon id from the genbank file.
-    with open(gbk_pathname, "r") as gbk:
-        # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
-        first_seq_record = next(SeqIO.parse(gbk, "genbank"))
-        try:
-            species_name = first_seq_record.annotations['organism']
-        except KeyError:
-            raise KeyError('No organism in the Genbank. In the SOURCE you must have: ORGANISM  Species name')      
+    if os.path.isfile(gbk_pathname):
+        input_name = gbk_name
+        # Take the species name and the taxon id from the genbank file.
+        with open(gbk_pathname, "r") as gbk:
+            # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
+            first_seq_record = next(SeqIO.parse(gbk, "genbank"))
+            try:
+                species_name = first_seq_record.annotations['organism']
+            except KeyError:
+                raise KeyError('No organism in the Genbank. In the SOURCE you must have: ORGANISM  Species name')      
 
-        # Take the source feature of the first record.
-        # This feature contains the taxon ID in the db_xref qualifier.
-        src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
-        try:
-            for src_feature in src_features:
-                src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
-                for src_dbxref_qualifier in src_dbxref_qualifiers:
-                    if 'taxon:' in src_dbxref_qualifier:
-                        taxon_id = src_dbxref_qualifier.replace('taxon:', '')
-        except KeyError:
-            raise KeyError('No taxon ID in the Genbank. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.')               
+            # Take the source feature of the first record.
+            # This feature contains the taxon ID in the db_xref qualifier.
+            src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
+            try:
+                for src_feature in src_features:
+                    src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                    for src_dbxref_qualifier in src_dbxref_qualifiers:
+                        if 'taxon:' in src_dbxref_qualifier:
+                            taxon_id = src_dbxref_qualifier.replace('taxon:', '')
+            except KeyError:
+                raise KeyError('No taxon ID in the Genbank. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.')               
+   
+    elif os.path.isfile(gff_pathname):
+        input_name = gff_name
+        gff_database = gffutils.create_db(gff_pathname, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
+        for region in gff_database.features_of_type('region'):
+            if 'Dbxref' in region.attributes: 
+                for dbxref in region.attributes['Dbxref']:
+                    if 'taxon' in dbxref:
+                        taxon_id = dbxref.replace('taxon:', '')
+    else:
+        sys.exit('Missing Genbank/GFF file. Check if you have a Genbank file and if it ends with .gbk or .gff')
 
     lisp_pathname = run_folder + "dat_extraction.lisp"
 
@@ -206,7 +216,7 @@ def create_dats_and_lisp(run_folder):
     with open(genetic_dat, 'w') as genetic_file:
         genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
         genetic_writer.writerow(['NAME', ''])
-        genetic_writer.writerow(['ANNOT-FILE', gbk_name])
+        genetic_writer.writerow(['ANNOT-FILE', input_name])
         genetic_writer.writerow(['//'])
 
     # Create the lisp script.
@@ -441,7 +451,7 @@ def run_pwt_dat(genbank_path):
         print(' '.join(cmd_dat))
 
     error_status = None
-    dat_creation_end = 'Opening Navigator window.'
+    dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']
     load_errors = ['Error: Organism']
     load_lines = []
 
@@ -449,7 +459,7 @@ def run_pwt_dat(genbank_path):
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
         for load_line in iter(load_subprocess.stdout.readline, ""):
             load_line = load_line.decode('utf-8')
-            if dat_creation_end in load_line:
+            if any(dat_end in load_line for dat_end in dat_creation_ends):
                 load_subprocess.stdout.close()
                 load_subprocess.kill()
                 return
