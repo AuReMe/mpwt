@@ -129,7 +129,9 @@ def create_dat_extraction_script(pgdb_id, lisp_pathname):
         lisp_file.write('\n')
         lisp_file.write("(select-organism :org-id '" + pgdb_id + ")")
         lisp_file.write('\n')
-        lisp_file.write("(create-flat-files-for-current-kb)")
+        lisp_file.write('(let ((*progress-noter-enabled?* NIL))')
+        lisp_file.write('\n')
+        lisp_file.write("        (create-flat-files-for-current-kb))")
 
 
 def create_dats_and_lisp(run_folder):

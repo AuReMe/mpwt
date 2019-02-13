@@ -17,7 +17,7 @@ def test_create_dats_and_lisp():
 
     genetic_string_expected = 'NAME\t\nANNOT-FILE\ttca_cycle_ecoli.gbk\n//\n'
     organism_string_expected = 'ID\ttca_cycle_ecoli\nSTORAGE\tFILE\nNCBI-TAXON-ID\t511145\nNAME\tEscherichia coli str. K-12 substr. MG1655\n'
-    lisp_string_expected = '''(in-package :ecocyc)\n(select-organism :org-id 'tca_cycle_ecoli)\n(create-flat-files-for-current-kb)'''
+    lisp_string_expected = '''(in-package :ecocyc)\n(select-organism :org-id 'tca_cycle_ecoli)\n(let ((*progress-noter-enabled?* NIL))\n        (create-flat-files-for-current-kb))'''
 
     with open(genetic_pathname, 'r') as genetic_file:
         genetic_string_found = genetic_file.read()
