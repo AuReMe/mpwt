@@ -40,8 +40,8 @@ Use
 Input data
 ~~~~~~~~~~
 
-The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.
-Genbank files must have the same name as the folder in which they are located and also finished with a .gbk.
+The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank/gff file.
+Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
 
 .. code-block:: text
 
@@ -49,14 +49,12 @@ Genbank files must have the same name as the folder in which they are located an
     ├── species_1
     │   └── species_1.gbk
     ├── species_2
-    │   └── species_2.gbk
+    │   └── species_2.gff
     ├── species_3
     │   └── species_3.gbk
     ..
 
-Pathway-Tools will run on each genbank file.
-It will create an output folder inside the folder containing all the result files from the PathoLogic inference for each species.
-You can also choose another output folder.
+Pathway-Tools will run on each genbank/gff file. It will create the results in the ptools-local folder but you can also choose an output folder.
 
 Genbank file example:
 
@@ -100,15 +98,16 @@ GFF file example:
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
 Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a genbank file.
-But PGDBs created with this format have missing sequences.
+But PGDBs created with this format have missing sequences. Also if you create dat files, mpwt will indicate that 18 on 23 dat files create.
+The missing files are all the dat files with -links in their names. These files are not created because of the missing sequences.
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three input files are created by mpwt. Informations are extracted from the genbank file.
-myDBName corresponds to the name of the folder and the genbank file.
-taxonid corresponds to the taxonid in the db_xref of the source feature in the genbank.
-species_name is extracted from the genbank file.
+Three input files are created by mpwt. Informations are extracted from the genbank/gff file.
+myDBName corresponds to the name of the folder and the genbank/gff file.
+taxonid corresponds to the taxonid in the db_xref of the source feature in the genbank/gff.
+species_name is extracted from the genbank/gff file.
 
 .. code-block:: text
 
@@ -126,12 +125,13 @@ species_name is extracted from the genbank file.
     dat_extraction.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
-    (create-flat-files-for-current-kb)
+    (let ((*progress-noter-enabled?* NIL))
+            (create-flat-files-for-current-kb))
 
 Command Line Example
 ~~~~~~~~~~~~~~~~~~~~
 
-mpwt is usable as a command line.
+mpwt can be used as a command line.
 
 .. code:: sh
 
@@ -206,7 +206,7 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
@@ -220,6 +220,8 @@ dat_extraction: True or nothing. If True, mpwt will create dat files of the PGDB
 size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
 
 number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
+
+patho_log: string or nothing. String corresponds to a folder pathname. Will create log files of PathoLogic inference inside the folder.
 
 verbose: True or nothing. If true, mpwt will be verbose.
 
@@ -265,12 +267,11 @@ Errors
 
 If you encounter errors (and it is highly possible) there is some tips that can help you resolved them.
 
-For error during PathoLogic inference, a log is created where you launch the command.
+For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
 There is also a pathologic.log in each sub-folders.
 
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
-For others errors, currently nothing is made to help you.
-Maybe in the future.
+If Pathway-tools crashed, mpwt can print some useful information in verbose mode.

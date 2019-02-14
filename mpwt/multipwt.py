@@ -3,7 +3,7 @@
 
 """
 Description:
-From genbank file this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at last it will generate dat files for AuReMe.
+From genbank/gff files this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at can generate dat files.
 The script takes a folder name as argument.
 
 usage:
@@ -20,9 +20,9 @@ options:
     --dat    Will extract only dat files from Pathway-Tools results.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
-    -r    Will delete files in ptools-local to reduce size of results.
+    -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
     --cpu=INT     Number of cpu to use for the multiprocessing.
-    --log=FOLDER     Create PathoLogic log files inside the given folder.
+    --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     -v     Verbose.
 
 """
@@ -45,8 +45,7 @@ def ptools_path():
     """
     Find the path of ptools using Pathway-Tools file.
     """
-    pathway_tools_str = subprocess.check_output('type pathway-tools', shell=True)
-    pathway_tools_path = pathway_tools_str.decode('UTF-8').split('is ')[1].strip('\n')
+    pathway_tools_path = shutil.which('pathway-tools')
 
     pathway_tools_file = open(pathway_tools_path, 'r')
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
@@ -256,6 +255,19 @@ def create_lisp_script_PGDB():
     return lisp_folders
 
 
+def permission_change(folder_pathname):
+    """
+    Give permission to output files inside a folder.
+    Used for log files and PGDB/dat files.
+    """
+    os.chmod(folder_pathname, 0o777)
+    for root, subfolders, subfiles in os.walk(folder_pathname):
+        for subfolder in subfolders:
+            os.chmod(os.path.join(root, subfolder), 0o777)
+        for subfile in subfiles:
+            os.chmod(os.path.join(root, subfile), 0o777)
+
+
 def check_pwt(genbank_paths, patho_log_folder):
     """
     Check PathoLogic's log.
@@ -355,9 +367,7 @@ def check_pwt(genbank_paths, patho_log_folder):
         sys.exit("Stop the inference.")
 
     if patho_log_folder:
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_error_pathname])
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_resume_pathname])
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', patho_log_folder])
+        permission_change(patho_log_folder)
 
 
 def extract_pgdb_pathname(run_folder):
@@ -628,7 +638,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             move_datas.append(pgdb_folders[genbank_path])
         mpwt_pool.map(run_move_pgdb, move_datas)
         # Give access to the file for user outside the container.
-        subprocess.call(['chmod', '-R', 'u=rwX,g=rwX,o=rwX', output_folder])
+        permission_change(output_folder)
 
     mpwt_pool.close()
     mpwt_pool.join()
