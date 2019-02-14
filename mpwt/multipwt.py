@@ -96,29 +96,6 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     return new_run_ids
 
 
-def pwt_run(run_folder):
-    """
-    Check if files needed by Pathway-Tools are available, if not create them.
-    Check if there is a pathologic.log from a previous run. If yes, delete it.
-    """
-    required_files = set(['organism-params.dat','genetic-elements.dat','dat_extraction.lisp'])
-    files_in = set(next(os.walk(run_folder))[2])
-    if global_verbose:
-        species_folder = run_folder.split('/')[-2]
-        print("Checking Pathway-Tools species_folder inputs for {0}:".format(species_folder))
-
-    if "pathologic.log" in files_in:
-        os.remove(run_folder + "pathologic.log")
-
-    if required_files.issubset(files_in):
-        if global_verbose:
-            print("OK")
-    else:
-        if global_verbose:
-            print("%s missing" %"; ".join(required_files.difference(files_in)))
-        create_dats_and_lisp(run_folder)
-
-
 def create_dat_extraction_script(pgdb_id, lisp_pathname):
     """
     Input: a PGDB ID and an output path.
@@ -201,6 +178,10 @@ def create_dats_and_lisp(run_folder):
                 for dbxref in region.attributes['Dbxref']:
                     if 'taxon' in dbxref:
                         taxon_id = dbxref.replace('taxon:', '')
+                    else:
+                        sys.exit('No taxon id in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+            else:
+                sys.exit('No Dbxref in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
     else:
         sys.exit('Missing Genbank/GFF file. Check if you have a Genbank file and if it ends with .gbk or .gff')
 
@@ -224,7 +205,30 @@ def create_dats_and_lisp(run_folder):
     # Create the lisp script.
     create_dat_extraction_script(pgdb_id, lisp_pathname)
 
-    print('Inputs file created for {0}.'.format(pgdb_id))
+
+def pwt_input_files(run_folder):
+    """
+    Check if files needed by Pathway-Tools are available, if not create them.
+    Check if there is a pathologic.log from a previous run. If yes, delete it.
+    """
+    required_files = set(['organism-params.dat','genetic-elements.dat','dat_extraction.lisp'])
+    files_in = set(next(os.walk(run_folder))[2])
+    if global_verbose:
+        species_folder = run_folder.split('/')[-2]
+
+    if "pathologic.log" in files_in:
+        os.remove(run_folder + "pathologic.log")
+
+    missing_string = ""
+    if required_files.issubset(files_in):
+        if global_verbose:
+            missing_string = "no missing files"
+    else:
+        if global_verbose:
+            missing_string = "missing {0}".format("; ".join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
+        create_dats_and_lisp(run_folder)
+    if global_verbose:
+        print("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
 
 
 def create_lisp_script_PGDB():
@@ -579,8 +583,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
         if verbose:
             print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
-        for genbank_path in genbank_paths:
-            pwt_run(genbank_path)
+        mpwt_pool.map(pwt_input_files, genbank_paths)
 
         if patho_inference:
             if verbose:

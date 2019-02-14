@@ -19,6 +19,7 @@ Requirements
 ~~~~~~~~~~~~
 
 mpwt works only on Python 3 and it has been tested on Python 3.6.
+It requires some python packages (biopython, docopt and gffutils) and Pathway-Tools. To avoid issues, Pathway-Tools version 22.5 is required.
 
 You must have an environment where Pathway-Tools is installed. Pathway-Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
@@ -83,6 +84,23 @@ Genbank file example:
                         /db_xref="InterPro:IPRXXXXXX"
                         /EC_number="X.X.X.X"
                         /translation="AMINOAACIDSSEQUENCE"
+
+Look at the `NCBI GBK format<http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
+
+GFF file example:
+
+.. code-block:: text
+
+    ##gff-version 3
+    ##sequence-region region_id 1 XXXXXX
+    region_id	Tools	region	1	XXXXXX	.	strand	.	ID=id0;Dbxref=taxon:id
+    region_id	Tools	gene	START	STOP	.	strand	.	ID=geneID
+    region_id	Tools	CDS	START	STOP	.	-	strand	ID=cds216;Parent=geneID;ec_number=x.x.x.x
+
+Look at the `NCBI GFF format<https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
+
+Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a genbank file.
+But PGDBs created with this format have missing sequences.
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
