@@ -85,7 +85,7 @@ Genbank file example:
                         /EC_number="X.X.X.X"
                         /translation="AMINOAACIDSSEQUENCE"
 
-Look at the `NCBI GBK format<http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
+Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
 
 GFF file example:
 
@@ -97,7 +97,7 @@ GFF file example:
     region_id	Tools	gene	START	STOP	.	strand	.	ID=geneID
     region_id	Tools	CDS	START	STOP	.	-	strand	ID=cds216;Parent=geneID;ec_number=x.x.x.x
 
-Look at the `NCBI GFF format<https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
+Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
 Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a genbank file.
 But PGDBs created with this format have missing sequences.
