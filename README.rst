@@ -145,7 +145,7 @@ Optional argument are identified by [].
 
 --patho will launch PathoLogic inference on input folder.
 
---dat will create dat files and only move them inside the output folder.
+--dat will create BioPAX/attribute-value dat files.
 
 --md will move only the dat files inside the output folder.
 
@@ -196,9 +196,13 @@ Then move the dat files to the output folder.
 Create dat files for the PGDB inside ptools-local.
 And move them to the output folder.
 
+.. code:: sh
+
     mpwt -o path/to/folder/output
 
 Move PGDB from ptools-local to the output folder.
+
+.. code:: sh
 
     mpwt -o path/to/folder/output --md
 
@@ -225,7 +229,7 @@ If you don't enter an argument, results will be inside the ptools-local folder.
 
 patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
 
-dat_creation: True or nothing. If True, mpwt will create dat files of the PGDBs.
+dat_creation: True or nothing. If True, mpwt will create BioPAX/attribute-value dat files of the PGDBs.
 
 dat_extraction: True or nothing. If True, mpwt will move the dat files inside the output folder instead of all the PGDB files.
 
@@ -294,7 +298,7 @@ Output
 If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway-Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
-If you used the output argument, there is two potential output depending on the use of the option --md/dat_extraction:
+If you used the output argument, there is two potential outputs depending on the use of the option --md/dat_extraction:
 
 1. without this option, you will have a complete PGDB folder inside your results, for example:
 

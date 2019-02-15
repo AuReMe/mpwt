@@ -18,7 +18,7 @@ options:
     -f=DIR     Working folder containing sub-folders with Genbank file.
     -o=DIR    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
-    --dat    Will create BioPAX/dat files from PGDB.
+    --dat    Will create BioPAX/attribute-value dat files from PGDB.
     --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).

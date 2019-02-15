@@ -51,7 +51,7 @@ def delete_pgdb(pgdb_name):
 
 def cleaning_input(input_folder, output_folder=None, verbose=None):
     """
-    Remove dat_extraction.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
+    Remove dat_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
     """
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
@@ -66,7 +66,7 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
 
     for genbank_path in genbank_paths:
         if os.path.isdir(genbank_path):
-            lisp_script = genbank_path + 'dat_extraction.lisp'
+            lisp_script = genbank_path + 'dat_creation.lisp'
             patho_log = genbank_path + 'pathologic.log'
             genetic_dat = genbank_path + 'genetic-elements.dat'
             organism_dat = genbank_path + 'organism-params.dat'
