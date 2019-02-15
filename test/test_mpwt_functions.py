@@ -13,7 +13,7 @@ def test_create_dats_and_lisp():
 
     genetic_pathname = 'test/tca_cycle_ecoli/genetic-elements.dat'
     organism_pathname = 'test/tca_cycle_ecoli/organism-params.dat'
-    lisp_pathname = 'test/tca_cycle_ecoli/dat_extraction.lisp'
+    lisp_pathname = 'test/tca_cycle_ecoli/dat_creation.lisp'
 
     genetic_string_expected = 'NAME\t\nANNOT-FILE\ttca_cycle_ecoli.gbk\n//\n'
     organism_string_expected = 'ID\ttca_cycle_ecoli\nSTORAGE\tFILE\nNCBI-TAXON-ID\t511145\nNAME\tEscherichia coli str. K-12 substr. MG1655\n'

@@ -90,10 +90,10 @@ GFF file example:
 .. code-block:: text
 
     ##gff-version 3
-    ##sequence-region region_id 1 XXXXXX
-    region_id	Tools	region	1	XXXXXX	.	strand	.	ID=id0;Dbxref=taxon:id
-    region_id	Tools	gene	START	STOP	.	strand	.	ID=geneID
-    region_id	Tools	CDS	START	STOP	.	-	strand	ID=cds216;Parent=geneID;ec_number=x.x.x.x
+    ##sequence-region scaffold_1 1 XXXXXX
+    scaffold_1	RefSeq	region	1	XXXXXXX	.	+	.	ID=region_id;Dbxref=taxon:XXXXXX
+    scaffold_1	RefSeq	gene	START	STOP	.	-	.	ID=gene_id
+    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
@@ -122,7 +122,7 @@ species_name is extracted from the genbank/gff file.
     ANNOT-FILE  gbk_pathname
     //
 
-    dat_extraction.lisp:
+    dat_creation.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
     (let ((*progress-noter-enabled?* NIL))
@@ -135,7 +135,7 @@ mpwt can be used as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
 
 Optional argument are identified by [].
 
@@ -146,6 +146,8 @@ Optional argument are identified by [].
 --patho will launch PathoLogic inference on input folder.
 
 --dat will create dat files and only move them inside the output folder.
+
+--md will move only the dat files inside the output folder.
 
 --cpu the number of cpu used for the multiprocessing.
 
@@ -178,21 +180,29 @@ Create PGDBs of studied organisms inside ptools-local and create dat files.
     mpwt -f path/to/folder/input --patho -o path/to/folder/output
 
 Create PGDBs of studied organisms inside ptools-local.
-Then extract the files inside the output folder.
+Then move the files to the output folder.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output
+    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
-Then extract the dat files inside the output folder.
+Then move the dat files to the output folder.
 
 .. code:: sh
 
-    mpwt --dat -o path/to/folder/output
+    mpwt --dat -o path/to/folder/output --md
 
 Create dat files for the PGDB inside ptools-local.
-And move them inside the output folder.
+And move them to the output folder.
+
+    mpwt -o path/to/folder/output
+
+Move PGDB from ptools-local to the output folder.
+
+    mpwt -o path/to/folder/output --md
+
+Move dat files from ptools-local to the output folder.
 
 Python Example
 ~~~~~~~~~~~~~~
@@ -206,7 +216,7 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
@@ -215,7 +225,9 @@ If you don't enter an argument, results will be inside the ptools-local folder.
 
 patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
 
-dat_extraction: True or nothing. If True, mpwt will create dat files of the PGDBs.
+dat_creation: True or nothing. If True, mpwt will create dat files of the PGDBs.
+
+dat_extraction: True or nothing. If True, mpwt will move the dat files inside the output folder instead of all the PGDB files.
 
 size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
 
@@ -228,7 +240,7 @@ verbose: True or nothing. If true, mpwt will be verbose.
 Useful functions
 ~~~~~~~~~~~~~~~~
 
-1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
+1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
 Run the multiprocess Pathway-Tools on input folder.
 
@@ -242,7 +254,7 @@ This can also be used with a command line argument:
 
     mpwt --clean
 
-If you use clean and the argument -f input_folder, it will delete input files ('dat_extraction.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
+If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
 
 .. code:: sh
 
@@ -275,3 +287,65 @@ If the build passed you have also the possibility to see the result of the infer
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
 If Pathway-tools crashed, mpwt can print some useful information in verbose mode.
+
+Output
+~~~~~~
+
+If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway-Tools.
+Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
+
+If you used the output argument, there is two potential output depending on the use of the option --md/dat_extraction:
+
+1. without this option, you will have a complete PGDB folder inside your results, for example:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── default-version
+    │   └── 1.0
+    │       └── data
+    │           └── contains BioPAX/dat files if you used the --dat/dat_creation option.
+    │       └── input
+    │           └── species_1.gbk
+    │           └── genetic-elements.dat
+    │           └── organism-init.dat
+    │           └── organism.dat
+    │       └── kb
+    │           └── species_1.ocelot
+    │       └── reports
+    │           └── contains Pathway-Tools reports.
+    ├── species_2
+    ..
+    ├── species_3
+    ..
+
+2. with this option, you will only have the dat files, for example:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── classes.dat
+    │   └── compounds.dat
+    │   └── dnabindsites.dat
+    │   └── enzrxns.dat
+    │   └── genes.dat
+    │   └── pathways.dat
+    │   └── promoters.dat
+    │   └── protein-features.dat
+    │   └── proteins.dat
+    │   └── protligandcplxes.dat
+    │   └── pubs.dat
+    │   └── reactions.dat
+    │   └── regulation.dat
+    │   └── regulons.dat
+    │   └── rnas.dat
+    │   └── species.dat
+    │   └── terminators.dat
+    │   └── transunits.dat
+    │   └── ..
+    ├── species_2
+    ..
+    ├── species_3
+    ..

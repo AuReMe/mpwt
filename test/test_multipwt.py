@@ -41,7 +41,7 @@ def test_multiprocess_pwt_import():
     """
     mpwt.cleaning()
     mpwt.cleaning_input('test')
-    mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_extraction=True, size_reduction=False, verbose=True)
+    mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
 
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_tca_pathname)
@@ -62,7 +62,7 @@ def test_multiprocess_pwt_call():
     """
     subprocess.call(['mpwt', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
-    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--patho', '--dat'])
+    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--patho', '--dat', '--md'])
 
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_tca_pathname)

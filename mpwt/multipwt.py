@@ -3,12 +3,13 @@
 
 """
 Description:
-From genbank/gff files this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them and at can generate dat files.
+From genbank/gff files this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them. It can also generate dat files.
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
-    mpwt --dat [-f=DIR] [-o=DIR] [-v]
+    mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
+    mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
+    mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [-v]
     mpwt --delete=STR
 
@@ -17,7 +18,8 @@ options:
     -f=DIR     Working folder containing sub-folders with Genbank file.
     -o=DIR    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
-    --dat    Will extract only dat files from Pathway-Tools results.
+    --dat    Will create BioPAX/dat files from PGDB.
+    --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
@@ -31,7 +33,6 @@ import csv
 import datetime
 import docopt
 import getpass
-import gffutils
 import os
 import shutil
 import subprocess
@@ -39,6 +40,7 @@ import sys
 
 from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
+from gffutils.iterators import DataIterator
 
 
 def ptools_path():
@@ -95,7 +97,7 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
     return new_run_ids
 
 
-def create_dat_extraction_script(pgdb_id, lisp_pathname):
+def create_dat_creation_script(pgdb_id, lisp_pathname):
     """
     Input: a PGDB ID and an output path.
     Create a lisp script allowing dat extraction.
@@ -127,7 +129,7 @@ def create_dats_and_lisp(run_folder):
     ANNOT-FILE  gbk_name
     //
 
-    Create dat_extraction.lisp:
+    Create dat_creation.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'pgdb_id)
     (create-flat-files-for-current-kb)
@@ -171,20 +173,20 @@ def create_dats_and_lisp(run_folder):
    
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
-        gff_database = gffutils.create_db(gff_pathname, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
-        for region in gff_database.features_of_type('region'):
-            if 'Dbxref' in region.attributes: 
-                for dbxref in region.attributes['Dbxref']:
-                    if 'taxon' in dbxref:
-                        taxon_id = dbxref.replace('taxon:', '')
-                    else:
-                        sys.exit('No taxon id in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
-            else:
-                sys.exit('No Dbxref in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+        # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
+        region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
+        if 'Dbxref' in region_feature.attributes:
+            for dbxref in region_feature.attributes['Dbxref']:
+                if 'taxon' in dbxref:
+                    taxon_id = dbxref.replace('taxon:', '')
+                else:
+                    sys.exit('No taxon id in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+        else:
+            sys.exit('No Dbxref in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
     else:
         sys.exit('Missing Genbank/GFF file. Check if you have a Genbank file and if it ends with .gbk or .gff')
 
-    lisp_pathname = run_folder + "dat_extraction.lisp"
+    lisp_pathname = run_folder + "dat_creation.lisp"
 
     # Create the organism-params dat file.
     with open(organism_dat, 'w') as organism_file:
@@ -202,7 +204,7 @@ def create_dats_and_lisp(run_folder):
         genetic_writer.writerow(['//'])
 
     # Create the lisp script.
-    create_dat_extraction_script(pgdb_id, lisp_pathname)
+    create_dat_creation_script(pgdb_id, lisp_pathname)
 
 
 def pwt_input_files(run_folder):
@@ -210,7 +212,7 @@ def pwt_input_files(run_folder):
     Check if files needed by Pathway-Tools are available, if not create them.
     Check if there is a pathologic.log from a previous run. If yes, delete it.
     """
-    required_files = set(['organism-params.dat','genetic-elements.dat','dat_extraction.lisp'])
+    required_files = set(['organism-params.dat','genetic-elements.dat','dat_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
     if global_verbose:
         species_folder = run_folder.split('/')[-2]
@@ -233,7 +235,7 @@ def pwt_input_files(run_folder):
 def create_lisp_script_PGDB():
     """
     Create a lisp script file for each PGDB in the ptools-local folder.
-    Return a list containing all the path to the dat_extraction.lisp.
+    Return a list containing all the path to the dat_creation.lisp.
     """
     ptools_local_path = ptools_path()
     pgdb_folder = ptools_local_path + '/pgdbs/user/'
@@ -248,8 +250,8 @@ def create_lisp_script_PGDB():
             pgdb_id = species_pgdb[:-3]
             pgdb_pathname = tmp_folder + pgdb_id + '/'
             os.mkdir(tmp_folder + pgdb_id)
-            lisp_pathname = pgdb_pathname + "dat_extraction.lisp"
-            create_dat_extraction_script(pgdb_id, lisp_pathname)
+            lisp_pathname = pgdb_pathname + "dat_creation.lisp"
+            create_dat_creation_script(pgdb_id, lisp_pathname)
             lisp_folders.append(pgdb_pathname)
 
     return lisp_folders
@@ -457,10 +459,10 @@ def run_pwt_dat(genbank_path):
     Kill the subprocess when the command reach the Navigator Window opening proposition.
     If this proposition is not closed, the script can't continue.
     Command used:
-    pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -load
+    pathway-tools -no-patch-download -disable-metadata-saving -nologfile -load
     """
-    lisp_path = genbank_path + '/dat_extraction.lisp'
-    cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
+    lisp_path = genbank_path + '/dat_creation.lisp'
+    cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
     if global_verbose:
@@ -555,7 +557,7 @@ def run_move_pgdb(pgdb_folders):
                     os.remove(output_species+'/'+pgdb_file)
 
 
-def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
+def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_creation=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -576,7 +578,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         number_cpu_to_use = cpu_count()
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
-    # Run folder contains sub-folders containing GBK file
+    # Run folder contains sub-folders containing GBK/GFF file.
     if input_folder:
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
         if output_folder:
@@ -589,7 +591,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             return
         genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
         if len(genbank_paths) == 0:
-            sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank file.")
+            sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
 
         if verbose:
             print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
@@ -603,10 +605,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
             check_pwt(genbank_paths, patho_log)
             if any(error_status):
-                sys.exit('Error during inference. Process stopped. Look at the command log. Also you look at the log files, if you have used --log argument.')
+                sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
     # Create path for lisp if there is no folder given.
-    if dat_extraction and not input_folder:
+    if (dat_creation and not input_folder) or (output_folder and not input_folder):
         genbank_paths = create_lisp_script_PGDB()
 
     if verbose:
@@ -616,7 +618,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         pgdb_id_folder = extract_pgdb_pathname(genbank_path)
         pgdb_folders[genbank_path] = pgdb_id_folder
 
-    if (input_folder and dat_extraction) or dat_extraction:
+    if (input_folder and dat_creation) or dat_creation:
         if verbose:
             print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
         mpwt_pool.map(run_pwt_dat, genbank_paths)
@@ -624,9 +626,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
         for genbank_path in pgdb_folders:
             check_dat(pgdb_folders[genbank_path])
-        if dat_extraction and not input_folder:
-            ptools_local_path = ptools_path()
-            shutil.rmtree(ptools_local_path + '/tmp')
+
+    if (dat_creation and not input_folder) or (output_folder and not input_folder):
+        ptools_local_path = ptools_path()
+        shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
         print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
@@ -667,7 +670,8 @@ def run_mpwt():
     input_folder = args['-f']
     output_folder = args['-o']
     patho_inference = args['--patho']
-    dat_extraction = args['--dat']
+    dat_creation = args['--dat']
+    move_dat = args['--md']
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
@@ -682,7 +686,7 @@ def run_mpwt():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_extraction, size_reduction, number_cpu, patho_log, verbose)
+    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_creation, move_dat, size_reduction, number_cpu, patho_log, verbose)
 
 
 if __name__ == '__main__':
