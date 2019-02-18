@@ -57,11 +57,28 @@ def ptools_path():
     return ptools_local_path
 
 
-def check_existing_pgdb(run_ids, input_folder, output_folder):
+def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     """
     Check output folder for already existing PGDB, don't create them.
     Check if PGDBs are already in ptools-local folder.
     """
+    # Check if there is files/folder inside the input folder. 
+    species_folders = [species_folder for species_folder in os.listdir(input_folder)]
+    if len(species_folders) == 0:
+        print("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
+        return None
+
+    # Check the structure of the input folder.
+    invalid_characters = ['.', '/']
+    for species_folder in species_folders:
+        if os.path.isfile(input_folder+'/'+species_folder):
+            print('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
+            return None
+        elif os.path.isdir(input_folder+'/'+species_folder):
+            if any(char in invalid_characters for char in species_folder):
+                print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                return None
+
     if output_folder:
         already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
         new_run_ids = set(run_ids) - set(already_present_outputs)
@@ -73,11 +90,7 @@ def check_existing_pgdb(run_ids, input_folder, output_folder):
 
     else:
         new_run_ids = []
-        invalid_characters = ['.', '/']
-        for species_folder in os.listdir(input_folder):
-            if any(char in invalid_characters for char in species_folder):
-                print('Error: . or / in genbank name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
-                return None
+        for species_folder in species_folders:
             new_run_ids.append(species_folder)
 
     ptools_local_path = ptools_path() + '/pgdbs/user/'
@@ -586,15 +599,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 if verbose:
                     print('No output directory, it will be created.')
                 os.mkdir(output_folder)
-        run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
+        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder)
         if not run_ids:
             return
         genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
-        if len(genbank_paths) == 0:
-            sys.exit("No folder containing genbank file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
 
         if verbose:
-            print('~~~~~~~~~~Creation of input data from Genbank~~~~~~~~~~')
+            print('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
         mpwt_pool.map(pwt_input_files, genbank_paths)
 
         if patho_inference:

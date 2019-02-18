@@ -5,7 +5,7 @@ import os
 import shutil
 import subprocess
 
-from mpwt.multipwt import check_existing_pgdb, ptools_path
+from mpwt.multipwt import check_input_and_existing_pgdb, ptools_path
 
 
 def cleaning(verbose=None):
@@ -58,7 +58,7 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
     if output_folder:
         if os.path.exists(output_folder) == False:
             output_folder = None
-        run_ids = check_existing_pgdb(run_ids, input_folder, output_folder)
+        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder)
         if not run_ids:
             return
 
