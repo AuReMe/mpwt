@@ -5,15 +5,46 @@ import os
 import shutil
 import subprocess
 
-from mpwt.multipwt import check_input_and_existing_pgdb, ptools_path
+from mpwt.multipwt import check_input_and_existing_pgdb, find_ptools_path
+from multiprocessing import Pool, cpu_count
 
 
-def cleaning(verbose=None):
+def delete_pgdb(pgdb_name):
+    """
+    Remove a specific PGDB.
+    """
+    ptools_local_path = find_ptools_path()
+    pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
+    if os.path.isdir(pgdb_path):
+        shutil.rmtree(pgdb_path)
+        print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
+    else:
+        print(pgdb_path + " not a folder.")
+
+
+def remove_pgbds(to_delete_pgdbs, number_cpu=None):
+    """
+    Delete all PGDB inside to_delete_pgdbs using multiprocessing.
+    Check if there is a Pool and if not spawn one.
+    """
+    # Use the number of cpu given by the user or all the cpu available.
+    if number_cpu:
+        number_cpu_to_use = int(number_cpu)
+    else:
+        number_cpu_to_use = cpu_count()
+    mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    mpwt_pool.map(delete_pgdb, to_delete_pgdbs)
+
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+def cleaning(number_cpu=None, verbose=None):
     """
     Clean Pathway-Tools PGDB's folder.
     The script will delete folders and files in ptools-local/pgdbs/user.
     """
-    ptools_local_path = ptools_path()
+    ptools_local_path = find_ptools_path()
     file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
 
     pgdb_metadata_path = file_path + 'PGDB-METADATA.ocelot'
@@ -28,25 +59,9 @@ def cleaning(verbose=None):
         if verbose:
             print('PGDB-counter.dat has been removed.')
 
-    for pgdb_folder in os.listdir(file_path):
-        pgdb_folder_path = file_path + pgdb_folder
-        if os.path.isdir(pgdb_folder_path):
-            shutil.rmtree(pgdb_folder_path)
-            if verbose:
-                print(pgdb_folder + ' has been removed.')
-
-
-def delete_pgdb(pgdb_name):
-    """
-    Remove a specific PGDB.
-    """
-    ptools_local_path = ptools_path()
-    pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
-    if os.path.isdir(pgdb_path):
-        shutil.rmtree(pgdb_path)
-        print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
-    else:
-        print(pgdb_path + " not a folder.")
+    # Extract all pgdbs inside ptools-local. Then delete them.
+    all_pgdbs = os.listdir(file_path)
+    remove_pgbds(all_pgdbs)
 
 
 def cleaning_input(input_folder, output_folder=None, verbose=None):
@@ -58,7 +73,7 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
     if output_folder:
         if os.path.exists(output_folder) == False:
             output_folder = None
-        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder)
+        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
         if not run_ids:
             return
 

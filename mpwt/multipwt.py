@@ -10,8 +10,8 @@ usage:
     mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
-    mpwt --clean [-v]
-    mpwt --delete=STR
+    mpwt --clean [--cpu=INT] [-v]
+    mpwt --delete=STR [--cpu=INT]
 
 options:
     -h --help     Show help.
@@ -43,7 +43,7 @@ from multiprocessing import Pool, cpu_count
 from gffutils.iterators import DataIterator
 
 
-def ptools_path():
+def find_ptools_path():
     """
     Find the path of ptools using Pathway-Tools file.
     """
@@ -57,7 +57,7 @@ def ptools_path():
     return ptools_local_path
 
 
-def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
+def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
     """
     Check output folder for already existing PGDB, don't create them.
     Check if PGDBs are already in ptools-local folder.
@@ -65,18 +65,18 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     # Check if there is files/folder inside the input folder. 
     species_folders = [species_folder for species_folder in os.listdir(input_folder)]
     if len(species_folders) == 0:
-        print("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
+        sys.exit("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
         return None
 
     # Check the structure of the input folder.
     invalid_characters = ['.', '/']
     for species_folder in species_folders:
         if os.path.isfile(input_folder+'/'+species_folder):
-            print('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
+            sys.exit('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
             return None
         elif os.path.isdir(input_folder+'/'+species_folder):
             if any(char in invalid_characters for char in species_folder):
-                print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                sys.exit('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None
 
     if output_folder:
@@ -93,7 +93,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
         for species_folder in species_folders:
             new_run_ids.append(species_folder)
 
-    ptools_local_path = ptools_path() + '/pgdbs/user/'
+    ptools_local_path = find_ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
         lower_case_new_run_ids = list(map(lambda x:x.lower(), new_run_ids))
@@ -250,7 +250,7 @@ def create_lisp_script_PGDB():
     Create a lisp script file for each PGDB in the ptools-local folder.
     Return a list containing all the path to the dat_creation.lisp.
     """
-    ptools_local_path = ptools_path()
+    ptools_local_path = find_ptools_path()
     pgdb_folder = ptools_local_path + '/pgdbs/user/'
     tmp_folder = ptools_local_path + '/tmp/'
 
@@ -391,7 +391,7 @@ def extract_pgdb_pathname(run_folder):
     """
     gbk_name = run_folder.split('/')[-2]
 
-    ptools_local_path = ptools_path()
+    ptools_local_path = find_ptools_path()
     pgdb_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
 
     # Replace all / by _ to ensure that there is no error with the path with gbk_name.
@@ -599,7 +599,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 if verbose:
                     print('No output directory, it will be created.')
                 os.mkdir(output_folder)
-        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder)
+        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
         if not run_ids:
             return
         genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
@@ -639,7 +639,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             check_dat(pgdb_folders[genbank_path])
 
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
-        ptools_local_path = ptools_path()
+        ptools_local_path = find_ptools_path()
         shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
@@ -665,18 +665,11 @@ def run_mpwt():
     """
     Function used with a mpwt call in the terminal.
     """
-    from mpwt.cleaning_pwt import cleaning, cleaning_input, delete_pgdb
+    from mpwt.cleaning_pwt import cleaning, cleaning_input, remove_pgbds
 
     args = docopt.docopt(__doc__)
 
     argument_number = len(sys.argv[1:])
-
-    # Delete PGDB if use of --delete argument.
-    pgdb_to_deletes = args['--delete']
-    if pgdb_to_deletes:
-        for pgdb_to_delete in pgdb_to_deletes.split(','):
-            delete_pgdb(pgdb_to_delete)
-        return
 
     input_folder = args['-f']
     output_folder = args['-o']
@@ -688,10 +681,16 @@ def run_mpwt():
     patho_log = args['--log']
     verbose = args['-v']
 
+    # Delete PGDB if use of --delete argument.
+    pgdb_to_deletes = args['--delete']
+    if pgdb_to_deletes:
+        remove_pgbds(pgdb_to_deletes.split(','), number_cpu)
+        return
+
     if args['--clean']:
         if verbose:
             print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
-        cleaning(verbose)
+        cleaning(number_cpu, verbose)
         if input_folder:
             cleaning_input(input_folder, output_folder, verbose)
         if argument_number == 1 or (argument_number == 2 and verbose):

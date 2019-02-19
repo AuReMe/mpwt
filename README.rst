@@ -264,7 +264,7 @@ If you use clean and the argument -f input_folder, it will delete input files ('
 
     mpwt --clean -f input_folder
 
-2. delete_pgdb(pgdb_name)
+2. remove_pgbds(pgdb_name)
 
 With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
 
