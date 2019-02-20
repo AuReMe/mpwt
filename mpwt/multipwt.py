@@ -12,6 +12,7 @@ usage:
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
+    mpwt --list
 
 options:
     -h --help     Show help.
@@ -25,6 +26,7 @@ options:
     -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
     --cpu=INT     Number of cpu to use for the multiprocessing.
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
+    --list     List all PGDBs inside the ptools-local folder.
     -v     Verbose.
 
 """
@@ -42,19 +44,7 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 from gffutils.iterators import DataIterator
 
-
-def find_ptools_path():
-    """
-    Find the path of ptools using Pathway-Tools file.
-    """
-    pathway_tools_path = shutil.which('pathway-tools')
-
-    pathway_tools_file = open(pathway_tools_path, 'r')
-    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
-    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
-    pathway_tools_file.close()
-
-    return ptools_local_path
+from mpwt import utils
 
 
 def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
@@ -62,21 +52,21 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     Check output folder for already existing PGDB, don't create them.
     Check if PGDBs are already in ptools-local folder.
     """
-    # Check if there is files/folder inside the input folder. 
+    # Check if there are files/folders inside the input folder.
     species_folders = [species_folder for species_folder in os.listdir(input_folder)]
     if len(species_folders) == 0:
-        sys.exit("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
+        print("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
         return None
 
     # Check the structure of the input folder.
     invalid_characters = ['.', '/']
     for species_folder in species_folders:
         if os.path.isfile(input_folder+'/'+species_folder):
-            sys.exit('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
+            print('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
             return None
         elif os.path.isdir(input_folder+'/'+species_folder):
             if any(char in invalid_characters for char in species_folder):
-                sys.exit('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None
 
     if output_folder:
@@ -93,7 +83,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         for species_folder in species_folders:
             new_run_ids.append(species_folder)
 
-    ptools_local_path = find_ptools_path() + '/pgdbs/user/'
+    ptools_local_path = utils.find_ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
         lower_case_new_run_ids = list(map(lambda x:x.lower(), new_run_ids))
@@ -250,7 +240,7 @@ def create_lisp_script_PGDB():
     Create a lisp script file for each PGDB in the ptools-local folder.
     Return a list containing all the path to the dat_creation.lisp.
     """
-    ptools_local_path = find_ptools_path()
+    ptools_local_path = utils.find_ptools_path()
     pgdb_folder = ptools_local_path + '/pgdbs/user/'
     tmp_folder = ptools_local_path + '/tmp/'
 
@@ -388,17 +378,17 @@ def check_pwt(genbank_paths, patho_log_folder):
 def extract_pgdb_pathname(run_folder):
     """
     Extract PGDB ID folder and path.
+    Return a tuple with the name of the genbank and the pathname to the PGDB.
     """
     gbk_name = run_folder.split('/')[-2]
 
-    ptools_local_path = find_ptools_path()
+    ptools_local_path = utils.find_ptools_path()
     pgdb_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
 
     # Replace all / by _ to ensure that there is no error with the path with gbk_name.
     pgdb_folder = pgdb_path + gbk_name.lower() + 'cyc/'
-    pgdb_id_folder = (gbk_name, pgdb_folder)
 
-    return pgdb_id_folder
+    return (gbk_name, pgdb_folder)
 
 
 def pwt_error(genbank_path, subprocess_returncode, subprocess_stdout, subprocess_stderr):
@@ -639,7 +629,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             check_dat(pgdb_folders[genbank_path])
 
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
-        ptools_local_path = find_ptools_path()
+        ptools_local_path = utils.find_ptools_path()
         shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
@@ -665,8 +655,6 @@ def run_mpwt():
     """
     Function used with a mpwt call in the terminal.
     """
-    from mpwt.cleaning_pwt import cleaning, cleaning_input, remove_pgbds
-
     args = docopt.docopt(__doc__)
 
     argument_number = len(sys.argv[1:])
@@ -679,20 +667,29 @@ def run_mpwt():
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
+    pgdb_to_deletes = args['--delete']
+    pgdb_list = args['--list']
     verbose = args['-v']
 
+    if pgdb_list:
+        pgdbs = utils.list_pgdb()
+        if pgdbs == []:
+            print('No PGDB inside ptools-local.')
+        else:
+            print(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
+        return
+
     # Delete PGDB if use of --delete argument.
-    pgdb_to_deletes = args['--delete']
     if pgdb_to_deletes:
-        remove_pgbds(pgdb_to_deletes.split(','), number_cpu)
+        utils.remove_pgbds(pgdb_to_deletes.split(','), number_cpu)
         return
 
     if args['--clean']:
         if verbose:
             print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
-        cleaning(number_cpu, verbose)
+        utils.cleaning(number_cpu, verbose)
         if input_folder:
-            cleaning_input(input_folder, output_folder, verbose)
+            utils.cleaning_input(input_folder, output_folder, verbose)
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 

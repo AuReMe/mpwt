@@ -45,7 +45,7 @@ def test_check_input_and_existing_pgdb():
 
 
 def test_ptools_path():
-    ptools_path = mpwt.multipwt.find_ptools_path()
+    ptools_path = mpwt.utils.find_ptools_path()
     assert ptools_path == '/root/ptools-local'
 
 

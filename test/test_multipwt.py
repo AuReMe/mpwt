@@ -64,6 +64,9 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--patho', '--dat', '--md'])
 
+    pgdbs = mpwt.utils.list_pgdb()
+    assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_icyc', 'tca_cycle_ecolicyc']
+
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_tca_pathname)
     assert set(tca_reactions()).issubset(set(expected_tca_reactions))

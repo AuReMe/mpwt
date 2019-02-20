@@ -5,8 +5,32 @@ import os
 import shutil
 import subprocess
 
-from mpwt.multipwt import check_input_and_existing_pgdb, find_ptools_path
 from multiprocessing import Pool, cpu_count
+
+
+def find_ptools_path():
+    """
+    Find the path of ptools using Pathway-Tools file.
+    """
+    pathway_tools_path = shutil.which('pathway-tools')
+
+    pathway_tools_file = open(pathway_tools_path, 'r')
+    ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
+    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
+    pathway_tools_file.close()
+
+    return ptools_local_path
+
+
+def list_pgdb():
+    """
+    List all the PGDB inside the ptools-local folder.
+    Return a list of their IDs.
+    """
+    ptools_local_path = find_ptools_path()
+    pgdb_folder = ptools_local_path + '/pgdbs/user/'
+
+    return [species_pgdb for species_pgdb in os.listdir(pgdb_folder) if 'cyc' in species_pgdb]
 
 
 def delete_pgdb(pgdb_name):
@@ -69,13 +93,6 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
     Remove dat_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
     """
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-
-    if output_folder:
-        if os.path.exists(output_folder) == False:
-            output_folder = None
-        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
-        if not run_ids:
-            return
 
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
 
