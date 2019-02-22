@@ -42,8 +42,6 @@ def delete_pgdb(pgdb_name):
     if os.path.isdir(pgdb_path):
         shutil.rmtree(pgdb_path)
         print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
-    else:
-        print(pgdb_path + " not a folder.")
 
 
 def remove_pgbds(to_delete_pgdbs, number_cpu=None):

@@ -39,7 +39,7 @@ def test_multiprocess_pwt_import():
     """
     Test mpwt when called in a python script.
     """
-    mpwt.cleaning()
+    mpwt.remove_pgbds('fatty_acid_beta_oxydation_icyc,tca_cycle_ecolicyc')
     mpwt.cleaning_input('test')
     mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
 
@@ -64,7 +64,7 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--patho', '--dat', '--md'])
 
-    pgdbs = mpwt.utils.list_pgdb()
+    pgdbs = mpwt.list_pgdb()
     assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_icyc', 'tca_cycle_ecolicyc']
 
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"

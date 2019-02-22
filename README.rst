@@ -25,7 +25,7 @@ You must have an environment where Pathway-Tools is installed. Pathway-Tools can
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
 If your OS doesn't support Pathway-Tools, you can use a docker. If it's your case, look at `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker>`__.
-It is a dockerfile that will create container with Pathway-Tools, its dependancies and this package. You just need to give a Pathway-Tools installer as input.
+It is a dockerfile that will create a container with Pathway-Tools, its dependencies and this package. You just need to give a Pathway-Tools installer as input.
 
 Using pip
 ~~~~~~~~~
@@ -40,7 +40,7 @@ Use
 Input data
 ~~~~~~~~~~
 
-The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank/gff file.
+The script takes a folder containing sub-folders as input. Each sub-folder contains a Genbank/GFF file.
 Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
 
 .. code-block:: text
@@ -54,7 +54,7 @@ Genbank files must have the same name as the folder in which they are located an
     │   └── species_3.gbk
     ..
 
-Pathway-Tools will run on each genbank/gff file. It will create the results in the ptools-local folder but you can also choose an output folder.
+Pathway-Tools will run on each Genbank/GFF file. It will create the results in the ptools-local folder but you can also choose an output folder.
 
 Genbank file example:
 
@@ -97,17 +97,18 @@ GFF file example:
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
-Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a genbank file.
+Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a Genbank file.
 But PGDBs created with this format have missing sequences. Also if you create dat files, mpwt will indicate that 18 on 23 dat files create.
 The missing files are all the dat files with -links in their names. These files are not created because of the missing sequences.
+In the future, a sequence file will be required when using a GFF file.
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three input files are created by mpwt. Informations are extracted from the genbank/gff file.
-myDBName corresponds to the name of the folder and the genbank/gff file.
-taxonid corresponds to the taxonid in the db_xref of the source feature in the genbank/gff.
-species_name is extracted from the genbank/gff file.
+Three input files are created by mpwt. Informations are extracted from the Genbank/GFF file.
+myDBName corresponds to the name of the folder and the Genbank/GFF file.
+taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF.
+species_name is extracted from the Genbank/GFF file.
 
 .. code-block:: text
 

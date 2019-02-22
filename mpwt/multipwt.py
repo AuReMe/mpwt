@@ -172,8 +172,8 @@ def create_dats_and_lisp(run_folder):
                         if 'taxon:' in src_dbxref_qualifier:
                             taxon_id = src_dbxref_qualifier.replace('taxon:', '')
             except KeyError:
-                raise KeyError('No taxon ID in the Genbank. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.')               
-   
+                raise KeyError('No taxon ID in the Genbank {0}. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
         # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
@@ -342,6 +342,19 @@ def check_pwt(genbank_paths, patho_log_folder):
         if patho_log_folder:
             patho_error_file.write('------------\n\n')
 
+    number_passed_inference = len(passed_inferences)
+    number_failed_inference = len(failed_inferences)
+
+    string_passed_build = 'build has' if number_passed_inference == 1 else 'builds have'
+    string_failed_build = 'build has' if number_failed_inference == 1 else 'builds have'
+
+    if number_passed_inference > 0:
+        if global_verbose:
+            print('\n{0} {1} passed!\n'.format(str(number_passed_inference), string_passed_build))
+    if number_failed_inference > 0:
+        if global_verbose:
+            print('WARNING: {0} {1} failed! See the log for more information.\n'.format(str(number_failed_inference), string_failed_build))
+
     if patho_log_folder:
         patho_error_file.close()
         patho_resume_file.close()
@@ -349,26 +362,15 @@ def check_pwt(genbank_paths, patho_log_folder):
             save = contents.read()
         with open(patho_error_pathname, 'w') as output_file:
                 output_file.write('Inference statistics:\n')
-                if len(passed_inferences) > 0:
-                    if global_verbose:
-                        print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')
-                    output_file.write('Build done: ' + str(len(passed_inferences)) + '\n')
+                if number_passed_inference > 0:
+                    output_file.write('Build done: ' + str(number_passed_inference) + '\n')
                     output_file.write('Species: ' + ', '.join(passed_inferences) +  '\n\n')
-                if len(failed_inferences) > 0:
-                    if global_verbose:
-                        print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
-                    output_file.write('Build failed: ' + str(len(failed_inferences)) + '\n')
+                if number_failed_inference > 0:
+                    output_file.write('Build failed: ' + str(number_failed_inference) + '\n')
                     output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
                 output_file.write(save)
-    else:
-        if len(passed_inferences) > 0:
-            if global_verbose:
-                print('\n' + str(len(passed_inferences)) + ' builds have passed!\n')
-        if len(failed_inferences) > 0:
-            if global_verbose:
-                print('WARNING: ' + str(len(failed_inferences)) + ' builds have failed! See the log for more information.\n')
 
-    if len(failed_inferences) > 0:
+    if number_failed_inference > 0:
         sys.exit("Stop the inference.")
 
     if patho_log_folder:
@@ -680,8 +682,9 @@ def run_mpwt():
         return
 
     # Delete PGDB if use of --delete argument.
+    # Use a set to remove redudant PGDB.
     if pgdb_to_deletes:
-        utils.remove_pgbds(pgdb_to_deletes.split(','), number_cpu)
+        utils.remove_pgbds(list(set(pgdb_to_deletes.split(','))), number_cpu)
         return
 
     if args['--clean']:
