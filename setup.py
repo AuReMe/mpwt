@@ -10,7 +10,7 @@ with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as read
 setup(name='mpwt',
       description='Multiprocessing for Pathway-Tools',
       long_description=long_description,
-      version='0.3.7.3a1',
+      version='0.4',
       url='https://github.com/AuReMe/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
@@ -31,7 +31,9 @@ setup(name='mpwt',
       ],
       packages=['mpwt'],
       install_requires=[
-            'biopython',
+            'biopython==1.73',
+            'docopt==0.6.2',
+            'gffutils==0.9',
       ],
       entry_points={
           'console_scripts': [

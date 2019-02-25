@@ -1,9 +1,7 @@
-import sys
-
-from mpwt.multipwt import run
+from mpwt.multipwt import run_mpwt
 
 def main(args=None):
-    run()
+    run_mpwt()
 
 if __name__ == "__main__":
     main()

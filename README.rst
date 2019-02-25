@@ -18,11 +18,14 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
+mpwt works only on Python 3 and it has been tested on Python 3.6.
+It requires some python packages (biopython, docopt and gffutils) and Pathway-Tools. To avoid issues, Pathway-Tools version 22.5 is required.
+
 You must have an environment where Pathway-Tools is installed. Pathway-Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
 If your OS doesn't support Pathway-Tools, you can use a docker. If it's your case, look at `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker>`__.
-It is a dockerfile that will create container with Pathway-Tools, its dependancies and this package. You just need to give a Pathway-Tools installer as input.
+It is a dockerfile that will create a container with Pathway-Tools, its dependencies and this package. You just need to give a Pathway-Tools installer as input.
 
 Using pip
 ~~~~~~~~~
@@ -37,8 +40,8 @@ Use
 Input data
 ~~~~~~~~~~
 
-The script takes a folder containing sub-folders as input. Each sub-folder contains a genbank file.
-Genbank files must have the same name as the folder in which they are located and also finished with a .gbk.
+The script takes a folder containing sub-folders as input. Each sub-folder contains a Genbank/GFF file.
+Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
 
 .. code-block:: text
 
@@ -46,14 +49,12 @@ Genbank files must have the same name as the folder in which they are located an
     ├── species_1
     │   └── species_1.gbk
     ├── species_2
-    │   └── species_2.gbk
+    │   └── species_2.gff
     ├── species_3
     │   └── species_3.gbk
     ..
 
-Pathway-Tools will run on each genbank file.
-It will create an output folder inside the folder containing all the result files from the PathoLogic inference for each species.
-You can also choose another output folder.
+Pathway-Tools will run on each Genbank/GFF file. It will create the results in the ptools-local folder but you can also choose an output folder.
 
 Genbank file example:
 
@@ -82,13 +83,32 @@ Genbank file example:
                         /EC_number="X.X.X.X"
                         /translation="AMINOAACIDSSEQUENCE"
 
+Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
+
+GFF file example:
+
+.. code-block:: text
+
+    ##gff-version 3
+    ##sequence-region scaffold_1 1 XXXXXX
+    scaffold_1	RefSeq	region	1	XXXXXXX	.	+	.	ID=region_id;Dbxref=taxon:XXXXXX
+    scaffold_1	RefSeq	gene	START	STOP	.	-	.	ID=gene_id
+    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id
+
+Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
+
+Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a Genbank file.
+But PGDBs created with this format have missing sequences. Also if you create dat files, mpwt will indicate that 18 on 23 dat files create.
+The missing files are all the dat files with -links in their names. These files are not created because of the missing sequences.
+In the future, a sequence file will be required when using a GFF file.
+
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three input files are created by mpwt. Informations are extracted from the genbank file.
-myDBName corresponds to the name of the folder and the genbank file.
-taxonid corresponds to the taxonid in the db_xref of the source feature in the genbank.
-species_name is extracted from the genbank file.
+Three input files are created by mpwt. Informations are extracted from the Genbank/GFF file.
+myDBName corresponds to the name of the folder and the Genbank/GFF file.
+taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF.
+species_name is extracted from the Genbank/GFF file.
 
 .. code-block:: text
 
@@ -103,33 +123,40 @@ species_name is extracted from the genbank file.
     ANNOT-FILE  gbk_pathname
     //
 
-    script.lisp:
+    dat_creation.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
-    (create-flat-files-for-current-kb)
+    (let ((*progress-noter-enabled?* NIL))
+            (create-flat-files-for-current-kb))
 
 Command Line Example
 ~~~~~~~~~~~~~~~~~~~~
 
-mpwt is usable as a command line.
+mpwt can be used as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [-d] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
 
 Optional argument are identified by [].
 
--f --folder input folder as described in Input data.
+-f input folder as described in Input data.
 
--o --output output folder containing PGDB data or dat files (see -d arguments).
+-o output folder containing PGDB data or dat files (see --dat arguments).
 
--d --dat will create dat files and only move them inside the output folder.
+--patho will launch PathoLogic inference on input folder.
 
--c --cpu the number of cpu used for the multiprocessing.
+--dat will create BioPAX/attribute-value dat files.
 
--r --reduce delete files in ptools-local to reduce size of results.
+--md will move only the dat files inside the output folder.
 
--v --verbose print some information about the processing of mpwt.
+--cpu the number of cpu used for the multiprocessing.
+
+-r delete files in ptools-local to reduce size of results.
+
+--log folder where log files for PathoLogic inference will be store.
+
+-v print some information about the processing of mpwt.
 
 --delete delete a specific PGDB inside the ptools-local folder.
 
@@ -139,29 +166,48 @@ Possible uses of mpwt:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input
+    mpwt -f path/to/folder/input --patho
 
 Create PGDBs of studied organisms inside ptools-local.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -d
+    mpwt -f path/to/folder/input --patho --dat
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -o path/to/folder/output
+    mpwt -f path/to/folder/input --patho -o path/to/folder/output
 
 Create PGDBs of studied organisms inside ptools-local.
-Then extract the files inside the output folder.
+Then move the files to the output folder.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input -o path/to/folder/output -d
+    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
-Then extract the dat files inside the output folder.
+Then move the dat files to the output folder.
+
+.. code:: sh
+
+    mpwt --dat -o path/to/folder/output --md
+
+Create dat files for the PGDB inside ptools-local.
+And move them to the output folder.
+
+.. code:: sh
+
+    mpwt -o path/to/folder/output
+
+Move PGDB from ptools-local to the output folder.
+
+.. code:: sh
+
+    mpwt -o path/to/folder/output --md
+
+Move dat files from ptools-local to the output folder.
 
 Python Example
 ~~~~~~~~~~~~~~
@@ -175,25 +221,31 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=10, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
 folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional.
-If you don't enter an argument, results will be stored in a folder named output inside the sub-folders containg Genbank file.
+If you don't enter an argument, results will be inside the ptools-local folder.
+
+patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
+
+dat_creation: True or nothing. If True, mpwt will create BioPAX/attribute-value dat files of the PGDBs.
+
+dat_extraction: True or nothing. If True, mpwt will move the dat files inside the output folder instead of all the PGDB files.
+
+size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
 
 number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
 
-dat_extraction: True or nothing. If True, mpwt will only return dat files of the PGDB.
-
-size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
+patho_log: string or nothing. String corresponds to a folder pathname. Will create log files of PathoLogic inference inside the folder.
 
 verbose: True or nothing. If true, mpwt will be verbose.
 
 Useful functions
 ~~~~~~~~~~~~~~~~
 
-1. multiprocess_pwt(folder_input, folder_output, dat_extraction=optional_boolean, size_reduction=optional_boolean, verbose=optional_boolean)
+1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
 Run the multiprocess Pathway-Tools on input folder.
 
@@ -207,13 +259,13 @@ This can also be used with a command line argument:
 
     mpwt --clean
 
-If you use clean and the argument -f input_folder, it will delete input files ('script.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
+If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
 
 .. code:: sh
 
     mpwt --clean -f input_folder
 
-2. delete_pgdb(pgdb_name)
+2. remove_pgbds(pgdb_name)
 
 With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
 
@@ -227,17 +279,86 @@ And as a command line:
 
 Return the path to ptools-local.
 
+5. list_pgdb()
+
+Return a list containing all the PGDBs inside ptools-local folder. Can be used as a command with:
+
+.. code:: sh
+
+    mpwt --list
+
 Errors
 ~~~~~~
 
 If you encounter errors (and it is highly possible) there is some tips that can help you resolved them.
 
-For error during PathoLogic inference, a log is created where you launch the command.
+For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
 There is also a pathologic.log in each sub-folders.
 
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
-For others errors, currently nothing is made to help you.
-Maybe in the future.
+If Pathway-tools crashed, mpwt can print some useful information in verbose mode.
+
+Output
+~~~~~~
+
+If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway-Tools.
+Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
+
+If you used the output argument, there is two potential outputs depending on the use of the option --md/dat_extraction:
+
+1. without this option, you will have a complete PGDB folder inside your results, for example:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── default-version
+    │   └── 1.0
+    │       └── data
+    │           └── contains BioPAX/dat files if you used the --dat/dat_creation option.
+    │       └── input
+    │           └── species_1.gbk
+    │           └── genetic-elements.dat
+    │           └── organism-init.dat
+    │           └── organism.dat
+    │       └── kb
+    │           └── species_1.ocelot
+    │       └── reports
+    │           └── contains Pathway-Tools reports.
+    ├── species_2
+    ..
+    ├── species_3
+    ..
+
+2. with this option, you will only have the dat files, for example:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── classes.dat
+    │   └── compounds.dat
+    │   └── dnabindsites.dat
+    │   └── enzrxns.dat
+    │   └── genes.dat
+    │   └── pathways.dat
+    │   └── promoters.dat
+    │   └── protein-features.dat
+    │   └── proteins.dat
+    │   └── protligandcplxes.dat
+    │   └── pubs.dat
+    │   └── reactions.dat
+    │   └── regulation.dat
+    │   └── regulons.dat
+    │   └── rnas.dat
+    │   └── species.dat
+    │   └── terminators.dat
+    │   └── transunits.dat
+    │   └── ..
+    ├── species_2
+    ..
+    ├── species_3
+    ..
