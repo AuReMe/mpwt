@@ -279,6 +279,14 @@ And as a command line:
 
 Return the path to ptools-local.
 
+5. list_pgdb()
+
+Return a list containing all the PGDBs inside ptools-local folder. Can be used as a command with:
+
+.. code:: sh
+
+    mpwt --list
+
 Errors
 ~~~~~~
 
