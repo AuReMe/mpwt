@@ -362,3 +362,8 @@ If you used the output argument, there is two potential outputs depending on the
     ..
     ├── species_3
     ..
+
+Release Notes
+~~~~~~~~~~~~~
+
+Changes between version are listed on the `release page <https://github.com/AuReMe/mpwt/releases>`__.
