@@ -136,7 +136,7 @@ mpwt can be used as a command line.
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
 
 Optional argument are identified by [].
 
@@ -145,6 +145,8 @@ Optional argument are identified by [].
 -o output folder containing PGDB data or dat files (see --dat arguments).
 
 --patho will launch PathoLogic inference on input folder.
+
+--hf (to use with --patho) will launch PathoLogic Hole Filler with Blast.
 
 --dat will create BioPAX/attribute-value dat files.
 
@@ -221,7 +223,7 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, patho_hole_filler=None, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 
@@ -229,6 +231,8 @@ folder_output: output folder where all the result of Pathway-Tools will be moved
 If you don't enter an argument, results will be inside the ptools-local folder.
 
 patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
+
+patho_hole_filler: True ir nothing. If True, mpwt will launch Pathway-Tools Hole Filler during PathoLogic inference.
 
 dat_creation: True or nothing. If True, mpwt will create BioPAX/attribute-value dat files of the PGDBs.
 

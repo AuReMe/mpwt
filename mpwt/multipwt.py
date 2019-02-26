@@ -7,7 +7,7 @@ From genbank/gff files this script will create Pathway-Tools input data, then ru
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -19,6 +19,7 @@ options:
     -f=DIR     Working folder containing sub-folders with Genbank file.
     -o=DIR    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
+    --hf    Use with --patho. Run the Hole Filler using Blast.
     --dat    Will create BioPAX/attribute-value dat files from PGDB.
     --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
@@ -418,7 +419,11 @@ def run_pwt(genbank_path):
     pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho
     """
     cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
+
     cmd_pwt = ['pathway-tools', *cmd_options, '-patho', genbank_path]
+
+    if global_hole_filler:
+        cmd_pwt.append('-hole-filler')
 
     if global_verbose:
         print(' '.join(cmd_pwt))
@@ -562,7 +567,7 @@ def run_move_pgdb(pgdb_folders):
                     os.remove(output_species+'/'+pgdb_file)
 
 
-def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, dat_creation=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
+def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, patho_hole_filler=None, dat_creation=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -570,8 +575,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
-    global global_output_folder, global_dat_extraction, global_size_reduction, global_verbose
+    global global_output_folder, global_dat_extraction, global_size_reduction, global_verbose, global_hole_filler
     global_output_folder = output_folder
+    global_hole_filler = patho_hole_filler
     global_dat_extraction = dat_extraction
     global_size_reduction = size_reduction
     global_verbose = verbose
@@ -664,6 +670,7 @@ def run_mpwt():
     input_folder = args['-f']
     output_folder = args['-o']
     patho_inference = args['--patho']
+    patho_hole_filler = args['--hf']
     dat_creation = args['--dat']
     move_dat = args['--md']
     size_reduction = args['-r']
@@ -696,7 +703,7 @@ def run_mpwt():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, patho_inference, dat_creation, move_dat, size_reduction, number_cpu, patho_log, verbose)
+    multiprocess_pwt(input_folder, output_folder, patho_inference, patho_hole_filler, dat_creation, move_dat, size_reduction, number_cpu, patho_log, verbose)
 
 
 if __name__ == '__main__':
