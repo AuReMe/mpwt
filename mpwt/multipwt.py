@@ -54,7 +54,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     Check if PGDBs are already in ptools-local folder.
     """
     # Check if there are files/folders inside the input folder.
-    species_folders = [species_folder for species_folder in os.listdir(input_folder) if '.' not in species_folder]
+    # And remove hidden folder (beginning with '.').
+    species_folders = [species_folder for species_folder in os.listdir(input_folder) if not species_folder.startswith('.')]
     if len(species_folders) == 0:
         print("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
         return None
@@ -572,6 +573,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
     """
+    # Check if patho_hole_filler or patho_log are launched with patho_inference.
+    if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
+        sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
+
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
