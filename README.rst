@@ -1,7 +1,7 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-Pathway-tools multiprocessing script
+Pathway-Tools multiprocessing script
 ====================================
 
 mpwt is a python package for running Pathway-Tools on multiple genomes using multiprocessing.
@@ -309,7 +309,7 @@ There is also a pathologic.log in each sub-folders.
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
-If Pathway-tools crashed, mpwt can print some useful information in verbose mode.
+If Pathway-Tools crashed, mpwt can print some useful information in verbose mode.
 
 Output
 ~~~~~~
