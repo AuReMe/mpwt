@@ -174,6 +174,12 @@ Create PGDBs of studied organisms inside ptools-local.
 
 .. code:: sh
 
+    mpwt -f path/to/folder/input --patho --hf
+
+Create PGDBs of studied organisms inside ptools-local with the Hole-Filler.
+
+.. code:: sh
+
     mpwt -f path/to/folder/input --patho --dat
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
@@ -223,7 +229,7 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, patho_hole_filler=None, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, patho_hole_filler=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
 
 folder_input: folder containing sub-folders with Genbank file inside.
 

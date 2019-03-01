@@ -31,9 +31,9 @@ setup(name='mpwt',
       ],
       packages=['mpwt'],
       install_requires=[
-            'biopython==1.73',
-            'docopt==0.6.2',
-            'gffutils==0.9',
+            'biopython>=1.70',
+            'docopt>=0.6.2',
+            'gffutils>=0.9',
       ],
       entry_points={
           'console_scripts': [
