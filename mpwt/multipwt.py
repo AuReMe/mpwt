@@ -57,7 +57,16 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     # And remove hidden folder/file (beginning with '.').
     species_folders = [species_folder for species_folder in os.listdir(input_folder) if not species_folder.startswith('.')]
     if len(species_folders) == 0:
-        print("No folder containing genbank/gff file. In " + input_folder + " you must have sub-folders containing Genbank/GFF file.")
+        print("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))
+        return None
+
+    # Check if there is a Genbank or a GFF file inside each subfolder.
+    input_extensions = ['.gbk', '.gff']
+    species_folders = [species_folder for species_folder in species_folders
+                                    for species_file in os.listdir(input_folder+species_folder)
+                                        if any(input_extension in species_file for input_extension in input_extensions)]
+    if len(species_folders) == 0:
+        print('Missing Genbank/GFF file for {0} Check if you have a Genbank file and if it ends with .gbk or .gff'.format(input_folder))
         return None
 
     # Check the structure of the input folder.
@@ -71,9 +80,10 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
                 print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None
 
+    # Take run_ids and remove folder with error (with the intersection with species_folders) and if there is already present output.
     if output_folder:
         already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
-        new_run_ids = set(run_ids) - set(already_present_outputs)
+        new_run_ids = set(run_ids).intersection(set(species_folders)) - set(already_present_outputs)
         new_run_ids = list(new_run_ids)
 
         if len(new_run_ids) == 0:
@@ -85,6 +95,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         for species_folder in species_folders:
             new_run_ids.append(species_folder)
 
+    # Check for PGDB in ptools-local to see if species are not already there.
     ptools_local_path = utils.find_ptools_path() + '/pgdbs/user/'
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
     if already_present_pgdbs != []:
@@ -162,22 +173,28 @@ def create_dats_and_lisp(run_folder):
             try:
                 species_name = first_seq_record.annotations['organism']
             except KeyError:
-                raise KeyError('No organism in the Genbank. In the SOURCE you must have: ORGANISM  Species name')      
+                raise KeyError('No organism in the Genbank {0} In the SOURCE you must have: ORGANISM  Species name'.format(pgdb_id))
 
             # Take the source feature of the first record.
             # This feature contains the taxon ID in the db_xref qualifier.
             src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
-            try:
-                for src_feature in src_features:
+            for src_feature in src_features:
+                try:
                     src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
                     for src_dbxref_qualifier in src_dbxref_qualifiers:
                         if 'taxon:' in src_dbxref_qualifier:
                             taxon_id = src_dbxref_qualifier.replace('taxon:', '')
-            except KeyError:
-                raise KeyError('No taxon ID in the Genbank {0}. In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+                except KeyError:
+                    raise KeyError('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
+        # Check if there is a fasta file.
+        if os.path.isfile(run_folder + input_name.replace('.gff', '.fasta')):
+            gff_fasta = input_name.replace('.gff', '.fasta')
+        else:
+            sys.exit('No fasta file with GFF {0}'.format(pgdb_id))
+
         # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
         region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
         if 'Dbxref' in region_feature.attributes:
@@ -185,11 +202,9 @@ def create_dats_and_lisp(run_folder):
                 if 'taxon' in dbxref:
                     taxon_id = dbxref.replace('taxon:', '')
                 else:
-                    sys.exit('No taxon id in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+                    sys.exit('No taxon id in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
         else:
-            sys.exit('No Dbxref in GFF file of {0}. GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
-    else:
-        sys.exit('Missing Genbank/GFF file. Check if you have a Genbank file and if it ends with .gbk or .gff')
+            sys.exit('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -206,6 +221,8 @@ def create_dats_and_lisp(run_folder):
         genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
         genetic_writer.writerow(['NAME', ''])
         genetic_writer.writerow(['ANNOT-FILE', input_name])
+        if os.path.isfile(gff_pathname):
+            genetic_writer.writerow(['SEQ-FILE', gff_fasta])
         genetic_writer.writerow(['//'])
 
     # Create the lisp script.
@@ -233,6 +250,7 @@ def pwt_input_files(run_folder):
         if global_verbose:
             missing_string = "missing {0}".format("; ".join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
         create_dats_and_lisp(run_folder)
+
     if global_verbose:
         print("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
 
