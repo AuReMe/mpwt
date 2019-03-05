@@ -4,15 +4,19 @@
 import os
 import shutil
 import subprocess
+import sys
 
 from multiprocessing import Pool, cpu_count
 
 
 def find_ptools_path():
     """
-    Find the path of ptools using Pathway-Tools file.
+    Check if Pathway-Tools is in PATH. If not stop the script.
+    If it finds it, return the path of ptools-local by reading Pathway-Tools file.
     """
     pathway_tools_path = shutil.which('pathway-tools')
+    if not pathway_tools_path:
+        sys.exit('Pathway-Tools is not in the Path, mpwt can not work without it.')
 
     pathway_tools_file = open(pathway_tools_path, 'r')
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]

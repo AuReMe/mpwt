@@ -62,11 +62,12 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
 
     # Check if there is a Genbank or a GFF file inside each subfolder.
     input_extensions = ['.gbk', '.gff']
-    species_folders = [species_folder for species_folder in species_folders
-                                    for species_file in os.listdir(input_folder+species_folder)
-                                        if any(input_extension in species_file for input_extension in input_extensions)]
+    species_folders = list(set([species_folder for species_folder in species_folders
+                                    for species_file in os.listdir(input_folder+'/'+species_folder)
+                                        if any(input_extension in species_file for input_extension in input_extensions)]))
+    missing_input_files = list(set(run_ids) - set(species_folders))
     if len(species_folders) == 0:
-        print('Missing Genbank/GFF file for {0} Check if you have a Genbank file and if it ends with .gbk or .gff'.format(input_folder))
+        print('Missing Genbank/GFF file for {0} Check if you have a Genbank file and if it ends with .gbk or .gff'.format(', '.join(missing_input_files)))
         return None
 
     # Check the structure of the input folder.
@@ -96,8 +97,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
             new_run_ids.append(species_folder)
 
     # Check for PGDB in ptools-local to see if species are not already there.
-    ptools_local_path = utils.find_ptools_path() + '/pgdbs/user/'
-    already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in os.listdir(ptools_local_path) if 'cyc' in pgdb_species_folder]
+    already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in utils.list_pgdb()]
     if already_present_pgdbs != []:
         lower_case_new_run_ids = list(map(lambda x:x.lower(), new_run_ids))
         for pgdb in already_present_pgdbs:
@@ -190,21 +190,25 @@ def create_dats_and_lisp(run_folder):
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
         # Check if there is a fasta file.
-        if os.path.isfile(run_folder + input_name.replace('.gff', '.fasta')):
-            gff_fasta = input_name.replace('.gff', '.fasta')
-        else:
-            sys.exit('No fasta file with GFF {0}'.format(pgdb_id))
+        try:
+            with open(run_folder + input_name.replace('.gff', '.fasta'), 'r'):
+                gff_fasta = input_name.replace('.gff', '.fasta')
+        except FileNotFoundError:
+            raise FileNotFoundError('No fasta file with the GFF of {0}'.format(pgdb_id))
 
         # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
         region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
-        if 'Dbxref' in region_feature.attributes:
-            for dbxref in region_feature.attributes['Dbxref']:
-                if 'taxon' in dbxref:
-                    taxon_id = dbxref.replace('taxon:', '')
-                else:
-                    sys.exit('No taxon id in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
-        else:
-            sys.exit('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+        try:
+            region_feature.attributes['Dbxref']
+        except KeyError:
+            raise KeyError('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+
+        for dbxref in region_feature.attributes['Dbxref']:
+            if 'taxon' in dbxref:
+                taxon_id = dbxref.split('taxon:')[1]
+        if not taxon_id:
+            raise Exception('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -405,7 +409,7 @@ def extract_pgdb_pathname(run_folder):
     gbk_name = run_folder.split('/')[-2]
 
     ptools_local_path = utils.find_ptools_path()
-    pgdb_path = ptools_local_path.replace('\n', '') + '/pgdbs/user/'
+    pgdb_path = ptools_local_path + '/pgdbs/user/'
 
     # Replace all / by _ to ensure that there is no error with the path with gbk_name.
     pgdb_folder = pgdb_path + gbk_name.lower() + 'cyc/'
@@ -591,10 +595,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
     """
-    # Check if patho_hole_filler or patho_log are launched with patho_inference.
-    if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
-        sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
-
     # Use a second verbose variable because a formal parameter can't be a global variable.
     # So if we want to use mpwt as a python import with this function we need to set a new global variable.
     # With this variable it is possible to set vervose in multiprocess function.
@@ -604,6 +604,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     global_dat_extraction = dat_extraction
     global_size_reduction = size_reduction
     global_verbose = verbose
+
+    # Check if Pathway-Tools is in the path.
+    utils.find_ptools_path()
+
+    # Check if patho_hole_filler or patho_log are launched with patho_inference.
+    if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
+        sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
 
     # Use the number of cpu given by the user or all the cpu available.
     if number_cpu:
