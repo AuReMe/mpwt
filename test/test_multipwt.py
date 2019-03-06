@@ -62,7 +62,9 @@ def test_multiprocess_pwt_call():
     """
     subprocess.call(['mpwt', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
-    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--patho', '--dat', '--md'])
+    subprocess.call(['mpwt', '-f', 'test', '--patho'])
+
+    subprocess.call(['mpwt', '-o', 'test_output', '--dat', '--md'])
 
     pgdbs = mpwt.list_pgdb()
     assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_icyc', 'tca_cycle_ecolicyc']

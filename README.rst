@@ -24,8 +24,11 @@ It requires some python packages (biopython, docopt and gffutils) and Pathway-To
 You must have an environment where Pathway-Tools is installed. Pathway-Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
-If your OS doesn't support Pathway-Tools, you can use a docker. If it's your case, look at `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/pathway-tools-multiprocessing-docker>`__.
+If your OS doesn't support Pathway-Tools, you can use a docker. If it's your case, look at `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway-Tools, its dependencies and this package. You just need to give a Pathway-Tools installer as input.
+
+You can also look at `Pathway-Tools Multiprocessing Singularity <https://github.com/ArnaudBelcour/mpwt-singularity>`__.
+More manipulations are required compared to Docker but with this you can create a Singularity image.
 
 Using pip
 ~~~~~~~~~
@@ -50,6 +53,7 @@ Genbank files must have the same name as the folder in which they are located an
     │   └── species_1.gbk
     ├── species_2
     │   └── species_2.gff
+    │   └── species_2.fasta
     ├── species_3
     │   └── species_3.gbk
     ..
@@ -84,6 +88,7 @@ Genbank file example:
                         /translation="AMINOAACIDSSEQUENCE"
 
 Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
+You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sample.gbff>`__ provided on Pathway-Tools site.
 
 GFF file example:
 
@@ -97,10 +102,13 @@ GFF file example:
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
-Pathway-Tools does not handle sequence in GFF files. This makes Pathway-Tools run faster compared to a run with a Genbank file.
-But PGDBs created with this format have missing sequences. Also if you create dat files, mpwt will indicate that 18 on 23 dat files create.
-The missing files are all the dat files with -links in their names. These files are not created because of the missing sequences.
-In the future, a sequence file will be required when using a GFF file.
+You have to provide a nucleotide sequence file associated with the GFF file containing the chromosome/scaffold/contig sequence.
+
+.. code-block:: text
+
+    >scaffold_1
+    ATGATGCTGATACTGACTTAGCAT
+
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
