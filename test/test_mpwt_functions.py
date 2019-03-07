@@ -69,8 +69,3 @@ def test_check_input_and_existing_pgdb():
 def test_ptools_path():
     ptools_path = mpwt.find_ptools_path()
     assert ptools_path == '/root/ptools-local'
-
-
-def test_extract_pgdb_pathname():
-    pgdb_id_folder = mpwt.multipwt.extract_pgdb_pathname('test/fatty_acid_beta_oxydation_I/')
-    assert pgdb_id_folder == ('fatty_acid_beta_oxydation_I', '/root/ptools-local/pgdbs/user/fatty_acid_beta_oxydation_icyc/')
