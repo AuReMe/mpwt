@@ -127,6 +127,8 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
         lisp_file.write('\n')
         lisp_file.write("        (create-flat-files-for-current-kb))")
 
+    return os.path.isfile(lisp_pathname)
+
 
 def create_dats_and_lisp(run_folder):
     """
@@ -230,7 +232,9 @@ def create_dats_and_lisp(run_folder):
         genetic_writer.writerow(['//'])
 
     # Create the lisp script.
-    create_dat_creation_script(pgdb_id, lisp_pathname)
+    check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
+
+    return all([os.path.isfile(organism_dat), os.path.isfile(genetic_dat), check_lisp_file])
 
 
 def pwt_input_files(multiprocess_input):
@@ -256,13 +260,15 @@ def pwt_input_files(multiprocess_input):
     else:
         if verbose:
             missing_string = "missing {0}".format("; ".join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
-        create_dats_and_lisp(run_folder)
+        check_datas_lisp = create_dats_and_lisp(run_folder)
+        if not check_datas_lisp:
+            raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
     if verbose:
         print("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
 
 
-def create_mpwt_input(run_ids, input_folder, verbose=None, patho_hole_filler=None, dat_extraction=None, output_folder=None, size_reduction=None):
+def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, patho_hole_filler=None, dat_extraction=None, output_folder=None, size_reduction=None, only_dat_creation=None):
     """
     Create input list for all multiprocess function, containing one lsit for each input subfolder.
     All arguments are also stored.
@@ -271,6 +277,12 @@ def create_mpwt_input(run_ids, input_folder, verbose=None, patho_hole_filler=Non
     for run_id in run_ids:
         multiprocess_input = {}
         input_folder_path = input_folder + "/" + run_id + "/"
+        species_pgdb_folder = pgdbs_folder_path + run_id.lower() + 'cyc/'
+        pgdb_id_folders = (run_id, species_pgdb_folder)
+        if only_dat_creation:
+            multiprocess_input['pgdb_folders'] = retrieve_complete_id(pgdb_id_folders)
+        else:
+            multiprocess_input['pgdb_folders'] = pgdb_id_folders
         multiprocess_input['species_input_folder_path'] = input_folder_path
         multiprocess_input['verbose'] = verbose
         multiprocess_input['patho_hole_filler'] = patho_hole_filler
@@ -280,6 +292,24 @@ def create_mpwt_input(run_ids, input_folder, verbose=None, patho_hole_filler=Non
         multiprocess_inputs.append(multiprocess_input)
 
     return multiprocess_inputs
+
+
+def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
+    """
+    Create a lisp script file for each PGDB in the ptools-local folder.
+    Return a generator with the PGDB IDs.
+    """
+    for species_pgdb in os.listdir(pgdbs_folder_path):
+        if os.path.isdir(pgdbs_folder_path + species_pgdb):
+            pgdb_id = species_pgdb[:-3]
+            pgdb_pathname = tmp_folder + pgdb_id + '/'
+            os.mkdir(tmp_folder + pgdb_id)
+            lisp_pathname = pgdb_pathname + "dat_creation.lisp"
+            check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
+            if not check_lisp_file:
+                raise Exception('Error with the creation of the lisp script for {0}'.format(species_pgdb))
+
+            yield pgdb_id
 
 
 def permission_change(folder_pathname):
@@ -295,11 +325,13 @@ def permission_change(folder_pathname):
             os.chmod(os.path.join(root, subfile), 0o777)
 
 
-def check_pwt(multiprocess_inputs, patho_log_folder, verbose):
+def check_pwt(multiprocess_inputs, patho_log_folder):
     """
     Check PathoLogic's log.
     Create two log files (log_error.txt which contains Pathway-Tools log and resume_inference which contains summary of network).
     """
+    verbose = multiprocess_inputs[0]['verbose']
+
     if patho_log_folder:
         if not os.path.exists(patho_log_folder):
             print('No log directory, it will be created.')
@@ -605,7 +637,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Check if Pathway-Tools is in the path.
     # Find PGDB folder path.
     ptools_local_path = utils.find_ptools_path()
-    pgdb_folder_path = ptools_local_path + '/pgdbs/user/'
+    pgdbs_folder_path = ptools_local_path + '/pgdbs/user/'
 
     # Check if patho_hole_filler or patho_log are launched with patho_inference.
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
@@ -631,7 +663,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             return
 
         # Create the list containing all the data used by the multiprocessing call.
-        multiprocess_inputs = create_mpwt_input(run_ids, input_folder, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
+        multiprocess_inputs = create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
 
         if verbose:
             print('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
@@ -644,43 +676,23 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
             if verbose:
                 print('~~~~~~~~~~Check inference~~~~~~~~~~')
-            check_pwt(multiprocess_inputs, patho_log, verbose)
+            check_pwt(multiprocess_inputs, patho_log)
             if any(error_status):
                 sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creaetion of BioPAX/attribute-values files.
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
+        only_dat_creation = True
         # Create a temporary folder in ptools-local where list script will be stored.
         tmp_folder = ptools_local_path + '/tmp/'
         if not os.path.exists(tmp_folder):
             os.mkdir(tmp_folder)
 
         # Create a lisp script file for each PGDB in the ptools-local folder.
-        dat_run_ids = []
-        for species_pgdb in os.listdir(pgdb_folder_path):
-            if os.path.isdir(pgdb_folder_path + species_pgdb):
-                pgdb_id = species_pgdb[:-3]
-                pgdb_pathname = tmp_folder + pgdb_id + '/'
-                os.mkdir(tmp_folder + pgdb_id)
-                lisp_pathname = pgdb_pathname + "dat_creation.lisp"
-                create_dat_creation_script(pgdb_id, lisp_pathname)
-                dat_run_ids.append(pgdb_id)
-        multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
+        dat_run_ids = create_only_dat_lisp(pgdbs_folder_path, tmp_folder)
 
-    if verbose:
-        print('~~~~~~~~~~Extraction of PGDB Pathname~~~~~~~~~~')
-    # Extract PGDB ID folder and path.
-    # Return a tuple with the name of the genbank and the pathname to the PGDB.
-    for multiprocess_input in multiprocess_inputs:
-        species_input_folder_path = multiprocess_input['species_input_folder_path']
-        pgdb_id = species_input_folder_path.split('/')[-2]
-        pgdb_folder = pgdb_folder_path + pgdb_id.lower() + 'cyc/'
-        pgdb_id_folder = (pgdb_id, pgdb_folder)
-        if (dat_creation and not input_folder) or (output_folder and not input_folder):
-            multiprocess_input['pgdb_folders'] = retrieve_complete_id(pgdb_id_folder)
-        else:
-            multiprocess_input['pgdb_folders'] = pgdb_id_folder
+        multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction, only_dat_creation)
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
