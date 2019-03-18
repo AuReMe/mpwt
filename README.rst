@@ -137,8 +137,8 @@ species_name is extracted from the Genbank/GFF file.
     (let ((*progress-noter-enabled?* NIL))
             (create-flat-files-for-current-kb))
 
-Command Line Example
-~~~~~~~~~~~~~~~~~~~~
+Command Line and Python arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mpwt can be used as a command line.
 
@@ -147,86 +147,6 @@ mpwt can be used as a command line.
     mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
 
 Optional argument are identified by [].
-
--f input folder as described in Input data.
-
--o output folder containing PGDB data or dat files (see --dat arguments).
-
---patho will launch PathoLogic inference on input folder.
-
---hf (to use with --patho) will launch PathoLogic Hole Filler with Blast.
-
---dat will create BioPAX/attribute-value dat files.
-
---md will move only the dat files inside the output folder.
-
---cpu the number of cpu used for the multiprocessing.
-
--r delete files in ptools-local to reduce size of results.
-
---log folder where log files for PathoLogic inference will be store.
-
--v print some information about the processing of mpwt.
-
---delete delete a specific PGDB inside the ptools-local folder.
-
---clean clean ptools-local folder, before any other operations.
-
-Possible uses of mpwt:
-
-.. code:: sh
-
-    mpwt -f path/to/folder/input --patho
-
-Create PGDBs of studied organisms inside ptools-local.
-
-.. code:: sh
-
-    mpwt -f path/to/folder/input --patho --hf
-
-Create PGDBs of studied organisms inside ptools-local with the Hole-Filler.
-
-.. code:: sh
-
-    mpwt -f path/to/folder/input --patho --dat
-
-Create PGDBs of studied organisms inside ptools-local and create dat files.
-
-.. code:: sh
-
-    mpwt -f path/to/folder/input --patho -o path/to/folder/output
-
-Create PGDBs of studied organisms inside ptools-local.
-Then move the files to the output folder.
-
-.. code:: sh
-
-    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
-
-Create PGDBs of studied organisms inside ptools-local and create dat files.
-Then move the dat files to the output folder.
-
-.. code:: sh
-
-    mpwt --dat -o path/to/folder/output --md
-
-Create dat files for the PGDB inside ptools-local.
-And move them to the output folder.
-
-.. code:: sh
-
-    mpwt -o path/to/folder/output
-
-Move PGDB from ptools-local to the output folder.
-
-.. code:: sh
-
-    mpwt -o path/to/folder/output --md
-
-Move dat files from ptools-local to the output folder.
-
-Python Example
-~~~~~~~~~~~~~~
 
 mpwt can be used in a python script with an import:
 
@@ -237,28 +157,156 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, patho_hole_filler=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, patho_log=optional_folder_pathname, verbose=optional_boolean)
+    mpwt.multiprocess_pwt(folder_input,
+    			  folder_output,
+			  patho_inference=optional_boolean,
+			  patho_hole_filler=optional_boolean,
+			  dat_creation=optional_boolean,
+			  dat_extraction=optional_boolean,
+			  size_reduction=optional_boolean,
+			  number_cpu=int,
+			  patho_log=optional_folder_pathname,
+			  verbose=optional_boolean)
 
-folder_input: folder containing sub-folders with Genbank file inside.
+Command line argument / Python argument: description
 
-folder_output: output folder where all the result of Pathway-Tools will be moved. This argument is optional.
-If you don't enter an argument, results will be inside the ptools-local folder.
+-f / folder_input(string: folder pathname): input folder as described in Input data.
 
-patho_inference: True or nothing. If True, mpwt will launch PathoLogic inference.
+-o / folder_output(string: folder pathname): output folder containing PGDB data or dat files (see --dat arguments).
 
-patho_hole_filler: True ir nothing. If True, mpwt will launch Pathway-Tools Hole Filler during PathoLogic inference.
+--patho / patho_inference(boolean): will launch PathoLogic inference on input folder.
 
-dat_creation: True or nothing. If True, mpwt will create BioPAX/attribute-value dat files of the PGDBs.
+--hf /patho_hole_filler(boolean): (to use with --patho) will launch PathoLogic Hole Filler with Blast.
 
-dat_extraction: True or nothing. If True, mpwt will move the dat files inside the output folder instead of all the PGDB files.
+--dat / dat_creation(boolean): will create BioPAX/attribute-value dat files.
 
-size_reduction: True or nothing. If True, after moving the data to the output folder, mpwt will delete files in ptools-local. This to decrease the size of the results.
+--md /dat_extraction(boolean): will move only the dat files inside the output folder.
 
-number_cpu: int or nothing. Number of cpu to use for the multiprocessing.
+--cpu / number_cpu(int): the number of cpu used for the multiprocessing.
 
-patho_log: string or nothing. String corresponds to a folder pathname. Will create log files of PathoLogic inference inside the folder.
+-r / dat_extraction(boolean): delete files in ptools-local to reduce size of results.
 
-verbose: True or nothing. If true, mpwt will be verbose.
+--log / patho_log(string: folder pathname): folder where log files for PathoLogic inference will be store.
+
+-v / verbose(boolean): print some information about the processing of mpwt.
+
+--delete / mpwt.remove_pgdbs()(string: pgdb name): delete a specific PGDB inside the ptools-local folder.
+
+--clean / mpwt.cleaning(): clean ptools-local folder, before any other operations.
+
+
+Examples
+~~~~~~~~
+
+Possible uses of mpwt:
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input --patho
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+			  patho_inference=True)
+
+Create PGDBs of studied organisms inside ptools-local.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input --patho --hf --log path/to/folder/log
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+			  patho_inference=True,
+			  patho_hole_filler=True,
+			  patho_log='path/to/folder/log')
+
+Create PGDBs of studied organisms inside ptools-local with the Hole-Filler.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input --patho --dat
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+			  patho_inference=True,
+                          dat_creation=True)
+
+Create PGDBs of studied organisms inside ptools-local and create dat files.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input --patho -o path/to/folder/output
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                          folder_output='path/to/folder/output',
+			  patho_inference=True)
+
+Create PGDBs of studied organisms inside ptools-local.
+Then move the files to the output folder.
+
+.. code:: sh
+
+    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
+
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                          folder_output='path/to/folder/output',
+			  patho_inference=True,
+                          dat_creation=True,
+			  dat_extraction=True)
+
+Create PGDBs of studied organisms inside ptools-local and create dat files.
+Then move the dat files to the output folder.
+
+.. code:: sh
+
+    mpwt --dat -o path/to/folder/output --md
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+                          dat_creation=True,
+			  dat_extraction=True)
+
+Create dat files for the PGDB inside ptools-local.
+And move them to the output folder.
+
+.. code:: sh
+
+    mpwt -o path/to/folder/output
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(folder_output='path/to/folder/output')
+
+Move PGDB from ptools-local to the output folder.
+
+.. code:: sh
+
+    mpwt -o path/to/folder/output --md
+
+.. code:: python
+
+    import mpwt
+    mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+			  dat_extraction=True)
+
+Move dat files from ptools-local to the output folder.
+
 
 Useful functions
 ~~~~~~~~~~~~~~~~
@@ -283,7 +331,7 @@ If you use clean and the argument -f input_folder, it will delete input files ('
 
     mpwt --clean -f input_folder
 
-2. remove_pgbds(pgdb_name)
+2. remove_pgdbs(pgdb_name)
 
 With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
 
