@@ -36,6 +36,7 @@ import csv
 import datetime
 import docopt
 import getpass
+import logging
 import os
 import shutil
 import subprocess
@@ -47,6 +48,9 @@ from gffutils.iterators import DataIterator
 
 from mpwt import utils
 
+logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     """
@@ -79,7 +83,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     # And remove hidden folder/file (beginning with '.').
     species_folders = [species_folder for species_folder in os.listdir(input_folder) if not species_folder.startswith('.')]
     if len(species_folders) == 0:
-        print("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))
+        logger.critical("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))
         return None, None
 
     # Check if there is a Genbank or a GFF file inside each subfolder.
@@ -89,18 +93,18 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
                                         if any(input_extension in species_file for input_extension in input_extensions)]))
     missing_input_files = list(set(run_ids) - set(species_folders))
     if len(species_folders) == 0:
-        print('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(' '.join(missing_input_files)))
+        logger.critical('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(' '.join(missing_input_files)))
         return None, None
 
     # Check the structure of the input folder.
     invalid_characters = ['.', '/']
     for species_folder in species_folders:
         if os.path.isfile(input_folder+'/'+species_folder):
-            print('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
+            logger.critical('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
             return None, None
         elif os.path.isdir(input_folder+'/'+species_folder):
             if any(char in invalid_characters for char in species_folder):
-                print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                logger.critical('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None, None
 
     # Take run_ids and remove folder with error (with the intersection with species_folders) and if there is already present output.
@@ -111,10 +115,10 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         new_run_ids = list(new_run_ids)
         for pgdb in already_present_outputs:
             if pgdb in clean_run_ids:
-                print("! PGDB {0} already in output folder {1}, no inference will be launch on this species.".format(pgdb, output_folder))
+                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launch on this species.".format(pgdb, output_folder))
 
         if len(new_run_ids) == 0:
-            print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
+            logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
             return None, None
 
     else:
@@ -128,7 +132,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
         run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
         for run_dat_id in run_dat_ids:
-            print("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
+            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
         return run_patho_dat_ids, run_dat_ids
 
     return new_run_ids, None
@@ -286,7 +290,7 @@ def pwt_input_files(multiprocess_input):
             raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
     if verbose:
-        print("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
+        logger.info("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
 
 
 def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, patho_hole_filler=None, dat_extraction=None, output_folder=None, size_reduction=None, only_dat_creation=None):
@@ -355,7 +359,7 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
 
     if patho_log_folder:
         if not os.path.exists(patho_log_folder):
-            print('No log directory, it will be created.')
+            logger.info('No log directory, it will be created.')
             os.mkdir(patho_log_folder)
 
         patho_error_pathname = patho_log_folder + '/log_error.txt'
@@ -413,7 +417,7 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
             if patho_log_folder:
                 patho_error_file.write('No pathologic log, an error occured before PathoLogic run.\n')
                 patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
-            print('No pathologic log for {0}, an error occured before PathoLogic run.'.format(species))
+            logger.info('No pathologic log for {0}, an error occured before PathoLogic run.'.format(species))
 
         if patho_log_folder:
             patho_error_file.write('------------\n\n')
@@ -426,10 +430,10 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
 
     if number_passed_inference > 0:
         if verbose:
-            print('\n{0} {1} passed!\n'.format(str(number_passed_inference), string_passed_build))
+            logger.info('\n{0} {1} passed!\n'.format(str(number_passed_inference), string_passed_build))
     if number_failed_inference > 0:
         if verbose:
-            print('WARNING: {0} {1} failed! See the log for more information.\n'.format(str(number_failed_inference), string_failed_build))
+            logger.critical('WARNING: {0} {1} failed! See the log for more information.\n'.format(str(number_failed_inference), string_failed_build))
 
     if patho_log_folder:
         patho_error_file.close()
@@ -469,16 +473,16 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     """
     Print error messages when there is a subprocess error during PathoLogic run.
     """
-    print('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = species_input_folder_path.split('/')[-2]
-    print('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
+    logger.info('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
-        print('An error occurred :' + subprocess_stderr.decode('utf-8'))
+        logger.info('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    print('\t', '=== Pathway-Tools log ===')
+    logger.info('\t' + '=== Pathway-Tools log ===')
     for line in subprocess_stdout:
-        print('\t', line, end='')
-    print('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+        logger.info('\t' + line)
+    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
 
 def run_pwt(multiprocess_input):
@@ -501,7 +505,7 @@ def run_pwt(multiprocess_input):
         cmd_pwt.append('-hole-filler')
 
     if verbose:
-        print(' '.join(cmd_pwt))
+        logger.info(' '.join(cmd_pwt))
 
     error_status = None
     errors = ['Restart actions (select using :continue):', 'Error']
@@ -513,7 +517,7 @@ def run_pwt(multiprocess_input):
         for patho_line in iter(patho_subprocess.stdout.readline, ""):
             patho_line = patho_line.decode('utf-8')
             if any(error in patho_line for error in errors):
-                print('Error possibly with the genbank file.')
+                logger.info('Error possibly with the genbank file.')
                 error_status = True
                 patho_subprocess.kill()
 
@@ -554,7 +558,7 @@ def run_pwt_dat(multiprocess_input):
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
     if verbose:
-        print(' '.join(cmd_dat))
+        logger.info(' '.join(cmd_dat))
 
     error_status = None
     dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']
@@ -610,7 +614,7 @@ def check_dat(multiprocess_input):
     if verbose:
         expected_dat_number = str(len(dat_files))
         found_dat_number = str(len(dat_checks))
-        print('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+        logger.info('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
 
 def run_move_pgdb(move_data):
@@ -677,7 +681,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if output_folder:
             if not os.path.exists(output_folder):
                 if verbose:
-                    print('No output directory, it will be created.')
+                    logger.info('No output directory, it will be created.')
                 os.mkdir(output_folder)
         run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
 
@@ -689,16 +693,16 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         multiprocess_inputs = create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
 
         if verbose:
-            print('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
         mpwt_pool.map(pwt_input_files, multiprocess_inputs)
 
         # Launch PathoLogic.
         if patho_inference:
             if verbose:
-                print('~~~~~~~~~~Inference on the data~~~~~~~~~~')
+                logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
             error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
             if verbose:
-                print('~~~~~~~~~~Check inference~~~~~~~~~~')
+                logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
             check_pwt(multiprocess_inputs, patho_log)
             if any(error_status):
                 sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
@@ -726,10 +730,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
         if verbose:
-            print('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
         mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
         if verbose:
-            print('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Check .dat ~~~~~~~~~~')
         for multiprocess_input in multiprocess_inputs:
             check_dat(multiprocess_input)
 
@@ -738,12 +742,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
-        print('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+        logger.info('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
 
     # Move PGDBs files.
     if output_folder:
         if verbose:
-            print('~~~~~~~~~~Moving result files~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
         mpwt_pool.map(run_move_pgdb, multiprocess_inputs)
         # Give access to the file for user outside the container.
         permission_change(output_folder)
@@ -752,7 +756,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     mpwt_pool.join()
 
     if verbose:
-        print('~~~~~~~~~~The script have finished! Thank you for using it.')
+        logger.info('~~~~~~~~~~The script have finished! Thank you for using it.')
 
 
 def run_mpwt():
@@ -779,9 +783,9 @@ def run_mpwt():
     if pgdb_list:
         pgdbs = utils.list_pgdb()
         if pgdbs == []:
-            print('No PGDB inside ptools-local.')
+            logger.info('No PGDB inside ptools-local.')
         else:
-            print(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
+            logger.info(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
         return
 
     # Delete PGDB if use of --delete argument.
@@ -792,7 +796,7 @@ def run_mpwt():
 
     if args['--clean']:
         if verbose:
-            print('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
         utils.cleaning(number_cpu, verbose)
         if input_folder:
             utils.cleaning_input(input_folder, output_folder, verbose)
