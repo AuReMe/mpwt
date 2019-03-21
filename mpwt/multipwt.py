@@ -469,7 +469,7 @@ def retrieve_complete_id(pgdb_id_folder):
     return (pgdb_id_complete, pgdb_id_folder[1])
 
 
-def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr):
+def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr, cmd):
     """
     Print error messages when there is a subprocess error during PathoLogic run.
     """
@@ -483,17 +483,19 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     for line in subprocess_stdout:
         logger.info('\t' + line)
 
-    fatal_error_index = None
-    with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
-        for index, line in enumerate(pathologic_log):
-            if 'fatal error' in line and not fatal_error_index:
-                fatal_error_index = index
-                logger.info('=== Error in Pathologic.log ===')
-                logger.info('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
-                logger.info('\t' + line)
-            if fatal_error_index:
-                if index > fatal_error_index:
+    # Look for error in pathologic.log.
+    if '-patho' in cmd:
+        fatal_error_index = None
+        with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
+            for index, line in enumerate(pathologic_log):
+                if 'fatal error' in line and not fatal_error_index:
+                    fatal_error_index = index
+                    logger.info('=== Error in Pathologic.log ===')
+                    logger.info('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
                     logger.info('\t' + line)
+                if fatal_error_index:
+                    if index > fatal_error_index:
+                        logger.info('\t' + line)
 
     logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
@@ -548,7 +550,7 @@ def run_pwt(multiprocess_input):
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        pwt_error(species_input_folder_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr)
+        pwt_error(species_input_folder_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr, cmd_pwt)
         error_status = True
     patho_subprocess.stdout.close()
 
@@ -598,7 +600,7 @@ def run_pwt_dat(multiprocess_input):
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr)
+        pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr, cmd_dat)
         error_status = True
     load_subprocess.stdout.close()
 
