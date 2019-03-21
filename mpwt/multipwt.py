@@ -48,17 +48,39 @@ from gffutils.iterators import DataIterator
 from mpwt import utils
 
 
+def ids_compare_ptools_ids(compare_ids, ptools_run_ids, set_operation):
+    """
+    Compare species IDs in input folder with IDs present in PGDB folder.
+    To comapre them, lower case the species IDs, then run a difference or an intersection between set.
+    Difference to obtain all IDs which are not in PGDB folder (which need to be run on PathoLogic).
+    Intersection to obtain all IDs which are already in PGDB folder (which need only to create BioPAX/dat files and mvoe them in output folder).
+    """
+    lower_case_compare_ids = list(map(lambda x:x.lower(), compare_ids))
+
+    lower_compare_ids = dict(zip(lower_case_compare_ids, compare_ids))
+
+    if set_operation == 'difference':
+        comapre_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
+    elif set_operation == 'intersection':
+        comapre_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
+
+    new_compare_ids = [lower_compare_ids[compare_id] for compare_id in comapre_ids_ptools]
+
+    return new_compare_ids
+
+
 def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
     """
     Check output folder for already existing PGDB, don't create them.
     Check if PGDBs are already in ptools-local folder.
+    Return a list containing the IDs to use with Pathologic/BioPAX-dat creation and a second list with only IDs to run on BioPAX/dat creation.
     """
     # Check if there are files/folders inside the input folder.
     # And remove hidden folder/file (beginning with '.').
     species_folders = [species_folder for species_folder in os.listdir(input_folder) if not species_folder.startswith('.')]
     if len(species_folders) == 0:
         print("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))
-        return None
+        return None, None
 
     # Check if there is a Genbank or a GFF file inside each subfolder.
     input_extensions = ['.gbk', '.gff']
@@ -68,49 +90,48 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     missing_input_files = list(set(run_ids) - set(species_folders))
     if len(species_folders) == 0:
         print('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(' '.join(missing_input_files)))
-        return None
+        return None, None
 
     # Check the structure of the input folder.
     invalid_characters = ['.', '/']
     for species_folder in species_folders:
         if os.path.isfile(input_folder+'/'+species_folder):
             print('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
-            return None
+            return None, None
         elif os.path.isdir(input_folder+'/'+species_folder):
             if any(char in invalid_characters for char in species_folder):
                 print('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
-                return None
+                return None, None
 
     # Take run_ids and remove folder with error (with the intersection with species_folders) and if there is already present output.
+    clean_run_ids = set(run_ids).intersection(set(species_folders))
     if output_folder:
         already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
-        new_run_ids = set(run_ids).intersection(set(species_folders)) - set(already_present_outputs)
+        new_run_ids = clean_run_ids - set(already_present_outputs)
         new_run_ids = list(new_run_ids)
+        for pgdb in already_present_outputs:
+            if pgdb in clean_run_ids:
+                print("! PGDB {0} already in output folder {1}, no inference will be launch on this species.".format(pgdb, output_folder))
 
         if len(new_run_ids) == 0:
             print("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
-            return None
+            return None, None
 
     else:
         new_run_ids = []
         for species_folder in species_folders:
             new_run_ids.append(species_folder)
 
-    # Check for PGDB in ptools-local to see if species are not already there.
+    # Check for PGDB in ptools-local to see if PGDB are already present but they haven't been exported.
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in utils.list_pgdb()]
     if already_present_pgdbs != []:
-        lower_case_new_run_ids = list(map(lambda x:x.lower(), new_run_ids))
-        for pgdb in already_present_pgdbs:
-            if pgdb in lower_case_new_run_ids:
-                print("! PGDB {0} already in ptools-local, no inference will be launch on this species.".format(pgdb))
-        lower_run_ids = dict(zip(lower_case_new_run_ids, new_run_ids))
-        wo_ptools_run_ids = set(lower_case_new_run_ids) - set(already_present_pgdbs)
-        new_run_ids = [lower_run_ids[run_id] for run_id in wo_ptools_run_ids]
-        if len(new_run_ids) == 0:
-            print("All PGDBs are already present in ptools-local. Remove them if you want a new inference, or use mpwt --dat only to create dat files from them.")
-            return None
+        run_patho_dat_ids = ids_compare_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
+        run_dat_ids = ids_compare_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
+        for run_dat_id in run_dat_ids:
+            print("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
+        return run_patho_dat_ids, run_dat_ids
 
-    return new_run_ids
+    return new_run_ids, None
 
 
 def create_dat_creation_script(pgdb_id, lisp_pathname):
@@ -658,7 +679,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 if verbose:
                     print('No output directory, it will be created.')
                 os.mkdir(output_folder)
-        run_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
+        run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
+
+        run_ids = run_patho_dat_ids
         if not run_ids:
             return
 
@@ -693,6 +716,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         dat_run_ids = create_only_dat_lisp(pgdbs_folder_path, tmp_folder)
 
         multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction, only_dat_creation)
+
+    # Add species that have data in PGDB but are not present in output folder.
+    if run_dat_ids:
+        multiprocess_dat_inputs = create_mpwt_input(run_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
+        multiprocess_inputs.extend(multiprocess_dat_inputs)
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
