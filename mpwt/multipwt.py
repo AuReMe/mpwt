@@ -48,10 +48,10 @@ from gffutils.iterators import DataIterator
 from mpwt import utils
 
 
-def ids_compare_ptools_ids(compare_ids, ptools_run_ids, set_operation):
+def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     """
     Compare species IDs in input folder with IDs present in PGDB folder.
-    To comapre them, lower case the species IDs, then run a difference or an intersection between set.
+    To compare them, lower case the species IDs, then run a difference or an intersection between set.
     Difference to obtain all IDs which are not in PGDB folder (which need to be run on PathoLogic).
     Intersection to obtain all IDs which are already in PGDB folder (which need only to create BioPAX/dat files and mvoe them in output folder).
     """
@@ -60,11 +60,11 @@ def ids_compare_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     lower_compare_ids = dict(zip(lower_case_compare_ids, compare_ids))
 
     if set_operation == 'difference':
-        comapre_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
+        compare_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
     elif set_operation == 'intersection':
-        comapre_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
+        compare_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
 
-    new_compare_ids = [lower_compare_ids[compare_id] for compare_id in comapre_ids_ptools]
+    new_compare_ids = [lower_compare_ids[compare_id] for compare_id in compare_ids_ptools]
 
     return new_compare_ids
 
@@ -125,8 +125,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
     # Check for PGDB in ptools-local to see if PGDB are already present but they haven't been exported.
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in utils.list_pgdb()]
     if already_present_pgdbs != []:
-        run_patho_dat_ids = ids_compare_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
-        run_dat_ids = ids_compare_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
+        run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
+        run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
         for run_dat_id in run_dat_ids:
             print("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
         return run_patho_dat_ids, run_dat_ids
@@ -718,9 +718,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction, only_dat_creation)
 
     # Add species that have data in PGDB but are not present in output folder.
-    if run_dat_ids:
-        multiprocess_dat_inputs = create_mpwt_input(run_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
-        multiprocess_inputs.extend(multiprocess_dat_inputs)
+    if input_folder:
+        if run_dat_ids:
+            multiprocess_dat_inputs = create_mpwt_input(run_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
+            multiprocess_inputs.extend(multiprocess_dat_inputs)
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:

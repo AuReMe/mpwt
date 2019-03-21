@@ -59,11 +59,13 @@ def test_create_dats_and_lisp():
 def test_check_input_and_existing_pgdb():
     mpwt.cleaning()
 
-    run_ids = mpwt.multipwt.check_input_and_existing_pgdb(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'], 'test', None)
-    assert sorted(run_ids) == sorted(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'])
+    run_patho_ids, run_dat_ids = mpwt.multipwt.check_input_and_existing_pgdb(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'], 'test', None)
+    assert sorted(run_patho_ids) == sorted(['fatty_acid_beta_oxydation_I', 'tca_cycle_ecoli'])
+    assert not run_dat_ids
 
-    run_ids = mpwt.multipwt.check_input_and_existing_pgdb(['wrong.gbk.id.gbk'], 'test_wrong_id', None)
-    assert run_ids == None
+    run_patho_ids, run_dat_ids = mpwt.multipwt.check_input_and_existing_pgdb(['wrong.gbk.id.gbk'], 'test_wrong_id', None)
+    assert not run_patho_ids
+    assert not run_dat_ids
 
 
 def test_ptools_path():
