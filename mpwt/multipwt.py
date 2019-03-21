@@ -803,7 +803,16 @@ def run_mpwt():
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
-    multiprocess_pwt(input_folder, output_folder, patho_inference, patho_hole_filler, dat_creation, move_dat, size_reduction, number_cpu, patho_log, verbose)
+    multiprocess_pwt(input_folder,
+                    output_folder,
+                    patho_inference,
+                    patho_hole_filler,
+                    dat_creation,
+                    move_dat,
+                    size_reduction,
+                    number_cpu,
+                    patho_log,
+                    verbose)
 
 
 if __name__ == '__main__':

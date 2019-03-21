@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import shutil
-import subprocess
 import sys
 
 from multiprocessing import Pool, cpu_count
+
+logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def find_ptools_path():
@@ -16,7 +20,8 @@ def find_ptools_path():
     """
     pathway_tools_path = shutil.which('pathway-tools')
     if not pathway_tools_path:
-        sys.exit('Pathway-Tools is not in the Path, mpwt can not work without it.')
+        logger.critical('Pathway-Tools is not in the Path, mpwt can not work without it.')
+        sys.exit(1)
 
     pathway_tools_file = open(pathway_tools_path, 'r')
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
@@ -45,7 +50,7 @@ def delete_pgdb(pgdb_name):
     pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
     if os.path.isdir(pgdb_path):
         shutil.rmtree(pgdb_path)
-        print('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
+        logger.info('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
 
 
 def remove_pgbds(to_delete_pgdbs, number_cpu=None):
@@ -65,6 +70,7 @@ def remove_pgbds(to_delete_pgdbs, number_cpu=None):
     mpwt_pool.close()
     mpwt_pool.join()
 
+
 def cleaning(number_cpu=None, verbose=None):
     """
     Clean Pathway-Tools PGDB's folder.
@@ -77,20 +83,20 @@ def cleaning(number_cpu=None, verbose=None):
     if os.path.isfile(pgdb_metadata_path):
         os.remove(pgdb_metadata_path)
         if verbose:
-            print('PGDB-METADATA.ocelot has been removed.')
+            logger.info('PGDB-METADATA.ocelot has been removed.')
 
     pgdb_counter_path = file_path + 'PGDB-counter.dat'
     if os.path.isfile(pgdb_counter_path):
         os.remove(pgdb_counter_path)
         if verbose:
-            print('PGDB-counter.dat has been removed.')
+            logger.info('PGDB-counter.dat has been removed.')
 
     # Extract all pgdbs inside ptools-local. Then delete them.
     all_pgdbs = os.listdir(file_path)
-    remove_pgbds(all_pgdbs)
+    remove_pgbds(all_pgdbs, number_cpu)
 
 
-def cleaning_input(input_folder, output_folder=None, verbose=None):
+def cleaning_input(input_folder, verbose=None):
     """
     Remove dat_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
     """
@@ -114,4 +120,4 @@ def cleaning_input(input_folder, output_folder=None, verbose=None):
                 os.remove(organism_dat)
             if verbose:
                 species = genbank_path.split('/')[-2]
-                print('Remove ' + species + ' temporary datas.')
+                logger.info('Remove ' + species + ' temporary datas.')
