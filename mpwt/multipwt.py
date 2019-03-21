@@ -479,9 +479,22 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     if subprocess_stderr:
         logger.info('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    logger.info('\t' + '=== Pathway-Tools log ===')
+    logger.info('=== Pathway-Tools log ===')
     for line in subprocess_stdout:
         logger.info('\t' + line)
+
+    fatal_error_index = None
+    with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
+        for index, line in enumerate(pathologic_log):
+            if 'fatal error' in line and not fatal_error_index:
+                fatal_error_index = index
+                logger.info('=== Error in Pathologic.log ===')
+                logger.info('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
+                logger.info('\t' + line)
+            if fatal_error_index:
+                if index > fatal_error_index:
+                    logger.info('\t' + line)
+
     logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
 
