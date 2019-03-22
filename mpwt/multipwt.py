@@ -115,7 +115,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         new_run_ids = list(new_run_ids)
         for pgdb in already_present_outputs:
             if pgdb in clean_run_ids:
-                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launch on this species.".format(pgdb, output_folder))
+                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
 
         if len(new_run_ids) == 0:
             logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
@@ -132,7 +132,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
         run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
         for run_dat_id in run_dat_ids:
-            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
+            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launched on this species.".format(run_dat_id))
         return run_patho_dat_ids, run_dat_ids
 
     return new_run_ids, None
