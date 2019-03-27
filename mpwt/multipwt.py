@@ -473,31 +473,33 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     """
     Print error messages when there is a subprocess error during PathoLogic run.
     """
-    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = species_input_folder_path.split('/')[-2]
-    logger.info('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
+    logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
-        logger.info('An error occurred :' + subprocess_stderr.decode('utf-8'))
+        logger.critical('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    logger.info('=== Pathway-Tools log ===')
+    logger.critical('=== Pathway-Tools log ===')
     for line in subprocess_stdout:
-        logger.info('\t' + line)
+        if line != '':
+            logger.critical('\t' + line)
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
         fatal_error_index = None
         with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
             for index, line in enumerate(pathologic_log):
-                if 'fatal error' in line and not fatal_error_index:
-                    fatal_error_index = index
-                    logger.info('=== Error in Pathologic.log ===')
-                    logger.info('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
-                    logger.info('\t' + line)
-                if fatal_error_index:
-                    if index > fatal_error_index:
-                        logger.info('\t' + line)
+                if line != '':
+                    if 'fatal error' in line and not fatal_error_index:
+                        fatal_error_index = index
+                        logger.critical('=== Error in Pathologic.log ===')
+                        logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
+                        logger.critical('\t' + line)
+                    if fatal_error_index:
+                        if index > fatal_error_index:
+                            logger.critical('\t' + line)
 
-    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
 
 def run_pwt(multiprocess_input):
@@ -814,7 +816,7 @@ def run_mpwt():
             logger.info('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
         utils.cleaning(number_cpu, verbose)
         if input_folder:
-            utils.cleaning_input(input_folder, output_folder, verbose)
+            utils.cleaning_input(input_folder, verbose)
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 
