@@ -631,7 +631,7 @@ def check_dat(multiprocess_input):
     if verbose:
         expected_dat_number = str(len(dat_files))
         found_dat_number = str(len(dat_checks))
-        logger.info('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+        logger.info('{0}: {1} out of {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
 
 def run_move_pgdb(move_data):
@@ -750,7 +750,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
         mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
         if verbose:
-            logger.info('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
         for multiprocess_input in multiprocess_inputs:
             check_dat(multiprocess_input)
 
