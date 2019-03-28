@@ -115,7 +115,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         new_run_ids = list(new_run_ids)
         for pgdb in already_present_outputs:
             if pgdb in clean_run_ids:
-                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launch on this species.".format(pgdb, output_folder))
+                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
 
         if len(new_run_ids) == 0:
             logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
@@ -132,7 +132,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
         run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
         for run_dat_id in run_dat_ids:
-            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launch on this species.".format(run_dat_id))
+            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launched on this species.".format(run_dat_id))
         return run_patho_dat_ids, run_dat_ids
 
     return new_run_ids, None
@@ -473,31 +473,33 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     """
     Print error messages when there is a subprocess error during PathoLogic run.
     """
-    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = species_input_folder_path.split('/')[-2]
-    logger.info('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
+    logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
-        logger.info('An error occurred :' + subprocess_stderr.decode('utf-8'))
+        logger.critical('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    logger.info('=== Pathway-Tools log ===')
+    logger.critical('=== Pathway-Tools log ===')
     for line in subprocess_stdout:
-        logger.info('\t' + line)
+        if line != '':
+            logger.critical('\t' + line)
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
         fatal_error_index = None
         with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
             for index, line in enumerate(pathologic_log):
-                if 'fatal error' in line and not fatal_error_index:
-                    fatal_error_index = index
-                    logger.info('=== Error in Pathologic.log ===')
-                    logger.info('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
-                    logger.info('\t' + line)
-                if fatal_error_index:
-                    if index > fatal_error_index:
-                        logger.info('\t' + line)
+                if line != '':
+                    if 'fatal error' in line and not fatal_error_index:
+                        fatal_error_index = index
+                        logger.critical('=== Error in Pathologic.log ===')
+                        logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
+                        logger.critical('\t' + line)
+                    if fatal_error_index:
+                        if index > fatal_error_index:
+                            logger.critical('\t' + line)
 
-    logger.info('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
 
 def run_pwt(multiprocess_input):
@@ -629,7 +631,7 @@ def check_dat(multiprocess_input):
     if verbose:
         expected_dat_number = str(len(dat_files))
         found_dat_number = str(len(dat_checks))
-        logger.info('{0}: {1} on {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+        logger.info('{0}: {1} out of {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
 
 def run_move_pgdb(move_data):
@@ -748,7 +750,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
         mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
         if verbose:
-            logger.info('~~~~~~~~~~Check .dat ~~~~~~~~~~')
+            logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
         for multiprocess_input in multiprocess_inputs:
             check_dat(multiprocess_input)
 
@@ -814,7 +816,7 @@ def run_mpwt():
             logger.info('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
         utils.cleaning(number_cpu, verbose)
         if input_folder:
-            utils.cleaning_input(input_folder, output_folder, verbose)
+            utils.cleaning_input(input_folder, verbose)
         if argument_number == 1 or (argument_number == 2 and verbose):
             sys.exit()
 

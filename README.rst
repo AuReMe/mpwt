@@ -100,6 +100,9 @@ GFF file example:
     scaffold_1	RefSeq	gene	START	STOP	.	-	.	ID=gene_id
     scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id
 
+**Warning**: it seems that metabolic networks from GFF file have less reactions/pathways/compounds than metabolic networks from Genbank file.
+Lack of some annotations (EC, GO) can be the reason explaining these differences.
+
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
 You have to provide a nucleotide sequence file associated with the GFF file containing the chromosome/scaffold/contig sequence.
