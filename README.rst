@@ -436,3 +436,14 @@ Release Notes
 ~~~~~~~~~~~~~
 
 Changes between version are listed on the `release page <https://github.com/AuReMe/mpwt/releases>`__.
+
+Acknowledgements
+~~~~~~~~~~~~~~~~
+
+`Mézaine Aite <https://github.com/mezianeAITE>`__ for his work on the first draft of this package.
+
+Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway-Tools and on Genbank format.
+
+GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
+
+All the users that have tested this tool.
