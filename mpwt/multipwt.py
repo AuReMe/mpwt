@@ -25,7 +25,7 @@ options:
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
-    --cpu=INT     Number of cpu to use for the multiprocessing.
+    --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
     -v     Verbose.
@@ -43,7 +43,7 @@ import subprocess
 import sys
 
 from Bio import SeqIO
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 from gffutils.iterators import DataIterator
 
 from mpwt import utils
@@ -53,18 +53,26 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
+    """ Compare species IDs in input folder with IDs present in PGDB folder.
+
+    Args:
+        compare_ids (list): species IDs (folder and GBK/GFF file name)
+        ptools_run_ids (list): PGDB IDs inside ptools-local
+        set_operation (str): difference or intersection between the two inputs list
+    Returns:
+        list: ID intersecting or different between the two lists
     """
-    Compare species IDs in input folder with IDs present in PGDB folder.
-    To compare them, lower case the species IDs, then run a difference or an intersection between set.
-    Difference to obtain all IDs which are not in PGDB folder (which need to be run on PathoLogic).
-    Intersection to obtain all IDs which are already in PGDB folder (which need only to create BioPAX/dat files and mvoe them in output folder).
-    """
+    # To compare them, lower case the species IDs, then run a difference or an intersection between set.
     lower_case_compare_ids = list(map(lambda x:x.lower(), compare_ids))
 
     lower_compare_ids = dict(zip(lower_case_compare_ids, compare_ids))
 
+    # Difference to obtain all IDs which are not in PGDB folder (which need to be run on PathoLogic).
     if set_operation == 'difference':
         compare_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
+
+    # Intersection to obtain all IDs which are already in PGDB folder.
+    # Which need only to create BioPAX/dat files and mvoe them in output folder.
     elif set_operation == 'intersection':
         compare_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
 
@@ -74,10 +82,16 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
 
 
 def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
-    """
-    Check output folder for already existing PGDB, don't create them.
-    Check if PGDBs are already in ptools-local folder.
-    Return a list containing the IDs to use with Pathologic/BioPAX-dat creation and a second list with only IDs to run on BioPAX/dat creation.
+    """ Check input structure and data in output folder and ptools-local.
+
+    Args:
+        run_ids (list): species IDs (folder and GBK/GFF file name)
+        input_folder (str): pathname to the input folder
+        output_folder (str): pathname to the output folder
+        verbose (bool): boolean verose or not
+    Returns:
+        list: input IDs for PathoLogic and BioPAX/dat creation
+        list: input IDs for BioPAX/dat creation
     """
     # Check if there are files/folders inside the input folder.
     # And remove hidden folder/file (beginning with '.').
@@ -139,9 +153,13 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
 
 
 def create_dat_creation_script(pgdb_id, lisp_pathname):
-    """
-    Input: a PGDB ID and an output path.
-    Create a lisp script allowing dat extraction.
+    """ Create a lisp script allowing dat extraction.
+
+    Args:
+        pgdb_id (str): ID of a PGDB
+        lisp_pathname (str): pathname to the output list script
+    Returns:
+        bool: True if lisp_pathname has been created
     """
     with open(lisp_pathname, 'w') as lisp_file:
         lisp_file.write("(in-package :ecocyc)")
@@ -176,7 +194,12 @@ def create_dats_and_lisp(run_folder):
     (in-package :ecocyc)
     (select-organism :org-id 'pgdb_id)
     (create-flat-files-for-current-kb)
-    """
+
+    Args:
+        run_folder (str): ID of a species of the input folder
+    Returns:
+        list: boolean list, True if all files have been created
+   """
     # Look for a Genbank file in the run folder.
     # PGDB ID corresponds to the name of the species folder.
     pgdb_id = run_folder.split('/')[-2]
@@ -266,6 +289,9 @@ def pwt_input_files(multiprocess_input):
     """
     Check if files needed by Pathway-Tools are available, if not create them.
     Check if there is a pathologic.log from a previous run. If yes, delete it.
+
+    Args:
+        multiprocess_input (dict): multiprocess dictionary input
     """
     run_folder = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']
@@ -297,6 +323,19 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, pa
     """
     Create input list for all multiprocess function, containing one lsit for each input subfolder.
     All arguments are also stored.
+
+    Args:
+        run_ids (list): input species IDs
+        input_folder (str): pathname to input folder
+        pgdbs_folder_path (str): pathname to species PGDB in ptools-local
+        verbose (bool): verbose argument
+        patho_hole_filler (bool): PathoLogic Hole Filler argument
+        dat_extraction (bool): BioPAX/attribute-values file extraction argument
+        output_folder (str): pathname to output folder
+        size_reduction (bool): ptools-local PGDB deletion after processing argument
+        only_dat_creation (bool): only create BioPAX/attribute values argument
+    Returns:
+        dictionary: contain all these data for multiprocessing
     """
     multiprocess_inputs = []
     for run_id in run_ids:
@@ -323,6 +362,12 @@ def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
     """
     Create a lisp script file for each PGDB in the ptools-local folder.
     Return a generator with the PGDB IDs.
+
+    Args:
+        pgdbs_folder_path (str): pathname to species PGDB in ptools-local
+        tmp_folder (str): termporary folder where lisp script will be stored
+    Returns:
+        generator: generator with the PGDB IDs.
     """
     for species_pgdb in os.listdir(pgdbs_folder_path):
         if os.path.isdir(pgdbs_folder_path + species_pgdb):
@@ -341,6 +386,9 @@ def permission_change(folder_pathname):
     """
     Give permission to output files inside a folder.
     Used for log files and PGDB/dat files.
+
+    Args:
+        folder_pathname (str): pathname to the folder which permissions will be changed
     """
     os.chmod(folder_pathname, 0o777)
     for root, subfolders, subfiles in os.walk(folder_pathname):
@@ -354,6 +402,10 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
     """
     Check PathoLogic's log.
     Create two log files (log_error.txt which contains Pathway-Tools log and resume_inference which contains summary of network).
+
+    Args:
+        multiprocess_inputs (list): list of dictionary contaning multiprocess input data
+        patho_log_folder (str): pathname to the PathoLogic log folder.
     """
     verbose = multiprocess_inputs[0]['verbose']
 
@@ -460,6 +512,11 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
 def retrieve_complete_id(pgdb_id_folder):
     """
     Retrieve the ID of the PGDB from the genetic-elements.dat file.
+
+    Args:
+        pgdb_id_folder (tuple): second tuple argument is the pathname to the PGDB
+    Returns:
+        tuple: (new PGDB ID (according to input file), pathname to PGDB folder)
     """
     with open(pgdb_id_folder[1] + '/1.0/input/genetic-elements.dat') as organism_file:
         for line in organism_file:
@@ -472,6 +529,12 @@ def retrieve_complete_id(pgdb_id_folder):
 def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr, cmd):
     """
     Print error messages when there is a subprocess error during PathoLogic run.
+
+    Args:
+        species_input_folder_path (str): pathname to the species input folder
+        subprocess_returncode (int): code returns by subprocess
+        subprocess_stdout (str): stdout returns by subprocess
+        cmd (str): command used which generates the error
     """
     logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = species_input_folder_path.split('/')[-2]
@@ -509,6 +572,9 @@ def run_pwt(multiprocess_input):
     Otherwise send the output to the null device.
     Command used:
     pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho
+
+    Args:
+        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']
@@ -566,6 +632,9 @@ def run_pwt_dat(multiprocess_input):
     If this proposition is not closed, the script can't continue.
     Command used:
     pathway-tools -no-patch-download -disable-metadata-saving -nologfile -load
+
+    Args:
+        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']
@@ -612,6 +681,9 @@ def run_pwt_dat(multiprocess_input):
 def check_dat(multiprocess_input):
     """
     Check dats creation.
+
+    Args:
+        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
     """
     pgdb_folder = multiprocess_input['pgdb_folders']
     verbose = multiprocess_input['verbose']
@@ -639,6 +711,9 @@ def run_move_pgdb(move_data):
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
     pgdb_folder_path: path to the PGDB of the species (in ptools-local).
+
+    Args:
+        move_data (dictionary): contains multiprocess input (PGDB ID, pttols-local PGDB pathname, ...)
     """
     pgdb_folder_dbname = move_data['pgdb_folders'][0]
     pgdb_folder_path = move_data['pgdb_folders'][1]
@@ -675,6 +750,18 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
+
+    Args:
+        input_folder (str): pathname to input folder
+        output_folder (str): pathname to output folder
+        patho_inference (bool): pathologic boolean (True/False)
+        patho_hole_filler (bool): pathologic hole filler boolean (True/False)
+        dat_creation (bool): BioPAX/attributes-values files creation boolean (True/False)
+        dat_extraction (bool): BioPAX/attributes-values files extraction boolean (True/False)
+        size_reduction (bool): Delete ptools-local data at the end boolean (True/False)
+        number_cpu (int): number of CPU used (default=1)
+        patho_log (str): pathname to mpwt log folder
+        verbose (bool): verbose argument
     """
     # Check if Pathway-Tools is in the path.
     # Find PGDB folder path.
@@ -689,7 +776,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
-        number_cpu_to_use = cpu_count()
+        number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
     # Check input folder and create input files for PathoLogic.

@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -17,6 +17,10 @@ def find_ptools_path():
     """
     Check if Pathway-Tools is in PATH. If not stop the script.
     If it finds it, return the path of ptools-local by reading Pathway-Tools file.
+
+    Args:
+    Returns:
+        string: pathname to ptools-local folder
     """
     pathway_tools_path = shutil.which('pathway-tools')
     if not pathway_tools_path:
@@ -35,6 +39,10 @@ def list_pgdb():
     """
     List all the PGDB inside the ptools-local folder.
     Return a list of their IDs.
+
+    Args:
+    Returns:
+        list: PGDB IDs inside ptools-local
     """
     ptools_local_path = find_ptools_path()
     pgdb_folder = ptools_local_path + '/pgdbs/user/'
@@ -45,6 +53,9 @@ def list_pgdb():
 def delete_pgdb(pgdb_name):
     """
     Remove a specific PGDB.
+
+    Args:
+        pgdb_name (str): PGDB ID to delete
     """
     ptools_local_path = find_ptools_path()
     pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
@@ -57,12 +68,16 @@ def remove_pgbds(to_delete_pgdbs, number_cpu=None):
     """
     Delete all PGDB inside to_delete_pgdbs using multiprocessing.
     Check if there is a Pool and if not spawn one.
+
+    Args:
+        to_delete_pgdbs (list): PGDB IDs to delete
+        number_cpu (str): number of CPUs to use (default = 1)
     """
     # Use the number of cpu given by the user or all the cpu available.
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
-        number_cpu_to_use = cpu_count()
+        number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
     mpwt_pool.map(delete_pgdb, to_delete_pgdbs)
@@ -75,6 +90,10 @@ def cleaning(number_cpu=None, verbose=None):
     """
     Clean Pathway-Tools PGDB's folder.
     The script will delete folders and files in ptools-local/pgdbs/user.
+
+    Args:
+        number_cpu (str): number of CPUs to use
+        verbose (bool): verbose argument
     """
     ptools_local_path = find_ptools_path()
     file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
@@ -99,6 +118,10 @@ def cleaning(number_cpu=None, verbose=None):
 def cleaning_input(input_folder, verbose=None):
     """
     Remove dat_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
+
+    Args:
+        input_folder (str): pathname to input folder
+        verbose (bool): verbose argument
     """
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
