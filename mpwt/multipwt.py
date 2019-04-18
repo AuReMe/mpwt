@@ -648,7 +648,7 @@ def run_pwt_dat(multiprocess_input):
 
     error_status = None
     dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']
-    load_errors = ['Error: Organism']
+    load_errors = ['Error']
     load_lines = []
 
     try:
@@ -789,27 +789,27 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 os.mkdir(output_folder)
         run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
 
-        run_ids = run_patho_dat_ids
-        if not run_ids:
-            return
+        # Check if some inputs need to be process by PathoLogic.
+        if run_patho_dat_ids:
+            # Create the list containing all the data used by the multiprocessing call.
+            multiprocess_inputs = create_mpwt_input(run_patho_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
 
-        # Create the list containing all the data used by the multiprocessing call.
-        multiprocess_inputs = create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
-
-        if verbose:
-            logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
-        mpwt_pool.map(pwt_input_files, multiprocess_inputs)
-
-        # Launch PathoLogic.
-        if patho_inference:
             if verbose:
-                logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-            error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
-            if verbose:
-                logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
-            check_pwt(multiprocess_inputs, patho_log)
-            if any(error_status):
-                sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+                logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
+            mpwt_pool.map(pwt_input_files, multiprocess_inputs)
+
+            # Launch PathoLogic.
+            if patho_inference:
+                if verbose:
+                    logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
+                error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
+                if verbose:
+                    logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
+                check_pwt(multiprocess_inputs, patho_log)
+                if any(error_status):
+                    sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+        else:
+            multiprocess_inputs = []
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creaetion of BioPAX/attribute-values files.
@@ -828,6 +828,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Add species that have data in PGDB but are not present in output folder.
     if input_folder:
         if run_dat_ids:
+            for run_dat_id in run_dat_ids:
+                create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
             multiprocess_dat_inputs = create_mpwt_input(run_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
             multiprocess_inputs.extend(multiprocess_dat_inputs)
 
