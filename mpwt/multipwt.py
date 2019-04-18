@@ -862,7 +862,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     mpwt_pool.join()
 
     if verbose:
-        logger.info('~~~~~~~~~~The script have finished! Thank you for using it.')
+        logger.info('~~~~~~~~~~mpwt has finished! Thank you for using it.')
 
 
 def run_mpwt():
