@@ -442,6 +442,8 @@ Acknowledgements
 
 `Mézaine Aite <https://github.com/mezianeAITE>`__ for his work on the first draft of this package.
 
+`Clémence Frioux <https://github.com/cfrioux>`__ for her work and feedbacks.
+
 Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway-Tools and on Genbank format.
 
 GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
