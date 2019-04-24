@@ -84,6 +84,7 @@ Genbank file example:
         CDS             START..STOP
                         /locus_tag="gene1"
                         /db_xref="InterPro:IPRXXXXXX"
+                        /go_component="GO:XXXXXXX"
                         /EC_number="X.X.X.X"
                         /translation="AMINOAACIDSSEQUENCE"
 
