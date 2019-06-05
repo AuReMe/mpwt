@@ -3,7 +3,7 @@
 
 """
 Description:
-From genbank/gff files this script will create Pathway-Tools input data, then run Pathway-Tools's PathoLogic on them. It can also generate dat files.
+From genbank/gff files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate dat files.
 The script takes a folder name as argument.
 
 usage:
@@ -72,7 +72,7 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
         compare_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
 
     # Intersection to obtain all IDs which are already in PGDB folder.
-    # Which need only to create BioPAX/dat files and mvoe them in output folder.
+    # Which need only to create BioPAX/dat files and move them in output folder.
     elif set_operation == 'intersection':
         compare_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
 
@@ -118,7 +118,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
             return None, None
         elif os.path.isdir(input_folder+'/'+species_folder):
             if any(char in invalid_characters for char in species_folder):
-                logger.critical('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway-Tools and Pathway-Tools does not create PGDB with . in ID.'.format(species_folder))
+                logger.critical('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway Tools and Pathway Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None, None
 
     # Take run_ids and remove folder with error (with the intersection with species_folders) and if there is already present output.
@@ -287,7 +287,7 @@ def create_dats_and_lisp(run_folder):
 
 def pwt_input_files(multiprocess_input):
     """
-    Check if files needed by Pathway-Tools are available, if not create them.
+    Check if files needed by Pathway Tools are available, if not create them.
     Check if there is a pathologic.log from a previous run. If yes, delete it.
 
     Args:
@@ -401,7 +401,7 @@ def permission_change(folder_pathname):
 def check_pwt(multiprocess_inputs, patho_log_folder):
     """
     Check PathoLogic's log.
-    Create two log files (log_error.txt which contains Pathway-Tools log and resume_inference which contains summary of network).
+    Create two log files (log_error.txt which contains Pathway Tools log and resume_inference which contains summary of network).
 
     Args:
         multiprocess_inputs (list): list of dictionary contaning multiprocess input data
@@ -547,7 +547,7 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     if subprocess_stderr:
         logger.critical('An error occurred :' + subprocess_stderr.decode('utf-8'))
 
-    logger.critical('=== Pathway-Tools log ===')
+    logger.critical('=== Pathway Tools log ===')
     for line in subprocess_stdout:
         if line != '':
             logger.critical('\t' + line)
@@ -573,7 +573,7 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
 def run_pwt(multiprocess_input):
     """
     Create PGDB using files created during 'create_dats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
-    With verbose run check_output to retrieve the output of subprocess (and show when Pathway-Tools has been killed).
+    With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
     Otherwise send the output to the null device.
     Command used:
     pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho
@@ -601,7 +601,7 @@ def run_pwt(multiprocess_input):
 
     try:
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
-        # Check internal error of Pathway-Tools (Error with Genbank).
+        # Check internal error of Pathway Tools (Error with Genbank).
         for patho_line in iter(patho_subprocess.stdout.readline, ""):
             patho_line = patho_line.decode('utf-8')
             if any(error in patho_line for error in errors):
@@ -612,8 +612,8 @@ def run_pwt(multiprocess_input):
             patho_lines.append(patho_line)
             patho_subprocess.poll()
             return_code = patho_subprocess.returncode
-            # Check if Pathway-Tools has been killed with returncode.
-            # Also check if Pathway-Tools has finished PathoLogic inference (returncode 0).
+            # Check if Pathway Tools has been killed with returncode.
+            # Also check if Pathway Tools has finished PathoLogic inference (returncode 0).
             if return_code or return_code == 0:
                 if return_code == 0:
                     patho_subprocess.stdout.close()
@@ -768,7 +768,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_log (str): pathname to mpwt log folder
         verbose (bool): verbose argument
     """
-    # Check if Pathway-Tools is in the path.
+    # Check if Pathway Tools is in the path.
     # Find PGDB folder path.
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = ptools_local_path + '/pgdbs/user/'
@@ -853,7 +853,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         shutil.rmtree(ptools_local_path + '/tmp')
 
     if verbose:
-        logger.info('~~~~~~~~~~End of the Pathway-Tools Inference~~~~~~~~~~')
+        logger.info('~~~~~~~~~~End of the Pathway Tools Inference~~~~~~~~~~')
 
     # Move PGDBs files.
     if output_folder:

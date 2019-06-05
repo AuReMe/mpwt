@@ -15,8 +15,8 @@ logger.setLevel(logging.DEBUG)
 
 def find_ptools_path():
     """
-    Check if Pathway-Tools is in PATH. If not stop the script.
-    If it finds it, return the path of ptools-local by reading Pathway-Tools file.
+    Check if Pathway Tools is in PATH. If not stop the script.
+    If it finds it, return the path of ptools-local by reading Pathway Tools file.
 
     Args:
     Returns:
@@ -24,7 +24,7 @@ def find_ptools_path():
     """
     pathway_tools_path = shutil.which('pathway-tools')
     if not pathway_tools_path:
-        logger.critical('Pathway-Tools is not in the Path, mpwt can not work without it.')
+        logger.critical('Pathway Tools is not in the Path, mpwt can not work without it.')
         sys.exit(1)
 
     pathway_tools_file = open(pathway_tools_path, 'r')
@@ -88,7 +88,7 @@ def remove_pgbds(to_delete_pgdbs, number_cpu=None):
 
 def cleaning(number_cpu=None, verbose=None):
     """
-    Clean Pathway-Tools PGDB's folder.
+    Clean Pathway Tools PGDB's folder.
     The script will delete folders and files in ptools-local/pgdbs/user.
 
     Args:

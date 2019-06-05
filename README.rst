@@ -1,10 +1,10 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-Pathway-Tools multiprocessing script
+Pathway Tools multiprocessing script
 ====================================
 
-mpwt is a python package for running Pathway-Tools on multiple genomes using multiprocessing.
+mpwt is a python package for running Pathway Tools on multiple genomes using multiprocessing.
 
 There is no guarantee that this script will work, it is a Work In Progress in early state.
 
@@ -19,15 +19,15 @@ Requirements
 ~~~~~~~~~~~~
 
 mpwt works only on Python 3 and it has been tested on Python 3.6.
-It requires some python packages (biopython, docopt and gffutils) and Pathway-Tools. To avoid issues, Pathway-Tools version 22.5 is required.
+It requires some python packages (biopython, docopt and gffutils) and Pathway Tools. To avoid issues, Pathway Tools version 22.5 is required.
 
-You must have an environment where Pathway-Tools is installed. Pathway-Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
+You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
-If your OS doesn't support Pathway-Tools, you can use a docker. If it's your case, look at `Pathway-Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
-It is a dockerfile that will create a container with Pathway-Tools, its dependencies and this package. You just need to give a Pathway-Tools installer as input.
+If your OS doesn't support Pathway Tools, you can use a docker. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
+It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
 
-You can also look at `Pathway-Tools Multiprocessing Singularity <https://github.com/ArnaudBelcour/mpwt-singularity>`__.
+You can also look at `Pathway Tools Multiprocessing Singularity <https://github.com/ArnaudBelcour/mpwt-singularity>`__.
 More manipulations are required compared to Docker but with this you can create a Singularity image.
 
 Using pip
@@ -58,7 +58,7 @@ Genbank files must have the same name as the folder in which they are located an
     │   └── species_3.gbk
     ..
 
-Pathway-Tools will run on each Genbank/GFF file. It will create the results in the ptools-local folder but you can also choose an output folder.
+Pathway Tools will run on each Genbank/GFF file. It will create the results in the ptools-local folder but you can also choose an output folder.
 
 Genbank file example:
 
@@ -89,7 +89,7 @@ Genbank file example:
                         /translation="AMINOAACIDSSEQUENCE"
 
 Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
-You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sample.gbff>`__ provided on Pathway-Tools site.
+You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sample.gbff>`__ provided on Pathway Tools site.
 
 GFF file example:
 
@@ -317,7 +317,7 @@ Useful functions
 
 1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
-Run the multiprocess Pathway-Tools on input folder.
+Run the multiprocess Pathway Tools on input folder.
 
 2. cleaning()
 
@@ -369,12 +369,12 @@ There is also a pathologic.log in each sub-folders.
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
-If Pathway-Tools crashed, mpwt can print some useful information in verbose mode.
+If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
 
 Output
 ~~~~~~
 
-If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway-Tools.
+If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
 If you used the output argument, there is two potential outputs depending on the use of the option --md/dat_extraction:
@@ -397,7 +397,7 @@ If you used the output argument, there is two potential outputs depending on the
     │       └── kb
     │           └── species_1.ocelot
     │       └── reports
-    │           └── contains Pathway-Tools reports.
+    │           └── contains Pathway Tools reports.
     ├── species_2
     ..
     ├── species_3
@@ -445,7 +445,7 @@ Acknowledgements
 
 `Clémence Frioux <https://github.com/cfrioux>`__ for her work and feedbacks.
 
-Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway-Tools and on Genbank format.
+Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway Tools and on Genbank format.
 
 GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
 
