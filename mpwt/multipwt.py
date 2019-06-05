@@ -440,7 +440,7 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
         if os.path.exists(patho_log):
             with open(patho_log, 'r') as input_file:
                 for index, line in enumerate(input_file):
-                    if 'fatal error' in line:
+                    if 'fatal error' in line or 'Error' in line:
                         fatal_error_index = index
                         failed_inferences.append(species)
                         if patho_log_folder:
@@ -465,6 +465,11 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
                             patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
 
                         passed_inferences.append(species)
+                if species not in passed_inferences and species not in failed_inferences:
+                    failed_inferences.append(species)
+                    if patho_log_folder:
+                        patho_error_file.write('No build in PathoLogic inference.')
+                        patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
         else:
             if patho_log_folder:
                 patho_error_file.write('No pathologic log, an error occured before PathoLogic run.\n')
@@ -553,7 +558,7 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
         with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
             for index, line in enumerate(pathologic_log):
                 if line != '':
-                    if 'fatal error' in line and not fatal_error_index:
+                    if 'fatal error' in line or 'Error' in line and not fatal_error_index:
                         fatal_error_index = index
                         logger.critical('=== Error in Pathologic.log ===')
                         logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
