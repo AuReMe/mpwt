@@ -8,7 +8,7 @@ with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as read
     long_description = readme_file.read()
 
 setup(name='mpwt',
-      description='Multiprocessing for Pathway-Tools',
+      description='Multiprocessing for Pathway Tools',
       long_description=long_description,
       version='0.4.2.2',
       url='https://github.com/AuReMe/mpwt',
