@@ -911,7 +911,7 @@ def run_mpwt():
         utils.cleaning(number_cpu, verbose)
         if input_folder:
             utils.cleaning_input(input_folder, verbose)
-        if argument_number == 1 or (argument_number == 2 and verbose) or (argument_number == 3 and verbose and number_cpu):
+        if argument_number == 1 or (argument_number == 2 and verbose) or (argument_number == 4 and verbose and number_cpu):
             sys.exit()
 
     multiprocess_pwt(input_folder,
