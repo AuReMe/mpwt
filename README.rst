@@ -69,8 +69,8 @@ For PF files, there is one file for each scaffold/contig and one corresponding f
 
 Pathway Tools will run on each Genbank/GFF/PF files. It will create the results in the ptools-local folder but you can also choose an output folder.
 
-Genbank files:
-++++++++++++++
+Genbank
++++++++
 
 Genbank file example:
 
@@ -103,8 +103,8 @@ Genbank file example:
 Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
 You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sample.gbff>`__ provided on Pathway Tools site.
 
-GFF files
-+++++++++
+GFF
++++
 
 GFF file example:
 
@@ -128,8 +128,8 @@ You have to provide a nucleotide sequence file associated with the GFF file cont
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-PathoLogic Format files
-+++++++++++++++++++++++
+PathoLogic Format
++++++++++++++++++
 
 PF file example:
 
@@ -159,7 +159,7 @@ You have to provide one nucleotide sequence for each pathologic containing one s
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-Also to add the taxon ID we need the pf_taxon_id.txt (a tsv file with tow values: the name of the folder containing the PF files and the taxon ID corresponding).
+Also to add the taxon ID we need the pf_taxon_id.txt (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
 
 .. code-block:: text
 

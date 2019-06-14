@@ -39,7 +39,7 @@ def test_multiprocess_pwt_import():
     """
     Test mpwt when called in a python script.
     """
-    mpwt.remove_pgbds('fatty_acid_beta_oxydation_icyc,tca_cycle_ecolicyc')
+    mpwt.remove_pgbds('fatty_acid_beta_oxydation_icyc,tca_cycle_ecolicyc,fatty_acid_beta_oxydation_i_pfcyc')
     mpwt.cleaning_input('test')
     mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
 
@@ -50,6 +50,10 @@ def test_multiprocess_pwt_import():
     pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I/pathways.dat"
     expected_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
     assert set(fabo_reactions()).issubset(set(expected_fabo_reactions))
+
+    pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I_pf/pathways.dat"
+    expected_pf_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
+    assert set(fabo_reactions()).issubset(set(expected_pf_fabo_reactions))
 
     mpwt.cleaning_input('test')
     shutil.rmtree('test_output')
@@ -67,7 +71,7 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-o', 'test_output', '--dat', '--md'])
 
     pgdbs = mpwt.list_pgdb()
-    assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_icyc', 'tca_cycle_ecolicyc']
+    assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_icyc', 'fatty_acid_beta_oxydation_i_pfcyc', 'tca_cycle_ecolicyc']
 
     pathway_tca_pathname = "test_output/tca_cycle_ecoli/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_tca_pathname)
@@ -76,6 +80,10 @@ def test_multiprocess_pwt_call():
     pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I/pathways.dat"
     expected_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
     assert set(fabo_reactions()).issubset(set(expected_fabo_reactions))
+
+    pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I_pf/pathways.dat"
+    expected_pf_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
+    assert set(fabo_reactions()).issubset(set(expected_pf_fabo_reactions))
 
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     shutil.rmtree('test_output')
