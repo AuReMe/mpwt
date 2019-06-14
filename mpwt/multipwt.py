@@ -16,7 +16,7 @@ usage:
 
 options:
     -h --help     Show help.
-    -f=DIR     Working folder containing sub-folders with Genbank file.
+    -f=DIR     Working folder containing sub-folders with Genbank/GFF/PF files.
     -o=DIR    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
     --hf    Use with --patho. Run the Hole Filler using Blast.
@@ -100,8 +100,12 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         logger.critical("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))
         return None, None
 
-    # Check if there is a Genbank or a GFF file inside each subfolder.
-    input_extensions = ['.gbk', '.gff']
+    # Remove Pathologic taxon ID file.
+    if 'pf_taxon_id.txt' in species_folders:
+        species_folders.remove('pf_taxon_id.txt')
+
+    # Check if there is a Genbank, a GFF or a PathoLogic file inside each subfolder.
+    input_extensions = ['.gbk', '.gff', '.pf']
     species_folders = list(set([species_folder for species_folder in species_folders
                                     for species_file in os.listdir(input_folder+'/'+species_folder)
                                         if any(input_extension in species_file for input_extension in input_extensions)]))
@@ -175,7 +179,7 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
 
 def create_dats_and_lisp(run_folder):
     """
-    Read Genbank file and create Pathway Tools needed file.
+    Read Genbank/GFF/PF files and create Pathway Tools needed file.
     Create also a lisp file to create dat files from Pathway tools results.
     The name of the PGDB created by Pathway Tools will be the name of the species with '_' instead of space.
 
@@ -200,7 +204,7 @@ def create_dats_and_lisp(run_folder):
     Returns:
         list: boolean list, True if all files have been created
    """
-    # Look for a Genbank file in the run folder.
+    # Look for a Genbank/GFF files in the run folder.
     # PGDB ID corresponds to the name of the species folder.
     pgdb_id = run_folder.split('/')[-2]
     gbk_name = pgdb_id + ".gbk"
@@ -259,6 +263,24 @@ def create_dats_and_lisp(run_folder):
         if not taxon_id:
             raise Exception('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
 
+    # Look for PF files.
+    elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
+        for species_file in os.listdir(run_folder):
+            if '.pf' in species_file:
+                # Check if there is a fasta file.
+                try:
+                    pf_fasta = open(run_folder + species_file.replace('.pf', '.fasta'), 'r')
+                    pf_fasta.close()
+                except FileNotFoundError:
+                    raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
+
+                input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
+                with open(input_folder + '/pf_taxon_id.txt') as pf_taxon_id:
+                    for line in pf_taxon_id.readlines():
+                        if pgdb_id in line:
+                            taxon_id = line.split('\t')[1]
+        if not taxon_id:
+            raise Exception('Missing "taxon:" in Pathologic file of {0} in {1}.'.format(pgdb_id, input_folder + '/pf_taxon_id.txt'))
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -272,13 +294,22 @@ def create_dats_and_lisp(run_folder):
 
     # Create the genetic-elements dat file.
     with open(genetic_dat, 'w') as genetic_file:
-        genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
-        genetic_writer.writerow(['NAME', ''])
-        genetic_writer.writerow(['ANNOT-FILE', input_name])
-        if os.path.isfile(gff_pathname):
-            genetic_writer.writerow(['SEQ-FILE', gff_fasta])
-        genetic_writer.writerow(['//'])
-
+        if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname):
+            genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
+            genetic_writer.writerow(['NAME', ''])
+            genetic_writer.writerow(['ANNOT-FILE', input_name])
+            if os.path.isfile(gff_pathname):
+                genetic_writer.writerow(['SEQ-FILE', gff_fasta])
+            genetic_writer.writerow(['//'])
+        elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
+            genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
+            for species_file in os.listdir(run_folder):
+                    if '.pf' in species_file:
+                        genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
+                        genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
+                        genetic_writer.writerow(['ANNOT-FILE', species_file])
+                        genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                        genetic_writer.writerow(['//'])
     # Create the lisp script.
     check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
 
@@ -442,7 +473,8 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
                 for index, line in enumerate(input_file):
                     if 'fatal error' in line or 'Error' in line:
                         fatal_error_index = index
-                        failed_inferences.append(species)
+                        if species not in failed_inferences:
+                            failed_inferences.append(species)
                         if patho_log_folder:
                             patho_error_file.write(line)
                             patho_resume_writer.writerow([species, 'ERROR', '', '', '', ''])
@@ -800,7 +832,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             multiprocess_inputs = create_mpwt_input(run_patho_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
 
             if verbose:
-                logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF~~~~~~~~~~')
+                logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
             mpwt_pool.map(pwt_input_files, multiprocess_inputs)
 
             # Launch PathoLogic.

@@ -43,8 +43,7 @@ Use
 Input data
 ~~~~~~~~~~
 
-The script takes a folder containing sub-folders as input. Each sub-folder contains a Genbank/GFF file.
-Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
+The script takes a folder containing sub-folders as input. Each sub-folder contains a Genbank/GFF file or multiple PathoLogic Format (PF) files.
 
 .. code-block:: text
 
@@ -56,9 +55,22 @@ Genbank files must have the same name as the folder in which they are located an
     │   └── species_2.fasta
     ├── species_3
     │   └── species_3.gbk
+    ├── species_4
+    │   └── scaffold_1.pf
+    │   └── scaffold_1.fasta
+    │   └── scaffold_2.pf
+    │   └── scaffold_2.fasta
+    pf_taxon_id.txt
     ..
 
-Pathway Tools will run on each Genbank/GFF file. It will create the results in the ptools-local folder but you can also choose an output folder.
+Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
+
+For PF files, there is one file for each scaffold/contig and one corresponding fasta file.
+
+Pathway Tools will run on each Genbank/GFF/PF files. It will create the results in the ptools-local folder but you can also choose an output folder.
+
+Genbank files:
+++++++++++++++
 
 Genbank file example:
 
@@ -91,6 +103,9 @@ Genbank file example:
 Look at the `NCBI GBK format <http://www.insdc.org/files/feature_table.html#7.1.2>`__ for more informations.
 You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sample.gbff>`__ provided on Pathway Tools site.
 
+GFF files
++++++++++
+
 GFF file example:
 
 .. code-block:: text
@@ -113,14 +128,50 @@ You have to provide a nucleotide sequence file associated with the GFF file cont
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
+PathoLogic Format files
++++++++++++++++++++++++
+
+PF file example:
+
+.. code-block:: text
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; scaffold_1
+    ;;;;;;;;;;;;;;;;;;;;;;;;;
+    ID	gene_id
+    NAME	gene_id
+    STARTBASE	START
+    ENDBASE	STOP
+    FUNCTION	ORF
+    PRODUCT-TYPE	P
+    PRODUCT-ID	prot gene_id
+    EC	X.X.X.X
+    DBLINK	GO:XXXXXXX
+    INTRON	START1-STOP1
+    //
+
+Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf/>`__ for more informations.
+
+You have to provide one nucleotide sequence for each pathologic containing one scaffold/contig.
+
+.. code-block:: text
+
+    >scaffold_1
+    ATGATGCTGATACTGACTTAGCAT
+
+Also to add the taxon ID we need the pf_taxon_id.txt (a tsv file with tow values: the name of the folder containing the PF files and the taxon ID corresponding).
+
+.. code-block:: text
+
+    species_4	4
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three input files are created by mpwt. Informations are extracted from the Genbank/GFF file.
-myDBName corresponds to the name of the folder and the Genbank/GFF file.
-taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF.
-species_name is extracted from the Genbank/GFF file.
+Three input files are created by mpwt. Informations are extracted from the Genbank/GFF/PF file.
+myDBName corresponds to the name of the folder and the Genbank/GFF/PF file.
+taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF/PF.
+species_name is extracted from the Genbank/GFF/PF files.
 
 .. code-block:: text
 
