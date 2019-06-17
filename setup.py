@@ -10,7 +10,7 @@ with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as read
 setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
-      version='0.4.2.4',
+      version='0.4.3',
       url='https://github.com/AuReMe/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
@@ -36,7 +36,7 @@ setup(name='mpwt',
       ],
       entry_points={
           'console_scripts': [
-              'mpwt = mpwt.__main__:main'
+              'mpwt = mpwt.__main__:run_mpwt'
           ]
       },
 )
