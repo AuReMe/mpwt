@@ -1,5 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+Check results from Pathwy Tools command:
+-check_pwt: results from PathoLogic (by looking at pathologic.log)
+-check_dat: attribute-values dat files
+"""
 
 import csv
 import os

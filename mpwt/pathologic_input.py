@@ -1,5 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+Create PathoLogic input files:
+-organism-params.dat
+-genetic-elements.dats
+-dat_creation.lisp
+"""
 
 import csv
 import logging

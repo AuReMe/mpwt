@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+Wrapping Pathway Tools for PathoLogic and attribute-values dat files creation.
+Move results files to an output folder.
+"""
 
 import logging
 import os

@@ -3,7 +3,7 @@
 
 """
 Description:
-From genbank/gff files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate dat files.
+From Genbank/GFF/PF files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate dat files.
 The script takes a folder name as argument.
 
 usage:

@@ -1,35 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
-Description:
-From genbank/gff files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate dat files.
-The script takes a folder name as argument.
-
-usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
-    mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
-    mpwt -o=DIR [--md] [--cpu=INT] [-v]
-    mpwt --clean [--cpu=INT] [-v]
-    mpwt --delete=STR [--cpu=INT]
-    mpwt --list
-
-options:
-    -h --help     Show help.
-    -f=DIR     Working folder containing sub-folders with Genbank/GFF/PF files.
-    -o=DIR    Output folder path. Will create a output folder in this folder.
-    --patho    Will run an inference of Pathologic on the input files.
-    --hf    Use with --patho. Run the Hole Filler using Blast.
-    --dat    Will create BioPAX/attribute-value dat files from PGDB.
-    --md    Move only the dat files into the output folder.
-    --clean    Clean ptools-local folder, before any other operations.
-    --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
-    -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
-    --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
-    --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
-    --list     List all PGDBs inside the ptools-local folder.
-    -v     Verbose.
-
+Workflow of mpwt:
+-create input files (pathologic_input)
+-launch Pathway Tools in multiprocess (pwt_wrapper)
+-check the results (results_check)
 """
 
 import logging
