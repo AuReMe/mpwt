@@ -1,8 +1,8 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-Pathway Tools multiprocessing script
-====================================
+mpwt: Pathway Tools multiprocessing wrapper
+===========================================
 
 mpwt is a python package for running Pathway Tools on multiple genomes using multiprocessing.
 
@@ -19,7 +19,7 @@ Requirements
 ~~~~~~~~~~~~
 
 mpwt works only on Python 3 and it has been tested on Python 3.6.
-It requires some python packages (biopython, docopt and gffutils) and Pathway Tools. To avoid issues, Pathway Tools version 22.5 is required.
+It requires some python packages (biopython, docopt and gffutils) and Pathway Tools.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
@@ -256,112 +256,140 @@ Examples
 
 Possible uses of mpwt:
 
-.. code:: sh
+..
 
-    mpwt -f path/to/folder/input --patho
+    .. code:: sh
 
-.. code:: python
+        command line
 
-    import mpwt
-    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-			  patho_inference=True)
+    .. code:: python
 
-Create PGDBs of studied organisms inside ptools-local.
+        import mpwt
+        python script
 
-.. code:: sh
+Create PGDBs of studied organisms inside ptools-local:
 
-    mpwt -f path/to/folder/input --patho --hf --log path/to/folder/log
+..
 
-.. code:: python
+    .. code:: sh
 
-    import mpwt
-    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-			  patho_inference=True,
-			  patho_hole_filler=True,
-			  patho_log='path/to/folder/log')
+        mpwt -f path/to/folder/input --patho
 
-Create PGDBs of studied organisms inside ptools-local with the Hole-Filler.
+    .. code:: python
 
-.. code:: sh
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                patho_inference=True)
 
-    mpwt -f path/to/folder/input --patho --dat
+Create PGDBs of studied organisms inside ptools-local with the Hole-Filler:
 
-.. code:: python
+..
 
-    import mpwt
-    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-			  patho_inference=True,
-                          dat_creation=True)
+    .. code:: sh
 
-Create PGDBs of studied organisms inside ptools-local and create dat files.
+        mpwt -f path/to/folder/input --patho --hf --log path/to/folder/log
 
-.. code:: sh
+    .. code:: python
 
-    mpwt -f path/to/folder/input --patho -o path/to/folder/output
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                patho_inference=True,
+                patho_hole_filler=True,
+                patho_log='path/to/folder/log')
 
-.. code:: python
+Create PGDBs of studied organisms inside ptools-local and create dat files:
 
-    import mpwt
-    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                          folder_output='path/to/folder/output',
-			  patho_inference=True)
+..
+
+    .. code:: sh
+
+        mpwt -f path/to/folder/input --patho --dat
+
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                patho_inference=True,
+                            dat_creation=True)
 
 Create PGDBs of studied organisms inside ptools-local.
 Then move the files to the output folder.
 
-.. code:: sh
+..
 
-    mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
+    .. code:: sh
 
+        mpwt -f path/to/folder/input --patho -o path/to/folder/output
 
-.. code:: python
+    .. code:: python
 
-    import mpwt
-    mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                          folder_output='path/to/folder/output',
-			  patho_inference=True,
-                          dat_creation=True,
-			  dat_extraction=True)
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                            folder_output='path/to/folder/output',
+                patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 Then move the dat files to the output folder.
 
-.. code:: sh
+..
 
-    mpwt --dat -o path/to/folder/output --md
+    .. code:: sh
 
-.. code:: python
+        mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
 
-    import mpwt
-    mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
-                          dat_creation=True,
-			  dat_extraction=True)
+
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                            folder_output='path/to/folder/output',
+                patho_inference=True,
+                            dat_creation=True,
+                dat_extraction=True)
+
 
 Create dat files for the PGDB inside ptools-local.
 And move them to the output folder.
 
-.. code:: sh
+..
 
-    mpwt -o path/to/folder/output
+    .. code:: sh
 
-.. code:: python
+        mpwt --dat -o path/to/folder/output --md
 
-    import mpwt
-    mpwt.multiprocess_pwt(folder_output='path/to/folder/output')
+    .. code:: python
 
-Move PGDB from ptools-local to the output folder.
+        import mpwt
+        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+                            dat_creation=True,
+                dat_extraction=True)
 
-.. code:: sh
+Move PGDB from ptools-local to the output folder:
 
-    mpwt -o path/to/folder/output --md
+..
 
-.. code:: python
+    .. code:: sh
 
-    import mpwt
-    mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
-			  dat_extraction=True)
+        mpwt -o path/to/folder/output
 
-Move dat files from ptools-local to the output folder.
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(folder_output='path/to/folder/output')
+
+Move dat files from ptools-local to the output folder:
+
+..
+
+    .. code:: sh
+
+        mpwt -o path/to/folder/output --md
+
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+                dat_extraction=True)
 
 
 Useful functions
@@ -422,6 +450,8 @@ If the build passed you have also the possibility to see the result of the infer
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
 
 If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
+It will show the terminal in which Pathway Tools has crashed.
+Also, if there is an errror in pathologic.log, it will be shown after === Error in Pathologic.log ===.
 
 Output
 ~~~~~~
@@ -483,6 +513,16 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_2
     ..
     ├── species_3
+    ..
+
+3. with the -r (size_reduction) argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1.zip
+    ├── species_2.zip
+    ├── species_3.zip
     ..
 
 Release Notes
