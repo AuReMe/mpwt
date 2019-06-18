@@ -239,7 +239,7 @@ Command line argument / Python argument: description
 
 --cpu / number_cpu(int): the number of cpu used for the multiprocessing.
 
--r / dat_extraction(boolean): delete files in ptools-local to reduce size of results.
+-r / dat_extraction(boolean): delete files in ptools-local to reduce size of results and return zip compressed files.
 
 --log / patho_log(string: folder pathname): folder where log files for PathoLogic inference will be store.
 

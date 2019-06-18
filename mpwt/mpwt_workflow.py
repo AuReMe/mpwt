@@ -47,6 +47,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
         sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
 
+    if size_reduction and not output_folder:
+        sys.exit('To use -r/size_reduction, you need to give an output folder (-o/output_folder).')
+
     # Use the number of cpu given by the user or all the cpu available.
     if number_cpu:
         number_cpu_to_use = int(number_cpu)

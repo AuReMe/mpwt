@@ -24,7 +24,7 @@ options:
     --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
-    -r    Will delete files in ptools-local to reduce size of results when moving files to output folder (use it with -o).
+    -r    Will delete files in ptools-local and compress results files to reduce results size (use it with -o).
     --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.

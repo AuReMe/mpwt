@@ -181,22 +181,20 @@ def run_move_pgdb(move_data):
     output_species = output_folder + '/' + pgdb_folder_dbname +'/'
 
     if dat_extraction:
-        pgdb_folder_path = pgdb_folder_path + '/1.0/data'
+        pgdb_tmp_folder_path = pgdb_folder_path + '/1.0/data'
+    else:
+        pgdb_tmp_folder_path = pgdb_folder_path
 
     if size_reduction:
-        if not os.path.exists(output_species):
-            os.mkdir(output_species)
-        for pgdb_file in os.listdir(pgdb_folder_path):
-            file_to_move_pathname = pgdb_folder_path + '/' + pgdb_file
-            output_file_pathname = output_species + pgdb_file
-            if dat_extraction:
-                if '.dat' in pgdb_file:
-                    shutil.move(file_to_move_pathname, output_file_pathname)
-            else:
-                shutil.move(file_to_move_pathname, output_file_pathname)
+        if dat_extraction:
+            for pgdb_file in os.listdir(pgdb_tmp_folder_path):
+                pgdb_file_pathname = pgdb_tmp_folder_path + '/' + pgdb_file
+                if '.dat' not in pgdb_file:
+                    os.remove(pgdb_file_pathname)
+        shutil.make_archive(output_folder + '/' + pgdb_folder_dbname, 'zip', pgdb_tmp_folder_path)
         shutil.rmtree(pgdb_folder_path)
     else:
-        shutil.copytree(pgdb_folder_path, output_species)
+        shutil.copytree(pgdb_tmp_folder_path, output_species)
         if dat_extraction:
             for pgdb_file in os.listdir(output_species):
                 if '.dat' not in pgdb_file:

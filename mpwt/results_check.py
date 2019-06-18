@@ -1,5 +1,5 @@
 """
-Check results from Pathwy Tools command:
+Check results from Pathway Tools command:
 -check_pwt: results from PathoLogic (by looking at pathologic.log)
 -check_dat: attribute-values dat files
 """
@@ -17,12 +17,13 @@ logger = logging.getLogger(__name__)
 def check_pwt(multiprocess_inputs, patho_log_folder):
     """
     Check PathoLogic's log.
-    Create two log files (log_error.txt which contains Pathway Tools log and resume_inference which contains summary of network).
+    Create two log files (log_error.txt which contains Pathway Tools log and resume_inference.tsv which contains summary of metabolic networks).
 
     Args:
         multiprocess_inputs (list): list of dictionary contaning multiprocess input data
         patho_log_folder (str): pathname to the PathoLogic log folder.
     """
+    # Extract verbose from first species (verbose is the same for all species).
     verbose = multiprocess_inputs[0]['verbose']
 
     if patho_log_folder:
