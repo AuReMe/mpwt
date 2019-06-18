@@ -223,32 +223,33 @@ mpwt can be used in a python script with an import:
 			  patho_log=optional_folder_pathname,
 			  verbose=optional_boolean)
 
-Command line argument / Python argument: description
-
--f / folder_input(string: folder pathname): input folder as described in Input data.
-
--o / folder_output(string: folder pathname): output folder containing PGDB data or dat files (see --dat arguments).
-
---patho / patho_inference(boolean): will launch PathoLogic inference on input folder.
-
---hf /patho_hole_filler(boolean): (to use with --patho) will launch PathoLogic Hole Filler with Blast.
-
---dat / dat_creation(boolean): will create BioPAX/attribute-value dat files.
-
---md /dat_extraction(boolean): will move only the dat files inside the output folder.
-
---cpu / number_cpu(int): the number of cpu used for the multiprocessing.
-
--r / dat_extraction(boolean): delete files in ptools-local to reduce size of results and return zip compressed files.
-
---log / patho_log(string: folder pathname): folder where log files for PathoLogic inference will be store.
-
--v / verbose(boolean): print some information about the processing of mpwt.
-
---delete / mpwt.remove_pgdbs()(string: pgdb name): delete a specific PGDB inside the ptools-local folder.
-
---clean / mpwt.cleaning(): clean ptools-local folder, before any other operations.
-
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+| Command line argument   | Python argument                                | description                                                             |
++=========================+================================================+=========================================================================+
+|          -f             | folder_input(string: folder pathname)          | input folder as described in Input data                                 |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -o             | folder_output(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --patho        | patho_inference(boolean)                       | launch PathoLogic inference on input folder                             |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --hf           | patho_hole_filler(boolean)                     | launch PathoLogic Hole Filler with Blast                                |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --dat          | dat_creation(boolean)                          | create BioPAX/attribute-value dat files                                 |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --md           | dat_extraction(boolean)                        | move only the dat files inside the output folder                        |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --cpu          | number_cpu(int)                                | number of cpu used for the multiprocessing                              |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -r             | size_reduction(boolean)                        | delete PGDB in ptools-local to reduce size and return compressed files  |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --log          | patho_log(string: folder pathname)             | folder where log files for PathoLogic inference will be store           |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --delete       | mpwt.remove_pgdbs()(string: pgdb name)         | delete a specific PGDB (or delete PGDB according to input data)         |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --clean        | mpwt.cleaning()                                | clean ptools-local folder, before any other operations                  |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -v             | verbose(boolean)                               | print some information about the processing of mpwt                     |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 
 Examples
 ~~~~~~~~
