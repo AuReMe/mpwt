@@ -77,7 +77,7 @@ def run_mpwt():
     # Delete PGDB if use of --delete argument.
     # Use a set to remove redudant PGDB.
     if pgdb_to_deletes:
-        utils.remove_pgbds(list(set(pgdb_to_deletes.split(','))), number_cpu)
+        utils.remove_pgdbs(list(set(pgdb_to_deletes.split(','))), number_cpu)
         return
 
     if args['--clean']:
@@ -87,7 +87,7 @@ def run_mpwt():
         if input_folder:
             utils.cleaning_input(input_folder, verbose)
             input_pgdb_to_deletes = [species.lower() + 'cyc' for species in os.listdir(input_folder)]
-            utils.remove_pgbds(input_pgdb_to_deletes, number_cpu)
+            utils.remove_pgdbs(input_pgdb_to_deletes, number_cpu)
         else:
             utils.cleaning(number_cpu, verbose)
         if argument_number == 1 or (argument_number == 2 and verbose) or (argument_number == 4 and verbose and number_cpu):

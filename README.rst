@@ -18,8 +18,8 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-mpwt works only on Python 3 and it has been tested on Python 3.6.
-It requires some python packages (biopython, docopt and gffutils) and Pathway Tools.
+mpwt works only on **Python 3** and it has been tested on Python 3.6.
+It requires some python packages (biopython, docopt and gffutils) and **Pathway Tools**.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
@@ -159,7 +159,7 @@ You have to provide one nucleotide sequence for each pathologic containing one s
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-Also to add the taxon ID we need the pf_taxon_id.txt (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
+Also to add the taxon ID we need the **pf_taxon_id.txt** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
 
 .. code-block:: text
 
@@ -175,18 +175,18 @@ species_name is extracted from the Genbank/GFF/PF files.
 
 .. code-block:: text
 
-    organism-params.dat:
+    **organism-params.dat**
     ID  myDBName
     STORAGE FILE
     NCBI-TAXON-ID   taxonid
     NAME    species_name
 
-    genetic-elements.dats:
+    **genetic-elements.dats**
     NAME    
     ANNOT-FILE  gbk_pathname
     //
 
-    dat_creation.lisp:
+    **dat_creation.lisp**
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
     (let ((*progress-noter-enabled?* NIL))
@@ -195,7 +195,7 @@ species_name is extracted from the Genbank/GFF/PF files.
 Command Line and Python arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-mpwt can be used as a command line.
+mpwt can be used with the command line:
 
 .. code:: sh
 
@@ -244,7 +244,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --log          | patho_log(string: folder pathname)             | folder where log files for PathoLogic inference will be store           |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --delete       | mpwt.remove_pgdbs()(string: pgdb name)         | delete a specific PGDB (or delete PGDB according to input data)         |
+|          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | delete a specific PGDB                                                  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --clean        | mpwt.cleaning()                                | delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -402,7 +402,14 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
+        mpwt.multiprocess_pwt(folder_input,
+                              folder_output,
+                              patho_inference=optional_boolean,
+                              dat_creation=optional_boolean,
+                              dat_extraction=optional_boolean,
+                              size_reduction=optional_boolean,
+                              number_cpu=int,
+                              verbose=optional_boolean)
 
 - Delete all the previous PGDB and the metadata files
 
@@ -518,7 +525,7 @@ For each species, it contains the number of genes/proteins/reactions/pathways/co
 
 If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
 It will show the terminal in which Pathway Tools has crashed.
-Also, if there is an errror in pathologic.log, it will be shown after === Error in Pathologic.log ===.
+Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
 
 Output
 ~~~~~~
@@ -526,7 +533,7 @@ Output
 If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
-If you used the output argument, there is two potential outputs depending on the use of the option --md/dat_extraction:
+If you used the output argument, there is two potential outputs depending on the use of the option **--md/dat_extraction**:
 
 - without --md/dat_extraction, you will have a complete PGDB folder inside your results, for example:
 
@@ -582,7 +589,7 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3
     ..
 
-- with the -r (size_reduction) argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
+- with the **-r /size_reduction** argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
 
 .. code-block:: text
 

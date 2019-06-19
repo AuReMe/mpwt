@@ -65,7 +65,7 @@ def delete_pgdb(pgdb_name):
         logger.info('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
 
 
-def remove_pgbds(to_delete_pgdbs, number_cpu=None):
+def remove_pgdbs(to_delete_pgdbs, number_cpu=None):
     """
     Delete all PGDB inside to_delete_pgdbs using multiprocessing.
     Check if there is a Pool and if not spawn one.
@@ -113,7 +113,7 @@ def cleaning(number_cpu=None, verbose=None):
 
     # Extract all pgdbs inside ptools-local. Then delete them.
     all_pgdbs = os.listdir(file_path)
-    remove_pgbds(all_pgdbs, number_cpu)
+    remove_pgdbs(all_pgdbs, number_cpu)
 
 
 def cleaning_input(input_folder, verbose=None):
