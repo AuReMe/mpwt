@@ -246,7 +246,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --delete       | mpwt.remove_pgdbs()(string: pgdb name)         | delete a specific PGDB (or delete PGDB according to input data)         |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --clean        | mpwt.cleaning()                                | clean ptools-local folder, before any other operations                  |
+|          --clean        | mpwt.cleaning()                                | delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -395,47 +395,114 @@ Move dat files from ptools-local to the output folder:
 Useful functions
 ~~~~~~~~~~~~~~~~
 
-1. multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
+- Run the multiprocess Pathway Tools on input folder
 
-Run the multiprocess Pathway Tools on input folder.
+..
 
-2. cleaning()
+    .. code:: python
 
-Delete all the previous PGDB and the metadata files.
+        import mpwt
+        mpwt.multiprocess_pwt(folder_input, folder_output, patho_inference=optional_boolean, dat_creation=optional_boolean, dat_extraction=optional_boolean, size_reduction=optional_boolean, number_cpu=int, verbose=optional_boolean)
 
-This can also be used with a command line argument:
+- Delete all the previous PGDB and the metadata files
 
-.. code:: sh
+..
 
-    mpwt --clean
+    .. code:: python
 
-If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat').
+        import mpwt
+        mpwt.cleaning()
 
-.. code:: sh
+    This can also be used with a command line argument:
 
-    mpwt --clean -f input_folder
+    .. code:: sh
 
-2. remove_pgdbs(pgdb_name)
+        mpwt --clean
 
-With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
+    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
 
-And as a command line:
+    .. code:: sh
 
-.. code:: sh
+        mpwt -f input_folder --clean
 
-    mpwt --delete mydbcyc1,mydbcyc2
+    For example if you have:
 
-4. ptools_path()
+    .. code-block:: text
 
-Return the path to ptools-local.
+        Folder_input
+        ├── species_1
+        │   └── species_1.gbk
+        ├── species_2
+        │   └── species_2.gff
+        │   └── species_2.fasta
+        ├── species_3
+        │   └── species_3.gbk
 
-5. list_pgdb()
+    And you have in your ptools-local:
 
-Return a list containing all the PGDBs inside ptools-local folder. Can be used as a command with:
+    .. code-block:: text
 
-.. code:: sh
+        ptools-local
+        ├── pgdbs
+            ├── user
+                ├── species_1cyc
+                │   └── ..
+                ├── species_2cyc
+                │   └── ..
+                ├── species_3cyc
+                │   └── ..
+                ├── species_4cyc
+                │   └── ..
 
-    mpwt --list
+    The command:
+
+    .. code:: sh
+
+        mpwt -f input_folder --clean
+
+    will delete species_1cyc, species_2cyc and species_3cyc but not species_4cyc.
+
+- Delete a specific PGDB
+
+..
+
+    With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
+
+    .. code:: python
+
+        import mpwt
+        mpwt.remove_pgdbs(pgdb_name)
+
+    And as a command line:
+
+    .. code:: sh
+
+        mpwt --delete mydbcyc1,mydbcyc2
+
+- Return the path of ptools-local
+
+..
+
+    .. code:: python
+
+        import mpwt
+        mpwt.find_ptools_path()
+
+
+- Return a list containing all the PGDBs inside ptools-local folder
+
+..
+
+    .. code:: python
+
+        import mpwt
+        mpwt.list_pgdb()
+
+    Can be used as a command with:
+
+    .. code:: sh
+
+        mpwt --list
 
 Errors
 ~~~~~~
@@ -461,7 +528,7 @@ Have in mind that mpwt does not create the cellular overview and does not used t
 
 If you used the output argument, there is two potential outputs depending on the use of the option --md/dat_extraction:
 
-1. without this option, you will have a complete PGDB folder inside your results, for example:
+- without --md/dat_extraction, you will have a complete PGDB folder inside your results, for example:
 
 .. code-block:: text
 
@@ -485,7 +552,7 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3
     ..
 
-2. with this option, you will only have the dat files, for example:
+- with --md/dat_extraction, you will only have the dat files, for example:
 
 .. code-block:: text
 
@@ -515,7 +582,7 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3
     ..
 
-3. with the -r (size_reduction) argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
+- with the -r (size_reduction) argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
 
 .. code-block:: text
 

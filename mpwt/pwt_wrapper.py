@@ -170,7 +170,7 @@ def run_move_pgdb(move_data):
     pgdb_folder_path: path to the PGDB of the species (in ptools-local).
 
     Args:
-        move_data (dictionary): contains multiprocess input (PGDB ID, pttols-local PGDB pathname, ...)
+        move_data (dictionary): contains multiprocess input (PGDB ID, ptools-local PGDB pathname, ...)
     """
     pgdb_folder_dbname = move_data['pgdb_folders'][0]
     pgdb_folder_path = move_data['pgdb_folders'][1]
