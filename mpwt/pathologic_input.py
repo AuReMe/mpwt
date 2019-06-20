@@ -154,7 +154,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
     with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
         taxon_id_reader = csv.reader(pf_taxon_id, delimiter='\t')
         for line in taxon_id_reader:
-            if pgdb_id in line:
+            if pgdb_id == line[0]:
                 taxon_id = line[1]
 
     if not taxon_id:
