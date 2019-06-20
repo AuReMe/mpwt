@@ -86,7 +86,7 @@ def run_mpwt():
 
         if input_folder:
             utils.cleaning_input(input_folder, verbose)
-            input_pgdb_to_deletes = [species.lower() + 'cyc' for species in os.listdir(input_folder)]
+            input_pgdb_to_deletes = [species.lower() + 'cyc' for species in os.listdir(input_folder) if not species.startswith('.') and species != 'taxon_id.tsv']
             utils.remove_pgdbs(input_pgdb_to_deletes, number_cpu)
         else:
             utils.cleaning(number_cpu, verbose)

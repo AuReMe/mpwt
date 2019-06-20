@@ -65,8 +65,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=
         return None, None
 
     # Remove Pathologic taxon ID file.
-    if 'pf_taxon_id.txt' in species_folders:
-        species_folders.remove('pf_taxon_id.txt')
+    if 'taxon_id.tsv' in species_folders:
+        species_folders.remove('taxon_id.tsv')
 
     # Check if there is a Genbank, a GFF or a PathoLogic file inside each subfolder.
     input_extensions = ['.gbk', '.gff', '.pf']
@@ -239,12 +239,12 @@ def create_dats_and_lisp(run_folder):
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
                 input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
-                with open(input_folder + '/pf_taxon_id.txt') as pf_taxon_id:
+                with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
                     for line in pf_taxon_id.readlines():
                         if pgdb_id in line:
                             taxon_id = line.split('\t')[1]
         if not taxon_id:
-            raise Exception('Missing "taxon:" in Pathologic file of {0} in {1}.'.format(pgdb_id, input_folder + '/pf_taxon_id.txt'))
+            raise Exception('Missing "taxon:" in Pathologic file of {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
