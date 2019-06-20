@@ -124,7 +124,7 @@ def run_pwt_dat(multiprocess_input):
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']
 
-    lisp_path = species_input_folder_path + '/dat_creation.lisp'
+    lisp_path = species_input_folder_path + 'dat_creation.lisp'
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 

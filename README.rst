@@ -161,9 +161,15 @@ You have to provide one nucleotide sequence for each pathologic containing one s
 
 Also to add the taxon ID we need the **pf_taxon_id.txt** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
 
+If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
+
 .. code-block:: text
 
-    species_4	4
+    +------------+------------+
+    |species     |taxon_id    |
+    +============+============+
+    |species_4   |4           |
+    +------------+------------+
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

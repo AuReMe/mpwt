@@ -130,15 +130,37 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
         bool: True if lisp_pathname has been created
     """
     with open(lisp_pathname, 'w') as lisp_file:
-        lisp_file.write("(in-package :ecocyc)")
+        lisp_file.write('(in-package :ecocyc)')
         lisp_file.write('\n')
-        lisp_file.write("(select-organism :org-id '" + pgdb_id + ")")
+        lisp_file.write("(select-organism :org-id '" + pgdb_id + ')')
         lisp_file.write('\n')
         lisp_file.write('(let ((*progress-noter-enabled?* NIL))')
         lisp_file.write('\n')
-        lisp_file.write("        (create-flat-files-for-current-kb))")
+        lisp_file.write('        (create-flat-files-for-current-kb))')
 
     return os.path.isfile(lisp_pathname)
+
+
+def extract_taxon_id(run_folder, pgdb_id, taxon_id):
+    """ Extract taxon ID from taxon_id.tsv file.
+
+    Args:
+        run_folder (str): ID of a species of the input folder
+        pgdb_id (str): ID of a PGDB
+    Returns:
+        taxon_id (str): Taxon ID for the corresponding species
+    """
+    input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
+    with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
+        taxon_id_reader = csv.reader(pf_taxon_id, delimiter='\t')
+        for line in taxon_id_reader:
+            if pgdb_id in line:
+                taxon_id = line[1]
+
+    if not taxon_id:
+        raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+
+    return taxon_id
 
 
 def create_dats_and_lisp(run_folder):
@@ -203,7 +225,9 @@ def create_dats_and_lisp(run_folder):
                         if 'taxon:' in src_dbxref_qualifier:
                             taxon_id = src_dbxref_qualifier.replace('taxon:', '')
                 except KeyError:
-                    raise KeyError('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+                    logger.info('Try to look in the taxon_id.tsv file')
+                    taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
@@ -225,7 +249,9 @@ def create_dats_and_lisp(run_folder):
             if 'taxon' in dbxref:
                 taxon_id = dbxref.split('taxon:')[1]
         if not taxon_id:
-            raise Exception('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+            logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+            logger.info('Try to look in the taxon_id.tsv file')
+            taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     # Look for PF files.
     elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
@@ -238,13 +264,7 @@ def create_dats_and_lisp(run_folder):
                 except FileNotFoundError:
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
-                input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
-                with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
-                    for line in pf_taxon_id.readlines():
-                        if pgdb_id in line:
-                            taxon_id = line.split('\t')[1]
-        if not taxon_id:
-            raise Exception('Missing "taxon:" in Pathologic file of {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+                taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -296,22 +316,22 @@ def pwt_input_files(multiprocess_input):
     if verbose:
         species_folder = run_folder.split('/')[-2]
 
-    if "pathologic.log" in files_in:
-        os.remove(run_folder + "pathologic.log")
+    if 'pathologic.log' in files_in:
+        os.remove(run_folder + 'pathologic.log')
 
-    missing_string = ""
+    missing_string = ''
     if required_files.issubset(files_in):
         if verbose:
-            missing_string = "no missing files"
+            missing_string = 'no missing files'
     else:
         if verbose:
-            missing_string = "missing {0}".format("; ".join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
+            missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
         check_datas_lisp = create_dats_and_lisp(run_folder)
         if not check_datas_lisp:
             raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
     if verbose:
-        logger.info("Checking inputs for {0}: {1}. ".format(species_folder, missing_string))
+        logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
 
 
 def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, patho_hole_filler=None, dat_extraction=None, output_folder=None, size_reduction=None, only_dat_creation=None):
@@ -335,7 +355,7 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, pa
     multiprocess_inputs = []
     for run_id in run_ids:
         multiprocess_input = {}
-        input_folder_path = input_folder + "/" + run_id + "/"
+        input_folder_path = input_folder + '/' + run_id + '/'
         species_pgdb_folder = pgdbs_folder_path + run_id.lower() + 'cyc/'
         pgdb_id_folders = (run_id, species_pgdb_folder)
         if only_dat_creation:
