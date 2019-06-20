@@ -163,13 +163,11 @@ Also to add the taxon ID we need the **pf_taxon_id.txt** (a tsv file with two va
 
 If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
 
-.. code-block:: text
-
-    +------------+------------+
-    |species     |taxon_id    |
-    +============+============+
-    |species_4   |4           |
-    +------------+------------+
++------------+------------+
+|species     |taxon_id    |
++============+============+
+|species_4   |4           |
++------------+------------+
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
