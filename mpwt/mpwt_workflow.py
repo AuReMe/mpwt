@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None, patho_hole_filler=None, dat_creation=None, dat_extraction=None, size_reduction=None, number_cpu=None, patho_log=None, verbose=None):
+def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
+                     patho_hole_filler=None, dat_creation=None, dat_extraction=None,
+                     size_reduction=None, number_cpu=None, patho_log=None,
+                     ignore_error=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -47,8 +50,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
         sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
 
+    # Check if size_reduction is used with output_folder.
     if size_reduction and not output_folder:
         sys.exit('To use -r/size_reduction, you need to give an output folder (-o/output_folder).')
+
+    # Check if ignore_error is used with patho_inference.
+    if ignore_error and not patho_inference:
+        sys.exit('To use --ignore-error/ignore_error, you need to use the --patho/patho_inference argument.')
 
     # Use the number of cpu given by the user or all the cpu available.
     if number_cpu:
@@ -83,14 +91,17 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
                 if verbose:
                     logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
-                check_pwt(multiprocess_inputs, patho_log)
+                passed_inferences = check_pwt(multiprocess_inputs, patho_log)
                 if any(error_status):
-                    sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+                    if ignore_error:
+                        logger.critical('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+                    else:
+                        sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
         else:
             multiprocess_inputs = []
 
     # Create path for lisp if there is no folder given.
-    # Create the input for the creaetion of BioPAX/attribute-values files.
+    # Create the input for the creation of BioPAX/attribute-values files.
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         only_dat_creation = True
         # Create a temporary folder in ptools-local where list script will be stored.
@@ -104,7 +115,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction, only_dat_creation)
 
     # Add species that have data in PGDB but are not present in output folder.
+    # Or if ignore_error has been used, select only PathoLogic build that have succeed + species in input with PGDB and not in output.
     if input_folder:
+        if ignore_error:
+            multiprocess_inputs = []
+            tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
+            tmp_run_dat_ids.extend(run_dat_ids)
+            run_dat_ids = tmp_run_dat_ids
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
                 create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
