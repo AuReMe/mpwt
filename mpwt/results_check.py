@@ -22,6 +22,9 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
     Args:
         multiprocess_inputs (list): list of dictionary contaning multiprocess input data
         patho_log_folder (str): pathname to the PathoLogic log folder.
+
+    Returns:
+        list: Species with successful build.
     """
     # Extract verbose from first species (verbose is the same for all species).
     verbose = multiprocess_inputs[0]['verbose']
@@ -125,12 +128,10 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
                     output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
                 output_file.write(save)
 
-    if number_failed_inference > 0:
-        sys.exit("Stop the inference.")
-
     if patho_log_folder:
         permission_change(patho_log_folder)
 
+    return passed_inferences
 
 def check_dat(multiprocess_input):
     """

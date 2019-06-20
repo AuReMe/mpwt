@@ -60,7 +60,7 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
     │   └── scaffold_2.fasta
-    pf_taxon_id.txt
+    taxon_id.tsv
     ..
 
 Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
@@ -159,15 +159,15 @@ You have to provide one nucleotide sequence for each pathologic containing one s
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-Also to add the taxon ID we need the **pf_taxon_id.txt** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
-
-If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
+Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
 
 +------------+------------+
 |species     |taxon_id    |
 +============+============+
 |species_4   |4           |
 +------------+------------+
+
+If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

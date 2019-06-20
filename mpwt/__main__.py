@@ -7,7 +7,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -28,6 +28,7 @@ options:
     --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
+    --ignore-error     ignore PathoLogic build error and continue for successful builds.
     -v     Verbose.
 
 """
@@ -64,6 +65,7 @@ def run_mpwt():
     patho_log = args['--log']
     pgdb_to_deletes = args['--delete']
     pgdb_list = args['--list']
+    ignore_error = args['--ignore-error']
     verbose = args['-v']
 
     if pgdb_list:
@@ -102,6 +104,7 @@ def run_mpwt():
                     size_reduction,
                     number_cpu,
                     patho_log,
+                    ignore_error,
                     verbose)
 
 

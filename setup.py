@@ -9,7 +9,7 @@ with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as read
 setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
-      version='0.4.3',
+      version='0.5',
       url='https://github.com/AuReMe/mpwt',
       author='A. Belcour',
       author_email='arnaud.belcour@gmail.com',
@@ -18,7 +18,7 @@ setup(name='mpwt',
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Audience
         'Intended Audience :: Science/Research',
