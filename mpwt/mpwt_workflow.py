@@ -132,11 +132,16 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if (input_folder and dat_creation) or dat_creation:
         if verbose:
             logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-        mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
+        dat_error_status = mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
         if verbose:
             logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
         for multiprocess_input in multiprocess_inputs:
             check_dat(multiprocess_input)
+        if any(dat_error_status):
+            if ignore_error:
+                logger.critical('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+            else:
+                sys.exit('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         ptools_local_path = utils.find_ptools_path()
