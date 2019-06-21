@@ -28,7 +28,7 @@ options:
     --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
-    --ignore-error     ignore PathoLogic build error and continue for successful builds.
+    --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
     -v     Verbose.
 
 """
@@ -95,17 +95,17 @@ def run_mpwt():
         if argument_number == 1 or (argument_number == 2 and verbose) or (argument_number == 4 and verbose and number_cpu):
             sys.exit()
 
-    multiprocess_pwt(input_folder,
-                    output_folder,
-                    patho_inference,
-                    patho_hole_filler,
-                    dat_creation,
-                    move_dat,
-                    size_reduction,
-                    number_cpu,
-                    patho_log,
-                    ignore_error,
-                    verbose)
+    multiprocess_pwt(input_folder=input_folder,
+                    output_folder=output_folder,
+                    patho_inference=patho_inference,
+                    patho_hole_filler=patho_hole_filler,
+                    dat_creation=dat_creation,
+                    dat_extraction=move_dat,
+                    size_reduction=size_reduction,
+                    number_cpu=number_cpu,
+                    patho_log=patho_log,
+                    ignore_error=ignore_error,
+                    verbose=verbose)
 
 
 if __name__ == "__main__":

@@ -203,7 +203,7 @@ mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
 
@@ -216,8 +216,8 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input,
-    			  folder_output,
+    mpwt.multiprocess_pwt(folder_input=string,
+			  folder_output=string,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
 			  dat_creation=optional_boolean,
@@ -225,6 +225,7 @@ mpwt can be used in a python script with an import:
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
+              ignore_error=boolean,
 			  verbose=optional_boolean)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -238,21 +239,23 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --hf           | patho_hole_filler(boolean)                     | launch PathoLogic Hole Filler with Blast                                |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --dat          | dat_creation(boolean)                          | create BioPAX/attribute-value dat files                                 |
+|          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --md           | dat_extraction(boolean)                        | move only the dat files inside the output folder                        |
+|          --md           | dat_extraction(boolean)                        | Move only the dat files inside the output folder                        |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --cpu          | number_cpu(int)                                | number of cpu used for the multiprocessing                              |
+|          --cpu          | number_cpu(int)                                | Number of cpu used for the multiprocessing                              |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -r             | size_reduction(boolean)                        | delete PGDB in ptools-local to reduce size and return compressed files  |
+|          -r             | size_reduction(boolean)                        | Delete PGDB in ptools-local to reduce size and return compressed files  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --log          | patho_log(string: folder pathname)             | folder where log files for PathoLogic inference will be store           |
+|          --log          | patho_log(string: folder pathname)             | Folder where log files for PathoLogic inference will be store           |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | delete a specific PGDB                                                  |
+|          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | Delete a specific PGDB                                                  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --clean        | mpwt.cleaning()                                | delete all PGDBs in ptools-local folder or only PGDB from input folder  |
+|          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -v             | verbose(boolean)                               | print some information about the processing of mpwt                     |
+|     --ignore-error      | ignore_error(boolean)                          | Ignore errors and continue the workflow for successful build            |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 
 Examples
@@ -497,7 +500,7 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.find_ptools_path()
+        ptools_local_path = mpwt.find_ptools_path()
 
 
 - Return a list containing all the PGDBs inside ptools-local folder
@@ -507,7 +510,7 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.list_pgdb()
+        list_of_pgdbs = mpwt.list_pgdb()
 
     Can be used as a command with:
 
@@ -530,6 +533,9 @@ For each species, it contains the number of genes/proteins/reactions/pathways/co
 If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
 It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
+
+You can also ignore PathoLogic errors by using the argument --ignore-error/ignore_error.
+This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
 
 Output
 ~~~~~~
