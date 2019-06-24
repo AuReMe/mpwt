@@ -1,8 +1,8 @@
 """
 Workflow of mpwt:
--create input files (pathologic_input)
--launch Pathway Tools in multiprocess (pwt_wrapper)
--check the results (results_check)
+    -create input files (pathologic_input)
+    -launch Pathway Tools in multiprocess (pwt_wrapper)
+    -check the results (results_check)
 """
 
 import logging
@@ -58,7 +58,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if ignore_error and not patho_inference:
         sys.exit('To use --ignore-error/ignore_error, you need to use the --patho/patho_inference argument.')
 
-    # Use the number of cpu given by the user or all the cpu available.
+    # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
@@ -75,7 +75,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 os.mkdir(output_folder)
         run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
 
-        # Check if some inputs need to be process by PathoLogic.
+        # Launch PathoLogic inference on species with no PGDBs.
         if run_patho_dat_ids:
             # Create the list containing all the data used by the multiprocessing call.
             multiprocess_inputs = create_mpwt_input(run_patho_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
@@ -89,6 +89,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 if verbose:
                     logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
                 error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
+
+                # Check PathoLogic build.
                 if verbose:
                     logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
                 passed_inferences = check_pwt(multiprocess_inputs, patho_log)
@@ -150,7 +152,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if verbose:
         logger.info('~~~~~~~~~~End of the Pathway Tools Inference~~~~~~~~~~')
 
-    # Move PGDBs files.
+    # Move PGDBs or attribute-values/dat files.
     if output_folder:
         if verbose:
             logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')

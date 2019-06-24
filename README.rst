@@ -225,7 +225,7 @@ mpwt can be used in a python script with an import:
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
-              ignore_error=boolean,
+			  ignore_error=boolean,
 			  verbose=optional_boolean)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
