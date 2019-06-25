@@ -163,7 +163,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
     return taxon_id
 
 
-def create_dats_and_lisp(run_folder):
+def create_dats_and_lisp(run_folder, taxon_file):
     """
     Read Genbank/GFF/PF files and create Pathway Tools needed file.
     Create also a lisp file to create dat files from Pathway tools results.
@@ -228,6 +228,8 @@ def create_dats_and_lisp(run_folder):
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
                     logger.info('Try to look in the taxon_id.tsv file')
                     taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+            if taxon_file:
+                taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
@@ -248,9 +250,10 @@ def create_dats_and_lisp(run_folder):
         for dbxref in region_feature.attributes['Dbxref']:
             if 'taxon' in dbxref:
                 taxon_id = dbxref.split('taxon:')[1]
-        if not taxon_id:
-            logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
-            logger.info('Try to look in the taxon_id.tsv file')
+        if not taxon_id or taxon_file:
+            if not taxon_id:
+                logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
+                logger.info('Try to look in the taxon_id.tsv file')
             taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     # Look for PF files.
@@ -309,6 +312,7 @@ def pwt_input_files(multiprocess_input):
         multiprocess_input (dict): multiprocess dictionary input
     """
     run_folder = multiprocess_input['species_input_folder_path']
+    taxon_file = multiprocess_input['taxon_file']
     verbose = multiprocess_input['verbose']
 
     required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
@@ -326,7 +330,7 @@ def pwt_input_files(multiprocess_input):
     else:
         if verbose:
             missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
-        check_datas_lisp = create_dats_and_lisp(run_folder)
+        check_datas_lisp = create_dats_and_lisp(run_folder, taxon_file)
         if not check_datas_lisp:
             raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
@@ -334,7 +338,9 @@ def pwt_input_files(multiprocess_input):
         logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
 
 
-def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, patho_hole_filler=None, dat_extraction=None, output_folder=None, size_reduction=None, only_dat_creation=None):
+def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
+                      patho_hole_filler=None, dat_extraction=None, output_folder=None,
+                      size_reduction=None, only_dat_creation=None, taxon_file=None):
     """
     Create input list for all multiprocess function, containing one lsit for each input subfolder.
     All arguments are also stored.
@@ -368,6 +374,7 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None, pa
         multiprocess_input['dat_extraction'] = dat_extraction
         multiprocess_input['output_folder'] = output_folder
         multiprocess_input['size_reduction'] = size_reduction
+        multiprocess_input['taxon_file'] = taxon_file
         multiprocess_inputs.append(multiprocess_input)
 
     return multiprocess_inputs

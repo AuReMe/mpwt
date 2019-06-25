@@ -7,7 +7,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -29,6 +29,7 @@ options:
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
+    --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
 
 """
@@ -66,6 +67,7 @@ def run_mpwt():
     pgdb_to_deletes = args['--delete']
     pgdb_list = args['--list']
     ignore_error = args['--ignore-error']
+    taxon_file = args['--taxon-file']
     verbose = args['-v']
 
     if pgdb_list:
@@ -105,6 +107,7 @@ def run_mpwt():
                     number_cpu=number_cpu,
                     patho_log=patho_log,
                     ignore_error=ignore_error,
+                    taxon_file=taxon_file,
                     verbose=verbose)
 
 

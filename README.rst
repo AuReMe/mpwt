@@ -225,7 +225,8 @@ mpwt can be used in a python script with an import:
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
-			  ignore_error=boolean,
+			  ignore_error=optional_boolean,
+			  taxon_file=optional_boolean,
 			  verbose=optional_boolean)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -254,6 +255,8 @@ mpwt can be used in a python script with an import:
 |          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |     --ignore-error      | ignore_error(boolean)                          | Ignore errors and continue the workflow for successful build            |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|     --taxon-file        | taxon_file(boolean)                            | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+

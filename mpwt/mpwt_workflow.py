@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, dat_creation=None, dat_extraction=None,
                      size_reduction=None, number_cpu=None, patho_log=None,
-                     ignore_error=None, verbose=None):
+                     ignore_error=None, taxon_file=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -78,8 +78,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         # Launch PathoLogic inference on species with no PGDBs.
         if run_patho_dat_ids:
             # Create the list containing all the data used by the multiprocessing call.
-            multiprocess_inputs = create_mpwt_input(run_patho_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
-
+            multiprocess_inputs = create_mpwt_input(run_ids=run_patho_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
+                                                    verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                    size_reduction=size_reduction, only_dat_creation=None, taxon_file=taxon_file)
             if verbose:
                 logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
             mpwt_pool.map(pwt_input_files, multiprocess_inputs)
@@ -114,8 +115,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         # Create a lisp script file for each PGDB in the ptools-local folder.
         dat_run_ids = create_only_dat_lisp(pgdbs_folder_path, tmp_folder)
 
-        multiprocess_inputs = create_mpwt_input(dat_run_ids, tmp_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction, only_dat_creation)
-
+        multiprocess_inputs = create_mpwt_input(run_ids=dat_run_ids, input_folder=tmp_folder, pgdbs_folder_path=pgdbs_folder_path,
+                                                verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                size_reduction=size_reduction, only_dat_creation=only_dat_creation, taxon_file=taxon_file)
     # Add species that have data in PGDB but are not present in output folder.
     # Or if ignore_error has been used, select only PathoLogic build that have succeed + species in input with PGDB and not in output.
     if input_folder:
@@ -127,7 +129,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
                 create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
-            multiprocess_dat_inputs = create_mpwt_input(run_dat_ids, input_folder, pgdbs_folder_path, verbose, patho_hole_filler, dat_extraction, output_folder, size_reduction)
+            multiprocess_dat_inputs = create_mpwt_input(run_ids=run_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
+                                                        verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                        size_reduction=size_reduction, only_dat_creation=None, taxon_file=taxon_file)
             multiprocess_inputs.extend(multiprocess_dat_inputs)
 
     # Create BioPAX/attributes-values dat files.
