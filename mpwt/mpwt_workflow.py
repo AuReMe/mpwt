@@ -9,6 +9,7 @@ import logging
 import os
 import shutil
 import sys
+import time
 
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_dat, run_move_pgdb
@@ -41,6 +42,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_log (str): pathname to mpwt log folder
         verbose (bool): verbose argument
     """
+    start_time = time.time()
+    times = []
+    steps = []
+    times.append(start_time)
+    steps.append('start')
+
     # Check if Pathway Tools is in the path.
     # Find PGDB folder path.
     ptools_local_path = utils.find_ptools_path()
@@ -85,6 +92,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
             mpwt_pool.map(pwt_input_files, multiprocess_inputs)
 
+            input_time = time.time()
+            times.append(input_time)
+            steps.append('pwt input creation')
+            if verbose:
+                logger.info('----------End of creation of input data from Genbank/GFF/PF: {0:.2f}s----------'.format(times[-1] - times[-2]))
+
             # Launch PathoLogic.
             if patho_inference:
                 if verbose:
@@ -100,6 +113,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                         logger.critical('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
                     else:
                         sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
+
+            patho_time = time.time()
+            times.append(patho_time)
+            steps.append('PathoLogic inference')
+            if verbose:
+                logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
             multiprocess_inputs = []
 
@@ -149,12 +168,19 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             else:
                 sys.exit('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
+        dat_time = time.time()
+        times.append(dat_time)
+        steps.append('BioPAX/attribute-value dat files creation')
+        if verbose:
+            logger.info('----------End of dat files creation: {0:.2f}s----------'.format(times[-1] - times[-2]))
+
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         ptools_local_path = utils.find_ptools_path()
         shutil.rmtree(ptools_local_path + '/tmp')
 
+
     if verbose:
-        logger.info('~~~~~~~~~~End of the Pathway Tools Inference~~~~~~~~~~')
+        logger.info('~~~~~~~~~~End of Pathway Tools~~~~~~~~~~')
 
     # Move PGDBs or attribute-values/dat files.
     if output_folder:
@@ -164,8 +190,32 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         # Give access to the file for user outside the container.
         permission_change(output_folder)
 
+        move_time = time.time()
+        times.append(move_time)
+        steps.append('Moving results files')
+        if verbose:
+            logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
+
+
     mpwt_pool.close()
     mpwt_pool.join()
 
+    end_time = time.time()
+    times.append(end_time)
+    steps.append('mpwt')
+    if patho_log:
+        patho_error_pathname = patho_log + '/log_error.txt'
+        with open(patho_error_pathname, 'a') as input_file:
+            input_file.write('\n\n---------Time---------\n')
+            for index, step_time in enumerate(times):
+                if index != 0:
+                    if index + 1 == len(times):
+                        step_duration = step_time - times[0]
+                    else:
+                        step_duration = step_time - times[index-1]
+                    input_file.write('Step {0} takes: {1:.2f}s.\n'.format(steps[index] , step_duration))
+
+        permission_change(patho_log)
+
     if verbose:
-        logger.info('~~~~~~~~~~mpwt has finished! Thank you for using it.')
+        logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
