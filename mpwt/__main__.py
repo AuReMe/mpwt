@@ -94,7 +94,7 @@ def run_mpwt():
             utils.remove_pgdbs(input_pgdb_to_deletes, number_cpu)
         else:
             utils.cleaning(number_cpu, verbose)
-        if argument_number == 1 or (argument_number == 2 and verbose) or (argument_number == 4 and verbose and number_cpu):
+        if not patho_inference and not dat_creation and not move_dat and not output_folder:
             sys.exit()
 
     multiprocess_pwt(input_folder=input_folder,
