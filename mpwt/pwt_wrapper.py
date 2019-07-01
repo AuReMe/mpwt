@@ -60,6 +60,8 @@ def run_pwt(multiprocess_input):
 
     Args:
         multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
+    Returns:
+        boolean: True if there is an error during Pathway Tools run
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']
@@ -120,6 +122,8 @@ def run_pwt_dat(multiprocess_input):
 
     Args:
         multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
+    Returns:
+        boolean: True if there is an error during lisp script execution
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     verbose = multiprocess_input['verbose']

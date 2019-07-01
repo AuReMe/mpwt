@@ -203,6 +203,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     end_time = time.time()
     times.append(end_time)
     steps.append('mpwt')
+
+    # Write each step time in log file.
     if patho_log:
         patho_error_pathname = patho_log + '/log_error.txt'
         with open(patho_error_pathname, 'a') as input_file:
