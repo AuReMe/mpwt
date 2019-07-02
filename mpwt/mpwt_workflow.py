@@ -65,6 +65,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if ignore_error and not patho_inference:
         sys.exit('To use --ignore-error/ignore_error, you need to use the --patho/patho_inference argument.')
 
+    # Check if taxon_file is used with patho_inference.
+    if taxon_file and not patho_inference:
+        sys.exit('To use --taxon-file/taxon_file, you need to use the --patho/patho_inference argument.')
+
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
