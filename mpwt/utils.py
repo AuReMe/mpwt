@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+Uselful functions for mpwt.
+"""
 
 import logging
 import os
@@ -64,7 +65,7 @@ def delete_pgdb(pgdb_name):
         logger.info('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
 
 
-def remove_pgbds(to_delete_pgdbs, number_cpu=None):
+def remove_pgdbs(to_delete_pgdbs, number_cpu=None):
     """
     Delete all PGDB inside to_delete_pgdbs using multiprocessing.
     Check if there is a Pool and if not spawn one.
@@ -112,7 +113,7 @@ def cleaning(number_cpu=None, verbose=None):
 
     # Extract all pgdbs inside ptools-local. Then delete them.
     all_pgdbs = os.listdir(file_path)
-    remove_pgbds(all_pgdbs, number_cpu)
+    remove_pgdbs(all_pgdbs, number_cpu)
 
 
 def cleaning_input(input_folder, verbose=None):
@@ -144,3 +145,19 @@ def cleaning_input(input_folder, verbose=None):
             if verbose:
                 species = genbank_path.split('/')[-2]
                 logger.info('Remove ' + species + ' temporary datas.')
+
+
+def permission_change(folder_pathname):
+    """
+    Give permission to output files inside a folder.
+    Used for log files and PGDB/dat files.
+
+    Args:
+        folder_pathname (str): pathname to the folder which permissions will be changed
+    """
+    os.chmod(folder_pathname, 0o777)
+    for root, subfolders, subfiles in os.walk(folder_pathname):
+        for subfolder in subfolders:
+            os.chmod(os.path.join(root, subfolder), 0o777)
+        for subfile in subfiles:
+            os.chmod(os.path.join(root, subfile), 0o777)
