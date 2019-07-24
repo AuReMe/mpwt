@@ -151,25 +151,40 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
         taxon_id (str): Taxon ID for the corresponding species
     """
     input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
+
+    known_element_types = [':CHRSM', ':PLASMID', ':MT', ':PT', ':CONTIG']
     with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
-        taxon_id_reader = csv.reader(pf_taxon_id, delimiter='\t')
-        for line in taxon_id_reader:
-            if pgdb_id == line[0]:
-                taxon_id = line[1]
-                logger.info('taxon_id.tsv: find {0} for {1}'.format(taxon_id, pgdb_id))
-                if len(line) >= 3:
-                    circular = line[2]
+        taxon_id_reader = csv.DictReader(pf_taxon_id, delimiter='\t')
+        for data in taxon_id_reader:
+            species = data['species']
+            if pgdb_id == species:
+                if 'taxon_id' in data:
+                    if data['taxon_id'] != '':
+                        taxon_id = data['taxon_id']
+                        logger.info('taxon_id.tsv: find taxon ID {0} for {1}'.format(taxon_id, pgdb_id))
+                    else:
+                        raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
                 else:
-                    circular = None
-                if len(line) >= 4:
-                    genome_type = line[3]
-                else:
-                    genome_type = None
+                    raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+                if 'circular' in data:
+                    if data['circular'] != '':
+                        if data['circular'] == 'Y' or data['circular'] == 'N':
+                            circular = data['circular']
+                        else:
+                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, circular))
+                    else:
+                        circular = None
+                if 'element_type' in data:
+                    if data['element_type'] != '':
+                        if data['element_type'] in known_element_types:
+                            element_type = data['element_type']
+                        else:
+                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
+                    else:
+                        element_type = None
 
-    if not taxon_id:
-        raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
-    return [taxon_id, circular, genome_type]
+    return [taxon_id, circular, element_type]
 
 
 def create_dats_and_lisp(run_folder, taxon_file):
@@ -213,7 +228,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
     taxon_id = ""
     species_name = ""
     circular = None
-    genome_type = None
+    element_type = None
 
     if os.path.isfile(gbk_pathname):
         input_name = gbk_name
@@ -238,9 +253,9 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except KeyError:
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
                     logger.info('Try to look in the taxon_id.tsv file')
-                    taxon_id, circular, genome_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                    taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
             if taxon_file:
-                taxon_id, circular, genome_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
@@ -265,7 +280,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
             if not taxon_id:
                 logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
                 logger.info('Try to look in the taxon_id.tsv file')
-            taxon_id, circular, genome_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+            taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     # Look for PF files.
     elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
@@ -278,7 +293,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except FileNotFoundError:
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
-                taxon_id, circular, genome_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -300,8 +315,8 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 genetic_writer.writerow(['SEQ-FILE', gff_fasta])
             if circular:
                 genetic_writer.writerow(['CIRCULAR?', circular])
-            if genome_type:
-                genetic_writer.writerow(['TYPE', genome_type])
+            if element_type:
+                genetic_writer.writerow(['TYPE', element_type])
             genetic_writer.writerow(['//'])
         elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
             genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
@@ -313,8 +328,8 @@ def create_dats_and_lisp(run_folder, taxon_file):
                         genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
                         if circular:
                             genetic_writer.writerow(['CIRCULAR?', circular])
-                        if genome_type:
-                            genetic_writer.writerow(['TYPE', genome_type])
+                        if element_type:
+                            genetic_writer.writerow(['TYPE', element_type])
                         genetic_writer.writerow(['//'])
     # Create the lisp script.
     check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)

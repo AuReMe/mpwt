@@ -169,6 +169,14 @@ Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two value
 
 If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
 
+You can also add more informations for the genetic elements like circular (Y or N) or element_type (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG):
+
++------------+------------+------------+------------+
+|species     |taxon_id    |  circular  |element_type|
++============+============+============+============+
+|species_4   |4           |    N       | :CHRSM     |
++------------+------------+------------+------------+
+
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
