@@ -183,7 +183,7 @@ Input files created by mpwt
 Three input files are created by mpwt. Informations are extracted from the Genbank/GFF/PF file.
 myDBName corresponds to the name of the folder and the Genbank/GFF/PF file.
 taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF/PF.
-species_name is extracted from the Genbank/GFF/PF files.
+The species_name is extracted from the Genbank/GFF/PF files.
 
 .. code-block:: text
 
@@ -224,8 +224,8 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input=string,
-			  folder_output=string,
+    mpwt.multiprocess_pwt(input_folder=folder_input,
+			  output_folder=folder_output,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
 			  dat_creation=optional_boolean,
@@ -240,9 +240,9 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                             |
 +=========================+================================================+=========================================================================+
-|          -f             | folder_input(string: folder pathname)          | input folder as described in Input data                                 |
+|          -f             | input_folder(string: folder pathname)          | input folder as described in Input data                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -o             | folder_output(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
+|          -o             | output_folder(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --patho        | patho_inference(boolean)                       | launch PathoLogic inference on input folder                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -343,7 +343,7 @@ Then move the files to the output folder.
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                            folder_output='path/to/folder/output',
+                            output_folder='path/to/folder/output',
                 patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
@@ -360,7 +360,7 @@ Then move the dat files to the output folder.
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                            folder_output='path/to/folder/output',
+                            output_folder='path/to/folder/output',
                 patho_inference=True,
                             dat_creation=True,
                 dat_extraction=True)
@@ -378,7 +378,7 @@ And move them to the output folder.
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                             dat_creation=True,
                 dat_extraction=True)
 
@@ -393,7 +393,7 @@ Move PGDB from ptools-local to the output folder:
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output')
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output')
 
 Move dat files from ptools-local to the output folder:
 
@@ -406,7 +406,7 @@ Move dat files from ptools-local to the output folder:
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                 dat_extraction=True)
 
 
@@ -420,8 +420,8 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_input,
-                              folder_output,
+        mpwt.multiprocess_pwt(input_folder,
+                              output_folder,
                               patho_inference=optional_boolean,
                               dat_creation=optional_boolean,
                               dat_extraction=optional_boolean,

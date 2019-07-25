@@ -43,17 +43,16 @@ from mpwt import utils
 from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+logger = logging.getLogger('mpwt')
+logger.setLevel(logging.CRITICAL)
+
 
 def run_mpwt():
     """
     Function used with a mpwt call in the terminal.
     """
     args = docopt.docopt(__doc__)
-
-    argument_number = len(sys.argv[1:])
 
     input_folder = args['-f']
     output_folder = args['-o']
@@ -69,6 +68,9 @@ def run_mpwt():
     ignore_error = args['--ignore-error']
     taxon_file = args['--taxon-file']
     verbose = args['-v']
+
+    if verbose:
+        logger.setLevel(logging.DEBUG)
 
     if pgdb_list:
         pgdbs = utils.list_pgdb()

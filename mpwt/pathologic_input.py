@@ -16,6 +16,7 @@ from mpwt import utils
 
 logger = logging.getLogger(__name__)
 
+
 def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     """ Compare species IDs in input folder with IDs present in PGDB folder.
 
@@ -45,14 +46,13 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     return new_compare_ids
 
 
-def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
+def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     """ Check input structure and data in output folder and ptools-local.
 
     Args:
         run_ids (list): species IDs (folder and GBK/GFF file name)
         input_folder (str): pathname to the input folder
         output_folder (str): pathname to the output folder
-        verbose (bool): boolean verose or not
     Returns:
         list: input IDs for PathoLogic and BioPAX/dat creation
         list: input IDs for BioPAX/dat creation
@@ -293,7 +293,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except FileNotFoundError:
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
-                taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+        taxon_id, circular, element_type = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -347,32 +347,28 @@ def pwt_input_files(multiprocess_input):
     """
     run_folder = multiprocess_input['species_input_folder_path']
     taxon_file = multiprocess_input['taxon_file']
-    verbose = multiprocess_input['verbose']
 
     required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
-    if verbose:
-        species_folder = run_folder.split('/')[-2]
+
+    species_folder = run_folder.split('/')[-2]
 
     if 'pathologic.log' in files_in:
         os.remove(run_folder + 'pathologic.log')
 
     missing_string = ''
     if required_files.issubset(files_in):
-        if verbose:
-            missing_string = 'no missing files'
+        missing_string = 'no missing files'
     else:
-        if verbose:
-            missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
+        missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
         check_datas_lisp = create_dats_and_lisp(run_folder, taxon_file)
         if not check_datas_lisp:
             raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
-    if verbose:
-        logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
+    logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
 
 
-def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
+def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
                       patho_hole_filler=None, dat_extraction=None, output_folder=None,
                       size_reduction=None, only_dat_creation=None, taxon_file=None):
     """
@@ -383,7 +379,6 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
         run_ids (list): input species IDs
         input_folder (str): pathname to input folder
         pgdbs_folder_path (str): pathname to species PGDB in ptools-local
-        verbose (bool): verbose argument
         patho_hole_filler (bool): PathoLogic Hole Filler argument
         dat_extraction (bool): BioPAX/attribute-values file extraction argument
         output_folder (str): pathname to output folder
@@ -403,7 +398,6 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
         else:
             multiprocess_input['pgdb_folders'] = pgdb_id_folders
         multiprocess_input['species_input_folder_path'] = input_folder_path
-        multiprocess_input['verbose'] = verbose
         multiprocess_input['patho_hole_filler'] = patho_hole_filler
         multiprocess_input['dat_extraction'] = dat_extraction
         multiprocess_input['output_folder'] = output_folder

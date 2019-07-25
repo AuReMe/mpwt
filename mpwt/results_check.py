@@ -26,9 +26,6 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
     Returns:
         list: Species with successful build.
     """
-    # Extract verbose from first species (verbose is the same for all species).
-    verbose = multiprocess_inputs[0]['verbose']
-
     if patho_log_folder:
         if not os.path.exists(patho_log_folder):
             logger.info('No log directory, it will be created.')
@@ -107,11 +104,9 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
     string_failed_build = 'build has' if number_failed_inference == 1 else 'builds have'
 
     if number_passed_inference > 0:
-        if verbose:
-            logger.info('\n{0} {1} passed!\n'.format(str(number_passed_inference), string_passed_build))
+        logger.info('\n{0} {1} passed!\n'.format(str(number_passed_inference), string_passed_build))
     if number_failed_inference > 0:
-        if verbose:
-            logger.critical('WARNING: {0} {1} failed! See the log for more information.\n'.format(str(number_failed_inference), string_failed_build))
+        logger.critical('WARNING: {0} {1} failed! See the log for more information.\n'.format(str(number_failed_inference), string_failed_build))
 
     if patho_log_folder:
         patho_error_file.close()
@@ -141,7 +136,6 @@ def check_dat(multiprocess_input):
         multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
     """
     pgdb_folder = multiprocess_input['pgdb_folders']
-    verbose = multiprocess_input['verbose']
     pgdb_folder_dbname = pgdb_folder[0].lower() + 'cyc'
 
     dats_path = pgdb_folder[1] +'/1.0/data/'
@@ -155,8 +149,8 @@ def check_dat(multiprocess_input):
         dat_file_path = dats_path + '/' + dat_file
         if os.path.exists(dat_file_path):
             dat_checks.append(dat_file_path)
-    if verbose:
-        expected_dat_number = str(len(dat_files))
-        found_dat_number = str(len(dat_checks))
-        logger.info('{0}: {1} out of {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+
+    expected_dat_number = str(len(dat_files))
+    found_dat_number = str(len(dat_checks))
+    logger.info('{0}: {1} out of {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
