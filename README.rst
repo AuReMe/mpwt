@@ -169,13 +169,63 @@ Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two value
 
 If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
 
-You can also add more informations for the genetic elements like circular (Y or N) or element_type (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG):
+You can also add more informations for the genetic elements like **circularity of genome** (Y or N), **type of genetic element** (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG) or **codon table** (see the corresponding code below).
 
-+------------+------------+------------+------------+
-|species     |taxon_id    |  circular  |element_type|
-+============+============+============+============+
-|species_4   |4           |    N       | :CHRSM     |
-+------------+------------+------------+------------+
+Example:
+
++------------+------------+------------+------------+------------+-------------------+
+|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file|
++============+============+============+============+============+===================+
+|species_1   |10          |    Y       | :CHRSM     |1           |                   |
++------------+------------+------------+------------+------------+-------------------+
+|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |
++------------+------------+------------+------------+------------+-------------------+
+|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |
++------------+------------+------------+------------+------------+-------------------+
+
+As you can see for **PF file** (species_4) you can use the column **corresponding_file** to add information for each PF files.
+
+Genetic code for Pathway Tools:
+
++--------------------+-----------------------------------------------------------------------------------------------+
+|Corresponding number|Genetic code                                                                                   |
++====================+===============================================================================================+
+|0                   |Unspecified                                                                                    |
++--------------------+-----------------------------------------------------------------------------------------------+
+|1                   | The Standard Code                                                                             |
++--------------------+-----------------------------------------------------------------------------------------------+
+|2                   | The Vertebrate Mitochondrial Code                                                             |
++--------------------+-----------------------------------------------------------------------------------------------+
+|3                   | The Yeast Mitochondrial Code                                                                  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|4                   | The Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|5                   |The Invertebrate Mitochondrial Code                                                            |
++--------------------+-----------------------------------------------------------------------------------------------+
+|6                   | The Ciliate, Dasycladacean and Hexamita Nuclear Code                                          |
++--------------------+-----------------------------------------------------------------------------------------------+
+|9                   | The Echinoderm and Flatworm Mitochondrial Code                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|10                  | The Euplotid Nuclear Code                                                                     |
++--------------------+-----------------------------------------------------------------------------------------------+
+|11                  | The Bacterial, Archaeal and Plant Plastid Code                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|12                  | The Alternative Yeast Nuclear Code                                                            |
++--------------------+-----------------------------------------------------------------------------------------------+
+|13                  |The Ascidian Mitochondrial Code                                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|14                  | The Alternative Flatworm Mitochondrial Code                                                   |
++--------------------+-----------------------------------------------------------------------------------------------+
+|15                  |Blepharisma Nuclear Code                                                                       |
++--------------------+-----------------------------------------------------------------------------------------------+
+|16                  | Chlorophycean Mitochondrial Code                                                              |
++--------------------+-----------------------------------------------------------------------------------------------+
+|21                  | Trematode Mitochondrial Code                                                                  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|22                  |Scenedesmus obliquus Mitochondrial Code                                                        |
++--------------------+-----------------------------------------------------------------------------------------------+
+|23                  | Thraustochytrium Mitochondrial Code                                                           |
++--------------------+-----------------------------------------------------------------------------------------------+
 
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

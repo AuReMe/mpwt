@@ -156,7 +156,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
     taxon_id_found = None
 
     known_element_types = [':CHRSM', ':PLASMID', ':MT', ':PT', ':CONTIG']
-    known_codon_table = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15']
+    known_codon_table = ['0', '1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23']
     with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
         taxon_id_reader = csv.DictReader(pf_taxon_id, delimiter='\t')
         for data in taxon_id_reader:
