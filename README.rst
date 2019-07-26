@@ -22,7 +22,8 @@ mpwt works only on **Python 3** and it has been tested on Python 3.6.
 It requires some python packages (biopython, docopt and gffutils) and **Pathway Tools**.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
-For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
+
+Pathway Tools needs **Blast**, so it must be install on your system. Also Pathway Tools needs a file named **.ncbirc** to locate Blast, for more informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
 If your OS doesn't support Pathway Tools, you can use a docker. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
