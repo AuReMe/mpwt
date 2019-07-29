@@ -75,9 +75,9 @@ def run_mpwt():
     if pgdb_list:
         pgdbs = utils.list_pgdb()
         if pgdbs == []:
-            logger.info('No PGDB inside ptools-local.')
+            logger.critical('No PGDB inside ptools-local.')
         else:
-            logger.info(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
+            logger.critical(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
         return
 
     # Delete PGDB if use of --delete argument.
