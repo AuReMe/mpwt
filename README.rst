@@ -596,7 +596,7 @@ If Pathway Tools crashed, mpwt can print some useful information in verbose mode
 It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
 
-There is a `Pathway Tools forum https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
+There is a `Pathway Tools forum <https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
 
 You can also ignore PathoLogic errors by using the argument --ignore-error/ignore_error.
 This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
