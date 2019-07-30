@@ -542,7 +542,7 @@ Useful functions
 
 ..
 
-    With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
+    With this command, it is possible to delete a specific PGDB, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
 
     .. code:: python
 
@@ -595,6 +595,8 @@ For each species, it contains the number of genes/proteins/reactions/pathways/co
 If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
 It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
+
+There is a `Pathway Tools forum https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
 
 You can also ignore PathoLogic errors by using the argument --ignore-error/ignore_error.
 This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
