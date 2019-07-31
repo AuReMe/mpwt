@@ -64,7 +64,6 @@ def run_pwt(multiprocess_input):
         boolean: True if there is an error during Pathway Tools run
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
-    verbose = multiprocess_input['verbose']
     patho_hole_filler = multiprocess_input['patho_hole_filler']
 
     cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
@@ -74,8 +73,7 @@ def run_pwt(multiprocess_input):
     if patho_hole_filler:
         cmd_pwt.append('-hole-filler')
 
-    if verbose:
-        logger.info(' '.join(cmd_pwt))
+    logger.info(' '.join(cmd_pwt))
 
     error_status = None
     errors = ['Restart actions (select using :continue):', 'Error']
@@ -126,14 +124,12 @@ def run_pwt_dat(multiprocess_input):
         boolean: True if there is an error during lisp script execution
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
-    verbose = multiprocess_input['verbose']
 
     lisp_path = species_input_folder_path + 'dat_creation.lisp'
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
-    if verbose:
-        logger.info(' '.join(cmd_dat))
+    logger.info(' '.join(cmd_dat))
 
     error_status = None
     dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']

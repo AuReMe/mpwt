@@ -19,10 +19,11 @@ Requirements
 ~~~~~~~~~~~~
 
 mpwt works only on **Python 3** and it has been tested on Python 3.6.
-It requires some python packages (biopython, docopt and gffutils) and **Pathway Tools**.
+It requires some python packages (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
-For some versions you need to have Blast installed on you system, for further informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
+
+Pathway Tools needs **Blast**, so it must be install on your system. Depending on your system, Pathway Tools needs a file named **.ncbirc** to locate Blast, for more informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
 If your OS doesn't support Pathway Tools, you can use a docker. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
@@ -169,13 +170,71 @@ Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two value
 
 If you don't have taxon ID in your Genbank or GFF file, you can add one in this file for the corresponding species.
 
+You can also add more informations for the genetic elements like **circularity of genome** (Y or N), **type of genetic element** (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG) or **codon table** (see the corresponding code below).
+
+Example:
+
++------------+------------+------------+------------+------------+-------------------+
+|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file|
++============+============+============+============+============+===================+
+|species_1   |10          |    Y       | :CHRSM     |1           |                   |
++------------+------------+------------+------------+------------+-------------------+
+|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |
++------------+------------+------------+------------+------------+-------------------+
+|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |
++------------+------------+------------+------------+------------+-------------------+
+
+As you can see for **PF file** (species_4) you can use the column **corresponding_file** to add information for each PF files.
+
+Genetic code for Pathway Tools:
+
++--------------------+-----------------------------------------------------------------------------------------------+
+|Corresponding number|Genetic code                                                                                   |
++====================+===============================================================================================+
+|0                   |Unspecified                                                                                    |
++--------------------+-----------------------------------------------------------------------------------------------+
+|1                   | The Standard Code                                                                             |
++--------------------+-----------------------------------------------------------------------------------------------+
+|2                   | The Vertebrate Mitochondrial Code                                                             |
++--------------------+-----------------------------------------------------------------------------------------------+
+|3                   | The Yeast Mitochondrial Code                                                                  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|4                   | The Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|5                   |The Invertebrate Mitochondrial Code                                                            |
++--------------------+-----------------------------------------------------------------------------------------------+
+|6                   | The Ciliate, Dasycladacean and Hexamita Nuclear Code                                          |
++--------------------+-----------------------------------------------------------------------------------------------+
+|9                   | The Echinoderm and Flatworm Mitochondrial Code                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|10                  | The Euplotid Nuclear Code                                                                     |
++--------------------+-----------------------------------------------------------------------------------------------+
+|11                  | The Bacterial, Archaeal and Plant Plastid Code                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|12                  | The Alternative Yeast Nuclear Code                                                            |
++--------------------+-----------------------------------------------------------------------------------------------+
+|13                  |The Ascidian Mitochondrial Code                                                                |
++--------------------+-----------------------------------------------------------------------------------------------+
+|14                  | The Alternative Flatworm Mitochondrial Code                                                   |
++--------------------+-----------------------------------------------------------------------------------------------+
+|15                  |Blepharisma Nuclear Code                                                                       |
++--------------------+-----------------------------------------------------------------------------------------------+
+|16                  | Chlorophycean Mitochondrial Code                                                              |
++--------------------+-----------------------------------------------------------------------------------------------+
+|21                  | Trematode Mitochondrial Code                                                                  |
++--------------------+-----------------------------------------------------------------------------------------------+
+|22                  |Scenedesmus obliquus Mitochondrial Code                                                        |
++--------------------+-----------------------------------------------------------------------------------------------+
+|23                  | Thraustochytrium Mitochondrial Code                                                           |
++--------------------+-----------------------------------------------------------------------------------------------+
+
 Input files created by mpwt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Three input files are created by mpwt. Informations are extracted from the Genbank/GFF/PF file.
 myDBName corresponds to the name of the folder and the Genbank/GFF/PF file.
 taxonid corresponds to the taxonid in the db_xref of the source feature in the Genbank/GFF/PF.
-species_name is extracted from the Genbank/GFF/PF files.
+The species_name is extracted from the Genbank/GFF/PF files.
 
 .. code-block:: text
 
@@ -216,8 +275,8 @@ mpwt can be used in a python script with an import:
     folder_input = "path/to/folder/input"
     folder_output = "path/to/folder/output"
 
-    mpwt.multiprocess_pwt(folder_input=string,
-			  folder_output=string,
+    mpwt.multiprocess_pwt(input_folder=folder_input,
+			  output_folder=folder_output,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
 			  dat_creation=optional_boolean,
@@ -232,9 +291,9 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                             |
 +=========================+================================================+=========================================================================+
-|          -f             | folder_input(string: folder pathname)          | input folder as described in Input data                                 |
+|          -f             | input_folder(string: folder pathname)          | input folder as described in Input data                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -o             | folder_output(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
+|          -o             | output_folder(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --patho        | patho_inference(boolean)                       | launch PathoLogic inference on input folder                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -335,7 +394,7 @@ Then move the files to the output folder.
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                            folder_output='path/to/folder/output',
+                            output_folder='path/to/folder/output',
                 patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
@@ -352,7 +411,7 @@ Then move the dat files to the output folder.
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                            folder_output='path/to/folder/output',
+                            output_folder='path/to/folder/output',
                 patho_inference=True,
                             dat_creation=True,
                 dat_extraction=True)
@@ -370,7 +429,7 @@ And move them to the output folder.
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                             dat_creation=True,
                 dat_extraction=True)
 
@@ -385,7 +444,7 @@ Move PGDB from ptools-local to the output folder:
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output')
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output')
 
 Move dat files from ptools-local to the output folder:
 
@@ -398,7 +457,7 @@ Move dat files from ptools-local to the output folder:
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_output='path/to/folder/output',
+        mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                 dat_extraction=True)
 
 
@@ -412,8 +471,8 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(folder_input,
-                              folder_output,
+        mpwt.multiprocess_pwt(input_folder,
+                              output_folder,
                               patho_inference=optional_boolean,
                               dat_creation=optional_boolean,
                               dat_extraction=optional_boolean,
@@ -483,7 +542,7 @@ Useful functions
 
 ..
 
-    With this command, it is possible to delete a specified db, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
+    With this command, it is possible to delete a specific PGDB, where pgdb_name is the name of the PGDB (ending with 'cyc'). It can be multiple pgdbs, to do this, put all the pgdb IDs in a string separated by  a ','.
 
     .. code:: python
 
@@ -536,6 +595,8 @@ For each species, it contains the number of genes/proteins/reactions/pathways/co
 If Pathway Tools crashed, mpwt can print some useful information in verbose mode.
 It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
+
+There is a `Pathway Tools forum <https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
 
 You can also ignore PathoLogic errors by using the argument --ignore-error/ignore_error.
 This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.

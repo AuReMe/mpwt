@@ -25,7 +25,7 @@ options:
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local and compress results files to reduce results size (use it with -o).
-    --cpu=INT     Number of cpu to use for the multiprocessing (default=1).
+    --cpu=INT     Number of cpu to use for the multiprocessing (default=1). [default: 1]
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
@@ -43,17 +43,16 @@ from mpwt import utils
 from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+logger = logging.getLogger('mpwt')
+logger.setLevel(logging.CRITICAL)
+
 
 def run_mpwt():
     """
     Function used with a mpwt call in the terminal.
     """
     args = docopt.docopt(__doc__)
-
-    argument_number = len(sys.argv[1:])
 
     input_folder = args['-f']
     output_folder = args['-o']
@@ -70,12 +69,15 @@ def run_mpwt():
     taxon_file = args['--taxon-file']
     verbose = args['-v']
 
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+
     if pgdb_list:
         pgdbs = utils.list_pgdb()
         if pgdbs == []:
-            logger.info('No PGDB inside ptools-local.')
+            logger.critical('No PGDB inside ptools-local.')
         else:
-            logger.info(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
+            logger.critical(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
         return
 
     # Delete PGDB if use of --delete argument.

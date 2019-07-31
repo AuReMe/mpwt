@@ -16,6 +16,7 @@ from mpwt import utils
 
 logger = logging.getLogger(__name__)
 
+
 def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     """ Compare species IDs in input folder with IDs present in PGDB folder.
 
@@ -45,14 +46,13 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     return new_compare_ids
 
 
-def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose=None):
+def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     """ Check input structure and data in output folder and ptools-local.
 
     Args:
         run_ids (list): species IDs (folder and GBK/GFF file name)
         input_folder (str): pathname to the input folder
         output_folder (str): pathname to the output folder
-        verbose (bool): boolean verose or not
     Returns:
         list: input IDs for PathoLogic and BioPAX/dat creation
         list: input IDs for BioPAX/dat creation
@@ -149,18 +149,77 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
         pgdb_id (str): ID of a PGDB
     Returns:
         taxon_id (str): Taxon ID for the corresponding species
+        taxon_datas (dict): Name of element file (or 'one_input' if only one file)
     """
     input_folder =  os.path.abspath(os.path.join(run_folder ,os.pardir))
+    taxon_datas = {}
+    taxon_id_found = None
+
+    known_element_types = [':CHRSM', ':PLASMID', ':MT', ':PT', ':CONTIG']
+    known_codon_table = ['0', '1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23']
     with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
-        taxon_id_reader = csv.reader(pf_taxon_id, delimiter='\t')
-        for line in taxon_id_reader:
-            if pgdb_id == line[0]:
-                taxon_id = line[1]
+        taxon_id_reader = csv.DictReader(pf_taxon_id, delimiter='\t')
+        for data in taxon_id_reader:
+            species = data['species']
+            if pgdb_id == species:
+                if 'taxon_id' in data:
+                    if data['taxon_id'] != '':
+                        if not taxon_id_found:
+                            taxon_id = data['taxon_id']
+                            taxon_id_found = True
+                            logger.info('taxon_id.tsv: find taxon ID {0} for {1}'.format(taxon_id, pgdb_id))
+                    else:
+                        raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+                else:
+                    raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
-    if not taxon_id:
-        raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+                if 'circular' in data:
+                    if data['circular'] != '':
+                        if data['circular'] == 'Y' or data['circular'] == 'N':
+                            circular = data['circular']
+                        else:
+                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, circular))
+                    else:
+                        circular = None
+                else:
+                    circular = None
 
-    return taxon_id
+                if 'element_type' in data:
+                    if data['element_type'] != '':
+                        if data['element_type'] in known_element_types:
+                            element_type = data['element_type']
+                        else:
+                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
+                    else:
+                        element_type = None
+                else:
+                    element_type = None
+
+                if 'codon_table' in data:
+                    if data['codon_table'] != '':
+                        if data['codon_table'] in known_codon_table:
+                            codon_table = data['codon_table']
+                        else:
+                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['codon_table'], ', '.join(known_codon_table)))
+                    else:
+                        codon_table = None
+                else:
+                    codon_table = None
+
+                if 'corresponding_file' in data:
+                    if data['corresponding_file'] != '':
+                        corresponding_file = data['corresponding_file']
+                        taxon_datas[corresponding_file] = [circular, element_type, codon_table]
+                    else:
+                        taxon_datas['circular'] = circular
+                        taxon_datas['element_type'] = element_type
+                        taxon_datas['codon_table'] = codon_table
+                else:
+                        taxon_datas['circular'] = circular
+                        taxon_datas['element_type'] = element_type
+                        taxon_datas['codon_table'] = codon_table
+
+    return taxon_id, taxon_datas
 
 
 def create_dats_and_lisp(run_folder, taxon_file):
@@ -203,6 +262,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
 
     taxon_id = ""
     species_name = ""
+    taxon_datas = {}
 
     if os.path.isfile(gbk_pathname):
         input_name = gbk_name
@@ -227,9 +287,9 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except KeyError:
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
                     logger.info('Try to look in the taxon_id.tsv file')
-                    taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                    taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
             if taxon_file:
-                taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
@@ -254,7 +314,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
             if not taxon_id:
                 logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
                 logger.info('Try to look in the taxon_id.tsv file')
-            taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+            taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     # Look for PF files.
     elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
@@ -267,7 +327,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except FileNotFoundError:
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
-                taxon_id = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+        taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
@@ -287,15 +347,42 @@ def create_dats_and_lisp(run_folder, taxon_file):
             genetic_writer.writerow(['ANNOT-FILE', input_name])
             if os.path.isfile(gff_pathname):
                 genetic_writer.writerow(['SEQ-FILE', gff_fasta])
+            if 'circular' in taxon_datas:
+                circular = taxon_datas['circular']
+                genetic_writer.writerow(['CIRCULAR?', circular])
+            if 'element_type' in taxon_datas:
+                element_type = taxon_datas['element_type']
+                genetic_writer.writerow(['TYPE', element_type])
+            if 'codon_table' in taxon_datas:
+                codon_table = taxon_datas['codon_table']
+                genetic_writer.writerow(['CODON-TABLE', codon_table])
             genetic_writer.writerow(['//'])
         elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
             genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
             for species_file in os.listdir(run_folder):
                     if '.pf' in species_file:
+                        species_file_name = os.path.splitext(species_file)[0]
+                        if species_file_name in taxon_datas:
+                            circular = taxon_datas[species_file_name][0]
+                            element_type = taxon_datas[species_file_name][1]
+                            codon_table = taxon_datas[species_file_name][2]
+                        else:
+                            if 'circular' in taxon_datas:
+                                circular = taxon_datas['circular']
+                            if 'element_type' in taxon_datas:
+                                element_type = taxon_datas['element_type']
+                            if 'codon_table' in taxon_datas:
+                                codon_table = taxon_datas['codon_table']
                         genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ANNOT-FILE', species_file])
                         genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                        if circular:
+                            genetic_writer.writerow(['CIRCULAR?', circular])
+                        if element_type:
+                            genetic_writer.writerow(['TYPE', element_type])
+                        if codon_table:
+                            genetic_writer.writerow(['CODON-TABLE', codon_table])
                         genetic_writer.writerow(['//'])
     # Create the lisp script.
     check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
@@ -313,32 +400,28 @@ def pwt_input_files(multiprocess_input):
     """
     run_folder = multiprocess_input['species_input_folder_path']
     taxon_file = multiprocess_input['taxon_file']
-    verbose = multiprocess_input['verbose']
 
     required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
-    if verbose:
-        species_folder = run_folder.split('/')[-2]
+
+    species_folder = run_folder.split('/')[-2]
 
     if 'pathologic.log' in files_in:
         os.remove(run_folder + 'pathologic.log')
 
     missing_string = ''
     if required_files.issubset(files_in):
-        if verbose:
-            missing_string = 'no missing files'
+        missing_string = 'no missing files'
     else:
-        if verbose:
-            missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
+        missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(run_folder.split('/')[-2])
         check_datas_lisp = create_dats_and_lisp(run_folder, taxon_file)
         if not check_datas_lisp:
             raise Exception('Error with the creation of input files of {0}'.format(run_folder))
 
-    if verbose:
-        logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
+    logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
 
 
-def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
+def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
                       patho_hole_filler=None, dat_extraction=None, output_folder=None,
                       size_reduction=None, only_dat_creation=None, taxon_file=None):
     """
@@ -349,7 +432,6 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
         run_ids (list): input species IDs
         input_folder (str): pathname to input folder
         pgdbs_folder_path (str): pathname to species PGDB in ptools-local
-        verbose (bool): verbose argument
         patho_hole_filler (bool): PathoLogic Hole Filler argument
         dat_extraction (bool): BioPAX/attribute-values file extraction argument
         output_folder (str): pathname to output folder
@@ -369,7 +451,6 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path, verbose=None,
         else:
             multiprocess_input['pgdb_folders'] = pgdb_id_folders
         multiprocess_input['species_input_folder_path'] = input_folder_path
-        multiprocess_input['verbose'] = verbose
         multiprocess_input['patho_hole_filler'] = patho_hole_filler
         multiprocess_input['dat_extraction'] = dat_extraction
         multiprocess_input['output_folder'] = output_folder

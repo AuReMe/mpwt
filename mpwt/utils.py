@@ -9,9 +9,7 @@ import sys
 
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def find_ptools_path():
@@ -96,20 +94,21 @@ def cleaning(number_cpu=None, verbose=None):
         number_cpu (str): number of CPUs to use
         verbose (bool): verbose argument
     """
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+
     ptools_local_path = find_ptools_path()
     file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
 
     pgdb_metadata_path = file_path + 'PGDB-METADATA.ocelot'
     if os.path.isfile(pgdb_metadata_path):
         os.remove(pgdb_metadata_path)
-        if verbose:
-            logger.info('PGDB-METADATA.ocelot has been removed.')
+        logger.info('PGDB-METADATA.ocelot has been removed.')
 
     pgdb_counter_path = file_path + 'PGDB-counter.dat'
     if os.path.isfile(pgdb_counter_path):
         os.remove(pgdb_counter_path)
-        if verbose:
-            logger.info('PGDB-counter.dat has been removed.')
+        logger.info('PGDB-counter.dat has been removed.')
 
     # Extract all pgdbs inside ptools-local. Then delete them.
     all_pgdbs = os.listdir(file_path)
@@ -124,6 +123,9 @@ def cleaning_input(input_folder, verbose=None):
         input_folder (str): pathname to input folder
         verbose (bool): verbose argument
     """
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
     genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
@@ -142,9 +144,8 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
                 os.remove(organism_dat)
-            if verbose:
-                species = genbank_path.split('/')[-2]
-                logger.info('Remove ' + species + ' temporary datas.')
+            species = genbank_path.split('/')[-2]
+            logger.info('Remove ' + species + ' temporary datas.')
 
 
 def permission_change(folder_pathname):

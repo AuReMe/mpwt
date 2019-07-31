@@ -17,9 +17,9 @@ from mpwt.results_check import check_dat, check_pwt, permission_change
 from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+logger = logging.getLogger('mpwt')
+logger.setLevel(logging.CRITICAL)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
@@ -42,6 +42,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_log (str): pathname to mpwt log folder
         verbose (bool): verbose argument
     """
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+
     start_time = time.time()
     times = []
     steps = []
@@ -71,7 +74,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
-        number_cpu_to_use = int(number_cpu)
+        try:
+            number_cpu_to_use = int(number_cpu)
+        except ValueError:
+            raise ValueError('The number of CPU must be an integer.')
     else:
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
@@ -81,36 +87,32 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
         if output_folder:
             if not os.path.exists(output_folder):
-                if verbose:
-                    logger.info('No output directory, it will be created.')
+                logger.info('No output directory, it will be created.')
                 os.mkdir(output_folder)
-        run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, verbose)
+        run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder)
 
         # Launch PathoLogic inference on species with no PGDBs.
         if run_patho_dat_ids:
             # Create the list containing all the data used by the multiprocessing call.
             multiprocess_inputs = create_mpwt_input(run_ids=run_patho_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                    verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                    patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
                                                     size_reduction=size_reduction, only_dat_creation=None, taxon_file=taxon_file)
-            if verbose:
-                logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
+
+            logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
             mpwt_pool.map(pwt_input_files, multiprocess_inputs)
 
             input_time = time.time()
             times.append(input_time)
             steps.append('pwt input creation')
-            if verbose:
-                logger.info('----------End of creation of input data from Genbank/GFF/PF: {0:.2f}s----------'.format(times[-1] - times[-2]))
+            logger.info('----------End of creation of input data from Genbank/GFF/PF: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
             # Launch PathoLogic.
             if patho_inference:
-                if verbose:
-                    logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
+                logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
                 error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
 
                 # Check PathoLogic build.
-                if verbose:
-                    logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
+                logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
                 passed_inferences = check_pwt(multiprocess_inputs, patho_log)
                 if any(error_status):
                     if ignore_error:
@@ -121,8 +123,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             patho_time = time.time()
             times.append(patho_time)
             steps.append('PathoLogic inference')
-            if verbose:
-                logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
+            logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
             multiprocess_inputs = []
 
@@ -139,7 +140,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         dat_run_ids = create_only_dat_lisp(pgdbs_folder_path, tmp_folder)
 
         multiprocess_inputs = create_mpwt_input(run_ids=dat_run_ids, input_folder=tmp_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
                                                 size_reduction=size_reduction, only_dat_creation=only_dat_creation, taxon_file=taxon_file)
     # Add species that have data in PGDB but are not present in output folder.
     # Or if ignore_error has been used, select only PathoLogic build that have succeed + species in input with PGDB and not in output.
@@ -153,17 +154,15 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             for run_dat_id in run_dat_ids:
                 create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
             multiprocess_dat_inputs = create_mpwt_input(run_ids=run_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                        verbose=verbose, patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
+                                                        patho_hole_filler=patho_hole_filler, dat_extraction=dat_extraction, output_folder=output_folder,
                                                         size_reduction=size_reduction, only_dat_creation=None, taxon_file=taxon_file)
             multiprocess_inputs.extend(multiprocess_dat_inputs)
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
-        if verbose:
-            logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
+        logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
         dat_error_status = mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
-        if verbose:
-            logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
+        logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
         for multiprocess_input in multiprocess_inputs:
             check_dat(multiprocess_input)
         if any(dat_error_status):
@@ -175,21 +174,17 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         dat_time = time.time()
         times.append(dat_time)
         steps.append('BioPAX/attribute-value dat files creation')
-        if verbose:
-            logger.info('----------End of dat files creation: {0:.2f}s----------'.format(times[-1] - times[-2]))
+        logger.info('----------End of dat files creation: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         ptools_local_path = utils.find_ptools_path()
         shutil.rmtree(ptools_local_path + '/tmp')
 
-
-    if verbose:
-        logger.info('~~~~~~~~~~End of Pathway Tools~~~~~~~~~~')
+    logger.info('~~~~~~~~~~End of Pathway Tools~~~~~~~~~~')
 
     # Move PGDBs or attribute-values/dat files.
     if output_folder:
-        if verbose:
-            logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
+        logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
         mpwt_pool.map(run_move_pgdb, multiprocess_inputs)
         # Give access to the file for user outside the container.
         permission_change(output_folder)
@@ -197,8 +192,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         move_time = time.time()
         times.append(move_time)
         steps.append('Moving results files')
-        if verbose:
-            logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
+        logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
 
     mpwt_pool.close()
@@ -210,6 +204,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     # Write each step time in log file.
     if patho_log:
+        if patho_log:
+            if not os.path.exists(patho_log):
+                logger.info('No log directory, it will be created.')
+                os.mkdir(patho_log)
         patho_error_pathname = patho_log + '/log_error.txt'
         with open(patho_error_pathname, 'a') as input_file:
             input_file.write('\n\n---------Time---------\n')
@@ -223,5 +221,4 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
         permission_change(patho_log)
 
-    if verbose:
-        logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+    logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
