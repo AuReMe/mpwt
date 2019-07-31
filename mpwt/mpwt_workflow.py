@@ -74,7 +74,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
-        number_cpu_to_use = int(number_cpu)
+        try:
+            number_cpu_to_use = int(number_cpu)
+        except ValueError:
+            raise ValueError('The number of CPU must be an integer.')
     else:
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
