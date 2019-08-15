@@ -13,6 +13,7 @@ usage:
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
+    mpwt gbk2pf -i=DIR -o=DIR [--cpu=INT]
 
 options:
     -h --help     Show help.
@@ -31,6 +32,8 @@ options:
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
+    gbk2pf     Will convert Genbank file into PathoLogic Format file.
+    -i=DIR     Working folder containing sub-folders with Genbank files.
 
 """
 
@@ -68,9 +71,16 @@ def run_mpwt():
     ignore_error = args['--ignore-error']
     taxon_file = args['--taxon-file']
     verbose = args['-v']
+    gbk2pf = args['gbk2pf']
+    gbk2pf_input_folder = args['-i']
 
     if verbose:
         logger.setLevel(logging.DEBUG)
+
+    if gbk2pf:
+        if gbk2pf_input_folder and output_folder:
+            utils.create_pathologic_file(gbk2pf_input_folder, output_folder)
+        return
 
     if pgdb_list:
         pgdbs = utils.list_pgdb()

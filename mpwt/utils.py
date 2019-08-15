@@ -2,11 +2,13 @@
 Uselful functions for mpwt.
 """
 
+import csv
 import logging
 import os
 import shutil
 import sys
 
+from Bio import SeqIO
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
@@ -162,3 +164,64 @@ def permission_change(folder_pathname):
             os.chmod(os.path.join(root, subfolder), 0o777)
         for subfile in subfiles:
             os.chmod(os.path.join(root, subfile), 0o777)
+
+
+def create_pathologic_file(input_folder, output_folder):
+
+    for genbank_folder in os.listdir(input_folder):
+        taxon_id = None
+        input_path = input_folder + '/' + genbank_folder + '/' + genbank_folder + '.gbk'
+        output_path = output_folder + '/' + genbank_folder
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+    # Add taxon ID in taxon_id.tsv if available.
+    with open(input_path, "r") as gbk:
+        first_seq_record = next(SeqIO.parse(gbk, "genbank"))
+        src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
+        for src_feature in src_features:
+            try:
+                src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                for src_dbxref_qualifier in src_dbxref_qualifiers:
+                    if 'taxon:' in src_dbxref_qualifier:
+                        taxon_id = src_dbxref_qualifier.replace('taxon:', '')
+            except KeyError:
+                logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(genbank_folder))
+        if taxon_id:
+            if not os.path.exists(output_folder + '/taxon_id.tsv'):
+                with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                    taxon_writer.writerow(['species', 'taxon_id'])
+                    taxon_writer.writerow([genbank_folder, taxon_id])
+            else:
+                with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                    taxon_writer.writerow([genbank_folder, taxon_id])
+
+        for record in SeqIO.parse(input_path, 'genbank'):
+            element_id = record.id
+            records = [record]
+            SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
+            with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                element_file.write(';; ' + element_id + '\n')
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                for feature in record.features:
+                    if feature.type == 'CDS':
+                        gene_id = feature.qualifiers['locus_tag'][0]
+                        element_file.write('ID\t' + gene_id + '\n')
+                        element_file.write('NAME\t' + gene_id + '\n')
+                        element_file.write('STARTBASE\t' + str(feature.location.start) + '\n')
+                        element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                        if 'function' in feature.qualifiers:
+                            for function in feature.qualifiers['function']:
+                                element_file.write('FUNCTION\t' + function + '\n')
+                        if 'EC_number' in feature.qualifiers:
+                            for ec in feature.qualifiers['EC_number']:
+                                element_file.write('EC\t' + ec + '\n')
+                        if 'go_component' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('DBLINK\t' + go + '\n')
+                        element_file.write('PRODUCT-TYPE\tP' + '\n')
+                        element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                        element_file.write('//\n\n')
