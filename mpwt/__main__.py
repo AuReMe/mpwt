@@ -79,7 +79,7 @@ def run_mpwt():
 
     if gbk2pf:
         if gbk2pf_input_folder and output_folder:
-            utils.create_pathologic_file(gbk2pf_input_folder, output_folder)
+            utils.create_pathologic_file(gbk2pf_input_folder, output_folder, number_cpu)
         return
 
     if pgdb_list:

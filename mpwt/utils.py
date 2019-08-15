@@ -166,15 +166,36 @@ def permission_change(folder_pathname):
             os.chmod(os.path.join(root, subfile), 0o777)
 
 
-def create_pathologic_file(input_folder, output_folder):
+def create_pathologic_file(input_folder, output_folder, number_cpu=None):
+    if number_cpu:
+        number_cpu_to_use = int(number_cpu)
+    else:
+        number_cpu_to_use = 1
+
+    multiprocessing_input_data = []
+
+    mpwt_pool = Pool(processes=number_cpu_to_use)
 
     for genbank_folder in os.listdir(input_folder):
-        taxon_id = None
         input_path = input_folder + '/' + genbank_folder + '/' + genbank_folder + '.gbk'
         output_path = output_folder + '/' + genbank_folder
         if not os.path.exists(output_path):
             os.makedirs(output_path)
+        multiprocessing_input_data.append({'input_path': input_path, 'output_path': output_path,
+                                            'output_folder': output_folder, 'genbank_folder': genbank_folder})
 
+    mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
+
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+
+def run_create_pathologic_file(multiprocessing_input_data):
+    input_path = multiprocessing_input_data['input_path']
+    output_folder = multiprocessing_input_data['output_folder']
+    output_path = multiprocessing_input_data['output_path']
+    genbank_folder = multiprocessing_input_data['genbank_folder']
+    taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
     with open(input_path, "r") as gbk:
         first_seq_record = next(SeqIO.parse(gbk, "genbank"))
@@ -208,10 +229,26 @@ def create_pathologic_file(input_folder, output_folder):
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 for feature in record.features:
                     if feature.type == 'CDS':
-                        gene_id = feature.qualifiers['locus_tag'][0]
-                        element_file.write('ID\t' + gene_id + '\n')
-                        element_file.write('NAME\t' + gene_id + '\n')
-                        element_file.write('STARTBASE\t' + str(feature.location.start) + '\n')
+                        gene_name = None
+                        gene_id = None
+                        if 'locus_tag' in feature.qualifiers:
+                            gene_id = feature.qualifiers['locus_tag'][0]
+                        if 'gene' in feature.qualifiers:
+                            gene_name = feature.qualifiers['gene'][0]
+                        if not gene_id and not gene_name:
+                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                            pass
+                        if gene_id:
+                            element_file.write('ID\t' + gene_id + '\n')
+                        else:
+                            if gene_name:
+                                element_file.write('ID\t' + gene_name + '\n')
+                        if gene_name:
+                            element_file.write('NAME\t' + gene_name + '\n')
+                        else:
+                            if gene_id:
+                                element_file.write('NAME\t' + gene_id + '\n')
+                        element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
                         element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
                         if 'function' in feature.qualifiers:
                             for function in feature.qualifiers['function']:
@@ -221,7 +258,17 @@ def create_pathologic_file(input_folder, output_folder):
                                 element_file.write('EC\t' + ec + '\n')
                         if 'go_component' in feature.qualifiers:
                             for go in feature.qualifiers['go_component']:
-                                element_file.write('DBLINK\t' + go + '\n')
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_function' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_process' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
                         element_file.write('PRODUCT-TYPE\tP' + '\n')
-                        element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                        if gene_id:
+                            element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                        else:
+                            if gene_name:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
                         element_file.write('//\n\n')
