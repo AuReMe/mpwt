@@ -678,6 +678,11 @@ Release Notes
 
 Changes between version are listed on the `release page <https://github.com/AuReMe/mpwt/releases>`__.
 
+Citation
+--------
+
+Arnaud Belcour, Clémence Frioux, Meziane Aite, Anthony Bretaudeau, Anne Siegel (2019) Metage2Metabo: metabolic complementarity applied to genomes of large-scale microbiotas for the identification of keystone species. bioRxiv 803056; doi: `https://doi.org/10.1101/803056 <https://doi.org/10.1101/803056>`__.
+
 Acknowledgements
 ----------------
 
