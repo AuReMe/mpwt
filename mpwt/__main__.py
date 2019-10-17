@@ -13,6 +13,7 @@ usage:
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
+    mpwt topf -f=DIR -o=DIR [--cpu=INT]
 
 options:
     -h --help     Show help.
@@ -31,6 +32,7 @@ options:
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
+    topf     Will convert Genbank file into PathoLogic Format file.
 
 """
 
@@ -68,9 +70,15 @@ def run_mpwt():
     ignore_error = args['--ignore-error']
     taxon_file = args['--taxon-file']
     verbose = args['-v']
+    topf = args['topf']
 
     if verbose:
         logger.setLevel(logging.DEBUG)
+
+    if topf:
+        if input_folder and output_folder:
+            utils.create_pathologic_file(input_folder, output_folder, number_cpu)
+        return
 
     if pgdb_list:
         pgdbs = utils.list_pgdb()

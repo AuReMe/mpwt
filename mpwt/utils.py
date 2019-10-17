@@ -2,11 +2,14 @@
 Uselful functions for mpwt.
 """
 
+import csv
+import gffutils
 import logging
 import os
 import shutil
 import sys
 
+from Bio import SeqIO
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
@@ -162,3 +165,169 @@ def permission_change(folder_pathname):
             os.chmod(os.path.join(root, subfolder), 0o777)
         for subfile in subfiles:
             os.chmod(os.path.join(root, subfile), 0o777)
+
+
+def create_pathologic_file(input_folder, output_folder, number_cpu=None):
+    if number_cpu:
+        number_cpu_to_use = int(number_cpu)
+    else:
+        number_cpu_to_use = 1
+
+    multiprocessing_input_data = []
+
+    mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    for input_name in os.listdir(input_folder):
+        input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
+        input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
+        if os.path.exists(input_path_gbk):
+            input_path = input_path_gbk
+        elif os.path.exists(input_path_gff):
+            input_path = input_path_gff
+        else:
+            sys.exit('No .gff or .gbk file in ' + input_folder + '/' + input_name)
+        output_path = output_folder + '/' + input_name
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        multiprocessing_input_data.append({'input_path': input_path, 'output_path': output_path,
+                                            'output_folder': output_folder, 'input_name': input_name})
+
+    mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
+
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+
+def run_create_pathologic_file(multiprocessing_input_data):
+    input_path = multiprocessing_input_data['input_path']
+    output_folder = multiprocessing_input_data['output_folder']
+    output_path = multiprocessing_input_data['output_path']
+    input_name = multiprocessing_input_data['input_name']
+    taxon_id = None
+    # Add taxon ID in taxon_id.tsv if available.
+    if input_path.endswith('.gbk'):
+        with open(input_path, "r") as gbk:
+            first_seq_record = next(SeqIO.parse(gbk, "genbank"))
+            src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
+            for src_feature in src_features:
+                try:
+                    src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                    for src_dbxref_qualifier in src_dbxref_qualifiers:
+                        if 'taxon:' in src_dbxref_qualifier:
+                            taxon_id = src_dbxref_qualifier.replace('taxon:', '')
+                except KeyError:
+                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(genbank_folder))
+            if taxon_id:
+                if not os.path.exists(output_folder + '/taxon_id.tsv'):
+                    with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                        taxon_writer.writerow(['species', 'taxon_id'])
+                        taxon_writer.writerow([input_name, taxon_id])
+                else:
+                    with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                        taxon_writer.writerow([input_name, taxon_id])
+
+            for record in SeqIO.parse(input_path, 'genbank'):
+                element_id = record.id
+                records = [record]
+                SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
+                with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
+                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                    element_file.write(';; ' + element_id + '\n')
+                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                    for feature in record.features:
+                        if feature.type == 'CDS':
+                            gene_name = None
+                            gene_id = None
+                            if 'locus_tag' in feature.qualifiers:
+                                gene_id = feature.qualifiers['locus_tag'][0]
+                            if 'gene' in feature.qualifiers:
+                                gene_name = feature.qualifiers['gene'][0]
+                            if not gene_id and not gene_name:
+                                logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                                pass
+                            if gene_id:
+                                element_file.write('ID\t' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('ID\t' + gene_name + '\n')
+                            if gene_name:
+                                element_file.write('NAME\t' + gene_name + '\n')
+                            else:
+                                if gene_id:
+                                    element_file.write('NAME\t' + gene_id + '\n')
+                            element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
+                            element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                            if 'function' in feature.qualifiers:
+                                for function in feature.qualifiers['function']:
+                                    element_file.write('FUNCTION\t' + function + '\n')
+                            if 'EC_number' in feature.qualifiers:
+                                for ec in feature.qualifiers['EC_number']:
+                                    element_file.write('EC\t' + ec + '\n')
+                            if 'go_component' in feature.qualifiers:
+                                for go in feature.qualifiers['go_component']:
+                                    element_file.write('GO\t' + go + '\n')
+                            if 'go_function' in feature.qualifiers:
+                                for go in feature.qualifiers['go_component']:
+                                    element_file.write('GO\t' + go + '\n')
+                            if 'go_process' in feature.qualifiers:
+                                for go in feature.qualifiers['go_component']:
+                                    element_file.write('GO\t' + go + '\n')
+                            element_file.write('PRODUCT-TYPE\tP' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+
+    elif input_path.endswith('.gff'):
+        gff_database = gffutils.create_db(input_path, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
+        regions = list(set([region.chrom for region in gff_database.features_of_type('region')]))
+        try:
+            first_region = list(set([region for region in gff_database.features_of_type('region')]))[0]
+        except IndexError:
+            raise IndexError("No 'region' feature in the GFF " + input_path)
+        if 'Dbxref' in first_region.attributes:
+            for dbxref in first_region.attributes['Dbxref']:
+                if 'taxon' in dbxref:
+                    taxon_id = dbxref.replace('taxon:', '')
+        if taxon_id:
+            if not os.path.exists(output_folder + '/taxon_id.tsv'):
+                with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                    taxon_writer.writerow(['species', 'taxon_id'])
+                    taxon_writer.writerow([input_name, taxon_id])
+            else:
+                with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                    taxon_writer.writerow([input_name, taxon_id])
+        for record in SeqIO.parse(input_path.replace('.gff', '.fasta'), 'fasta'):
+            output_fasta = output_path + '/' + record.id + '.fasta'
+            SeqIO.write(record, output_fasta, 'fasta')
+        for region in regions:
+            with open(output_path + '/' + region + '.pf', 'w') as element_file:
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                element_file.write(';; ' + region + '\n')
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                for feature in gff_database.features_of_type(tuple(gff_database.featuretypes())):
+                    if feature.featuretype == 'gene':
+                        if feature.chrom == region:
+                            element_file.write('ID\t' + feature.id + '\n')
+                            element_file.write('NAME\t' + feature.id + '\n')
+                            element_file.write('STARTBASE\t' + str(feature.start) + '\n')
+                            element_file.write('ENDBASE\t' + str(feature.stop) + '\n')
+                            element_file.write('PRODUCT-TYPE\tP' + '\n')
+                            element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
+                            for child in gff_database.children(feature.id):
+                                if 'product' in child.attributes:
+                                    for product in child.attributes['product']:
+                                        element_file.write('FUNCTION\t' + product + '\n')
+                                if 'ec_number' in child.attributes:
+                                    for ec in child.attributes['ec_number']:
+                                        element_file.write('EC\t' + ec + '\n')
+
+                element_file.write('//\n\n')
+
+        

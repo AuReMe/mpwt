@@ -301,7 +301,11 @@ def create_dats_and_lisp(run_folder, taxon_file):
             raise FileNotFoundError('No fasta file with the GFF of {0}'.format(pgdb_id))
 
         # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
-        region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
+        try:
+            region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
+        except IndexError:
+            raise IndexError('No region feature in the GFF file of {0}, GFF file must have region features.'.format(pgdb_id))
+
         try:
             region_feature.attributes['Dbxref']
         except KeyError:
