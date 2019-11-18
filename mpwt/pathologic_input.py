@@ -426,8 +426,10 @@ def pwt_input_files(multiprocess_input):
 
 
 def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
-                      patho_hole_filler=None, dat_extraction=None, output_folder=None,
-                      size_reduction=None, only_dat_creation=None, taxon_file=None):
+                      patho_hole_filler=None, patho_operon_predictor=None,
+                      dat_extraction=None, output_folder=None,
+                      size_reduction=None, only_dat_creation=None,
+                      taxon_file=None):
     """
     Create input list for all multiprocess function, containing one lsit for each input subfolder.
     All arguments are also stored.
@@ -456,6 +458,7 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
             multiprocess_input['pgdb_folders'] = pgdb_id_folders
         multiprocess_input['species_input_folder_path'] = input_folder_path
         multiprocess_input['patho_hole_filler'] = patho_hole_filler
+        multiprocess_input['patho_operon_predictor'] = patho_operon_predictor
         multiprocess_input['dat_extraction'] = dat_extraction
         multiprocess_input['output_folder'] = output_folder
         multiprocess_input['size_reduction'] = size_reduction

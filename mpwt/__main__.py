@@ -7,7 +7,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--dat] [--md] [--cpu=INT] [-r] [--nc] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -21,7 +21,8 @@ options:
     -o=DIR    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
     --hf    Use with --patho. Run the Hole Filler using Blast.
-    --nc    Turn off loading of Pubmed entries.
+    --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
+    --nc    Use with --patho. Turn off loading of Pubmed entries.
     --dat    Will create BioPAX/attribute-value dat files from PGDB.
     --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
@@ -61,6 +62,8 @@ def run_mpwt():
     output_folder = args['-o']
     patho_inference = args['--patho']
     patho_hole_filler = args['--hf']
+    patho_operon_predictor = args['--op']
+    patho_citations = args['--nc']
     dat_creation = args['--dat']
     move_dat = args['--md']
     size_reduction = args['-r']
@@ -70,7 +73,6 @@ def run_mpwt():
     pgdb_list = args['--list']
     ignore_error = args['--ignore-error']
     taxon_file = args['--taxon-file']
-    turn_off_citations = args['--nc']
     verbose = args['-v']
     topf = args['topf']
 
@@ -113,6 +115,8 @@ def run_mpwt():
                     output_folder=output_folder,
                     patho_inference=patho_inference,
                     patho_hole_filler=patho_hole_filler,
+                    patho_operon_predictor=patho_operon_predictor,
+                    patho_citations=patho_citations,
                     dat_creation=dat_creation,
                     dat_extraction=move_dat,
                     size_reduction=size_reduction,
@@ -120,7 +124,6 @@ def run_mpwt():
                     patho_log=patho_log,
                     ignore_error=ignore_error,
                     taxon_file=taxon_file,
-                    turn_off_citations=turn_off_citations,
                     verbose=verbose)
 
 

@@ -65,6 +65,7 @@ def run_pwt(multiprocess_input):
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     patho_hole_filler = multiprocess_input['patho_hole_filler']
+    patho_operon_predictor = multiprocess_input['patho_operon_predictor']
 
     cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
 
@@ -72,6 +73,9 @@ def run_pwt(multiprocess_input):
 
     if patho_hole_filler:
         cmd_pwt.append('-hole-filler')
+
+    if patho_operon_predictor:
+        cmd_pwt.append('-operon-predictor')
 
     logger.info(' '.join(cmd_pwt))
 
