@@ -216,7 +216,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'taxon:' in src_dbxref_qualifier:
                             taxon_id = src_dbxref_qualifier.replace('taxon:', '')
                 except KeyError:
-                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(genbank_folder))
+                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(input_path))
             if taxon_id:
                 if not os.path.exists(output_folder + '/taxon_id.tsv'):
                     with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
@@ -228,59 +228,59 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
                         taxon_writer.writerow([input_name, taxon_id])
 
-            for record in SeqIO.parse(input_path, 'genbank'):
-                element_id = record.id
-                records = [record]
-                SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
-                with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
-                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
-                    element_file.write(';; ' + element_id + '\n')
-                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
-                    for feature in record.features:
-                        if feature.type == 'CDS':
-                            gene_name = None
-                            gene_id = None
-                            if 'locus_tag' in feature.qualifiers:
-                                gene_id = feature.qualifiers['locus_tag'][0]
-                            if 'gene' in feature.qualifiers:
-                                gene_name = feature.qualifiers['gene'][0]
-                            if not gene_id and not gene_name:
-                                logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
-                                pass
-                            if gene_id:
-                                element_file.write('ID\t' + gene_id + '\n')
-                            else:
-                                if gene_name:
-                                    element_file.write('ID\t' + gene_name + '\n')
+        for record in SeqIO.parse(input_path, 'genbank'):
+            element_id = record.id
+            records = [record]
+            SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
+            with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                element_file.write(';; ' + element_id + '\n')
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                for feature in record.features:
+                    if feature.type == 'CDS':
+                        gene_name = None
+                        gene_id = None
+                        if 'locus_tag' in feature.qualifiers:
+                            gene_id = feature.qualifiers['locus_tag'][0]
+                        if 'gene' in feature.qualifiers:
+                            gene_name = feature.qualifiers['gene'][0]
+                        if not gene_id and not gene_name:
+                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                            pass
+                        if gene_id:
+                            element_file.write('ID\t' + gene_id + '\n')
+                        else:
                             if gene_name:
-                                element_file.write('NAME\t' + gene_name + '\n')
-                            else:
-                                if gene_id:
-                                    element_file.write('NAME\t' + gene_id + '\n')
-                            element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
-                            element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
-                            if 'function' in feature.qualifiers:
-                                for function in feature.qualifiers['function']:
-                                    element_file.write('FUNCTION\t' + function + '\n')
-                            if 'EC_number' in feature.qualifiers:
-                                for ec in feature.qualifiers['EC_number']:
-                                    element_file.write('EC\t' + ec + '\n')
-                            if 'go_component' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            if 'go_function' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            if 'go_process' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            element_file.write('PRODUCT-TYPE\tP' + '\n')
+                                element_file.write('ID\t' + gene_name + '\n')
+                        if gene_name:
+                            element_file.write('NAME\t' + gene_name + '\n')
+                        else:
                             if gene_id:
-                                element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
-                            else:
-                                if gene_name:
-                                    element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
-                            element_file.write('//\n\n')
+                                element_file.write('NAME\t' + gene_id + '\n')
+                        element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
+                        element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                        if 'function' in feature.qualifiers:
+                            for function in feature.qualifiers['function']:
+                                element_file.write('FUNCTION\t' + function + '\n')
+                        if 'EC_number' in feature.qualifiers:
+                            for ec in feature.qualifiers['EC_number']:
+                                element_file.write('EC\t' + ec + '\n')
+                        if 'go_component' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_function' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_process' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
+                        element_file.write('PRODUCT-TYPE\tP' + '\n')
+                        if gene_id:
+                            element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                        else:
+                            if gene_name:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
+                        element_file.write('//\n\n')
 
     elif input_path.endswith('.gff'):
         gff_database = gffutils.create_db(input_path, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
@@ -339,9 +339,12 @@ def pubmed_citations(activate_citations):
             if '##download-pubmed-citations' in line:
                 if activate_citations:
                     line = line.replace('N', 'Y')
-                elif activate_citations == False:
+                else:
                     line = line.replace('Y', 'N')
-            new_ptools_file = new_ptools_file + line + '\n'
+            if line != '':
+                new_ptools_file = new_ptools_file + line + '\n'
+            else:
+                new_ptools_file = new_ptools_file + line
 
     with open(ptools_init_filepath, 'w') as ptools_init_file:
         ptools_init_file.write(new_ptools_file)
