@@ -262,7 +262,7 @@ mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
 
@@ -279,6 +279,8 @@ mpwt can be used in a python script with an import:
 			  output_folder=folder_output,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
+              patho_operon_predictor=optional_boolean,
+              patho_citations=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
 			  size_reduction=optional_boolean,
@@ -291,13 +293,17 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                             |
 +=========================+================================================+=========================================================================+
-|          -f             | input_folder(string: folder pathname)          | input folder as described in Input data                                 |
+|          -f             | input_folder(string: folder pathname)          | Input folder as described in Input data                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -o             | output_folder(string: folder pathname)         | output folder containing PGDB data or dat files (see --dat arguments)   |
+|          -o             | output_folder(string: folder pathname)         | Output folder containing PGDB data or dat files (see --dat arguments)   |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --patho        | patho_inference(boolean)                       | launch PathoLogic inference on input folder                             |
+|          --patho        | patho_inference(boolean)                       | Launch PathoLogic inference on input folder                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --hf           | patho_hole_filler(boolean)                     | launch PathoLogic Hole Filler with Blast                                |
+|          --hf           | patho_hole_filler(boolean)                     | Launch PathoLogic Hole Filler with Blast                                |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --nc           | patho_citations(boolean)                       | Launch PathoLogic without loading PubMed citations                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -350,13 +356,13 @@ Create PGDBs of studied organisms inside ptools-local:
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                 patho_inference=True)
 
-Create PGDBs of studied organisms inside ptools-local with the Hole-Filler:
+Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations:
 
 ..
 
     .. code:: sh
 
-        mpwt -f path/to/folder/input --patho --hf --log path/to/folder/log
+        mpwt -f path/to/folder/input --patho --hf --op --nc --log path/to/folder/log
 
     .. code:: python
 
@@ -364,6 +370,8 @@ Create PGDBs of studied organisms inside ptools-local with the Hole-Filler:
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                 patho_inference=True,
                 patho_hole_filler=True,
+                patho_operon_predictor=True,
+                patho_citations=True,
                 patho_log='path/to/folder/log')
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:
