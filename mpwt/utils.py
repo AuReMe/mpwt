@@ -330,4 +330,18 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
                 element_file.write('//\n\n')
 
-        
+
+def pubmed_citations(activate_citations):
+    ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
+    new_ptools_file = ""
+    with open(ptools_init_filepath, 'r') as ptools_init_file:
+        for line in ptools_init_file.read().split('\n'):
+            if '##download-pubmed-citations' in line:
+                if activate_citations:
+                    line = line.replace('N', 'Y')
+                elif activate_citations == False:
+                    line = line.replace('Y', 'N')
+            new_ptools_file = new_ptools_file + line + '\n'
+
+    with open(ptools_init_filepath, 'w') as ptools_init_file:
+        ptools_init_file.write(new_ptools_file)

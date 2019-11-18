@@ -25,7 +25,8 @@ logger.setLevel(logging.CRITICAL)
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, dat_creation=None, dat_extraction=None,
                      size_reduction=None, number_cpu=None, patho_log=None,
-                     ignore_error=None, taxon_file=None, verbose=None):
+                     ignore_error=None, taxon_file=None, turn_off_citations=None,
+                     verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -72,6 +73,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if taxon_file and not patho_inference:
         sys.exit('To use --taxon-file/taxon_file, you need to use the --patho/patho_inference argument.')
 
+    #Check if turn_off_citations is used with patho_inference.
+    if turn_off_citations and not patho_inference:
+        sys.exit('To use --nc/turn_off_citations, you need to use the --patho/patho_inference argument.')
+
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
         try:
@@ -81,6 +86,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     else:
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    # Turn off loading of pubmed entries.
+    if turn_off_citations:
+        utils.pubmed_citations(activate_citations=False)
 
     # Check input folder and create input files for PathoLogic.
     if input_folder:
@@ -197,6 +206,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     mpwt_pool.close()
     mpwt_pool.join()
+
+    # Turn on loading of pubmed entries.
+    if turn_off_citations:
+        utils.pubmed_citations(activate_citations=True)
 
     end_time = time.time()
     times.append(end_time)
