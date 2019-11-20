@@ -34,11 +34,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     Args:
         input_folder (str): pathname to input folder
         output_folder (str): pathname to output folder
-        patho_inference (bool): pathologic boolean (True/False)
-        patho_hole_filler (bool): pathologic hole filler boolean (True/False)
-        dat_creation (bool): BioPAX/attributes-values files creation boolean (True/False)
-        dat_extraction (bool): BioPAX/attributes-values files extraction boolean (True/False)
-        size_reduction (bool): Delete ptools-local data at the end boolean (True/False)
+        patho_inference (bool): PathoLogic inference (True/False)
+        patho_hole_filler (bool): PathoLogic hole filler (True/False)
+        patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
+        patho_citations (bool): turning off loading of PubMed citations (True/False)
+        dat_creation (bool): BioPAX/attributes-values files creation (True/False)
+        dat_extraction (bool): BioPAX/attributes-values files extraction (True/False)
+        size_reduction (bool): delete ptools-local data at the end (True/False)
         number_cpu (int): number of CPU used (default=1)
         patho_log (str): pathname to mpwt log folder
         verbose (bool): verbose argument

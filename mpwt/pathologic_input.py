@@ -439,6 +439,7 @@ def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
         input_folder (str): pathname to input folder
         pgdbs_folder_path (str): pathname to species PGDB in ptools-local
         patho_hole_filler (bool): PathoLogic Hole Filler argument
+        patho_operon_predictor (bool): PathoLogic Operon predictor argument
         dat_extraction (bool): BioPAX/attribute-values file extraction argument
         output_folder (str): pathname to output folder
         size_reduction (bool): ptools-local PGDB deletion after processing argument

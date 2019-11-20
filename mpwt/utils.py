@@ -168,6 +168,14 @@ def permission_change(folder_pathname):
 
 
 def create_pathologic_file(input_folder, output_folder, number_cpu=None):
+    """
+    Create PathoLogic file from Genbank or GFF files.
+
+    Args:
+        input_folder (str): pathname to the folder containing Genbanks or GFFs
+        output_folder (str): pathname to the output folder containing the PathoLogic files
+        number_cpu (str): number of CPU
+    """
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
@@ -199,6 +207,12 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
 
 def run_create_pathologic_file(multiprocessing_input_data):
+    """
+    Create PathoLogic files from a Genbank or a GFF file.
+
+    Args:
+        multiprocess_input (dictionary): contains multiprocess input (input folder, output_path, output folder and input_name)
+    """
     input_path = multiprocessing_input_data['input_path']
     output_folder = multiprocessing_input_data['output_folder']
     output_path = multiprocessing_input_data['output_path']
@@ -332,6 +346,11 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
 
 def pubmed_citations(activate_citations):
+    """
+    Activate or deactivate loading of PubMed citations.
+
+    TODO: update this function with the argument from the new version of Pathway Tools
+    """
     ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
     new_ptools_file = ""
     with open(ptools_init_filepath, 'r') as ptools_init_file:
