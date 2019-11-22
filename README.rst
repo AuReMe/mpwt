@@ -326,6 +326,21 @@ mpwt can be used in a python script with an import:
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 
+There is also another argument:
+
+.. code:: sh
+
+    mpwt topf -f input_folder -o output_folder -c cpu_number
+
+.. code:: python
+
+    import mpwt
+    mpwt.create_pathologic_file(input_folder, output_folder, cpu_number)
+
+This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
+
+It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
+
 Examples
 ~~~~~~~~
 
@@ -355,6 +370,21 @@ Create PGDBs of studied organisms inside ptools-local:
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                 patho_inference=True)
+
+Convert Genbank and GFF files into PathoLogic files then create PGDBs of studied organisms inside ptools-local:
+
+..
+
+    .. code:: sh
+
+        mpwt topf -f path/to/folder/input -o path/to/folder/pf
+        mpwt -f path/to/folder/pf --patho
+
+    .. code:: python
+
+        import mpwt
+        mpwt.create_pathologic_file(input_folder='path/to/folder/input', output_folder='path/to/folder/pf')
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/pf', patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations:
 
