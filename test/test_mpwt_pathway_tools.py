@@ -36,7 +36,9 @@ def test_multiprocess_pwt_import():
     """
     mpwt.remove_pgdbs('fatty_acid_beta_oxydation_icyc,fatty_acid_beta_oxydation_i_gffcyc,fatty_acid_beta_oxydation_i_pfcyc')
     mpwt.cleaning_input('test')
-    mpwt.multiprocess_pwt('test', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
+
+    mpwt.create_pathologic_file('test', 'test_pf')
+    mpwt.multiprocess_pwt('test_pf', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
 
     pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I_gff/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_fabo_pathname)
@@ -51,6 +53,7 @@ def test_multiprocess_pwt_import():
     assert set(fabo_reactions()).issubset(set(expected_pf_fabo_reactions))
 
     mpwt.cleaning_input('test')
+    shutil.rmtree('test_pf')
     shutil.rmtree('test_output')
     shutil.rmtree('__pycache__')
 

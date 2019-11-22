@@ -185,25 +185,58 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
-    for input_name in os.listdir(input_folder):
+    input_names = os.listdir(input_folder)
+
+    if 'taxon_id.tsv' in input_names:
+        taxon_ids = {}
+        input_names.remove('taxon_id.tsv')
+        with open(input_folder + '/taxon_id.tsv') as taxon_file:
+            for row in csv.reader(taxon_file, delimiter='\t'):
+                taxon_ids[row[0]] = row[1]
+    else:
+        taxon_ids = None
+
+    for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
         input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
+        elif all([True for species_file in os.listdir(input_folder + '/' + input_name + '/') if '.pf' in species_file or '.fasta' in species_file]):
+            input_path = input_folder + '/' + input_name + '/'
         else:
             sys.exit('No .gff or .gbk file in ' + input_folder + '/' + input_name)
+
         output_path = output_folder + '/' + input_name
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        multiprocessing_input_data.append({'input_path': input_path, 'output_path': output_path,
-                                            'output_folder': output_folder, 'input_name': input_name})
+
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        multiprocessing_dict = {'input_path': input_path, 'output_path': output_path,
+                                'output_folder': output_folder, 'input_name': input_name}
+        if taxon_ids:
+            if input_name in taxon_ids:
+                multiprocessing_dict['taxon_id'] = taxon_ids[input_name]
+
+        multiprocessing_input_data.append(multiprocessing_dict)
 
     mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
 
     mpwt_pool.close()
     mpwt_pool.join()
+
+
+def write_taxon_id_file(input_name, taxon_id, output_folder):
+    if not os.path.exists(output_folder + '/taxon_id.tsv'):
+        with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+            taxon_writer.writerow(['species', 'taxon_id'])
+            taxon_writer.writerow([input_name, taxon_id])
+    else:
+        with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+            taxon_writer.writerow([input_name, taxon_id])
 
 
 def run_create_pathologic_file(multiprocessing_input_data):
@@ -220,6 +253,10 @@ def run_create_pathologic_file(multiprocessing_input_data):
     taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
     if input_path.endswith('.gbk'):
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
         with open(input_path, "r") as gbk:
             first_seq_record = next(SeqIO.parse(gbk, "genbank"))
             src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
@@ -232,15 +269,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 except KeyError:
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(input_path))
             if taxon_id:
-                if not os.path.exists(output_folder + '/taxon_id.tsv'):
-                    with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                        taxon_writer.writerow(['species', 'taxon_id'])
-                        taxon_writer.writerow([input_name, taxon_id])
-                else:
-                    with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
-                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                        taxon_writer.writerow([input_name, taxon_id])
+                write_taxon_id_file(input_name, taxon_id, output_folder)
 
         for record in SeqIO.parse(input_path, 'genbank'):
             element_id = record.id
@@ -297,6 +326,10 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         element_file.write('//\n\n')
 
     elif input_path.endswith('.gff'):
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
         gff_database = gffutils.create_db(input_path, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
         regions = list(set([region.chrom for region in gff_database.features_of_type('region')]))
         try:
@@ -308,15 +341,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 if 'taxon' in dbxref:
                     taxon_id = dbxref.replace('taxon:', '')
         if taxon_id:
-            if not os.path.exists(output_folder + '/taxon_id.tsv'):
-                with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                    taxon_writer.writerow(['species', 'taxon_id'])
-                    taxon_writer.writerow([input_name, taxon_id])
-            else:
-                with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
-                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                    taxon_writer.writerow([input_name, taxon_id])
+            write_taxon_id_file(input_name, taxon_id, output_folder)
+
         for record in SeqIO.parse(input_path.replace('.gff', '.fasta'), 'fasta'):
             output_fasta = output_path + '/' + record.id + '.fasta'
             SeqIO.write(record, output_fasta, 'fasta')
@@ -343,6 +369,11 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                         element_file.write('EC\t' + ec + '\n')
 
                 element_file.write('//\n\n')
+
+    elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
+        taxon_id = multiprocessing_input_data['taxon_id']
+        write_taxon_id_file(input_name, taxon_id, output_folder)
+        shutil.copytree(input_path, output_path)
 
 
 def pubmed_citations(activate_citations):

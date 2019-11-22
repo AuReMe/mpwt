@@ -34,7 +34,7 @@ options:
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
-    topf     Will convert Genbank file into PathoLogic Format file.
+    topf     Will convert Genbank and/or GFF files into PathoLogic Format file.
 
 """
 
