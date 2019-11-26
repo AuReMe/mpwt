@@ -151,7 +151,7 @@ PF file example:
     INTRON	START1-STOP1
     //
 
-Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf/>`__ for more informations.
+Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf>`__ for more informations.
 
 You have to provide one nucleotide sequence for each pathologic containing one scaffold/contig.
 

@@ -367,8 +367,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if 'ec_number' in child.attributes:
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
-
-                element_file.write('//\n\n')
+                            element_file.write('//\n\n')
 
     elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
         taxon_id = multiprocessing_input_data['taxon_id']
