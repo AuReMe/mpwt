@@ -312,10 +312,10 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             for go in feature.qualifiers['go_component']:
                                 element_file.write('GO\t' + go + '\n')
                         if 'go_function' in feature.qualifiers:
-                            for go in feature.qualifiers['go_component']:
+                            for go in feature.qualifiers['go_function']:
                                 element_file.write('GO\t' + go + '\n')
                         if 'go_process' in feature.qualifiers:
-                            for go in feature.qualifiers['go_component']:
+                            for go in feature.qualifiers['go_process']:
                                 element_file.write('GO\t' + go + '\n')
                         element_file.write('PRODUCT-TYPE\tP' + '\n')
                         if gene_id:
