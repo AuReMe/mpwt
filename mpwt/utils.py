@@ -379,17 +379,18 @@ def pubmed_citations(activate_citations):
     """
     Activate or deactivate loading of PubMed citations.
 
-    TODO: update this function with the argument from the new version of Pathway Tools
+    Args:
+    activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
     """
     ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
     new_ptools_file = ""
     with open(ptools_init_filepath, 'r') as ptools_init_file:
         for line in ptools_init_file.read().split('\n'):
-            if '##download-pubmed-citations' in line:
+            if '###Batch-PathoLogic-Download-Pubmed-Entries?' in line:
                 if activate_citations:
-                    line = line.replace('N', 'Y')
+                    line = line.replace('F', 'T')
                 else:
-                    line = line.replace('Y', 'N')
+                    line = line.replace('T', 'F')
             if line != '':
                 new_ptools_file = new_ptools_file + line + '\n'
             else:

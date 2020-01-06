@@ -394,6 +394,55 @@ def create_dats_and_lisp(run_folder, taxon_file):
     return all([os.path.isfile(organism_dat), os.path.isfile(genetic_dat), check_lisp_file])
 
 
+def read_taxon_id(run_folder):
+    taxon_ids = {}
+
+    for input_folder in os.listdir(run_folder):
+        for input_file in os.listdir(run_folder + '/' + input_folder):
+            if '.gbk' in input_file:
+                gbk_pathname = run_folder + '/' + input_folder + '/' + input_file
+                # Take the species name and the taxon id from the genbank file.
+                with open(gbk_pathname, "r") as gbk:
+                    # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
+                    first_seq_record = next(SeqIO.parse(gbk, "genbank"))
+                    # Take the source feature of the first record.
+                    # This feature contains the taxon ID in the db_xref qualifier.
+                    src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
+                    for src_feature in src_features:
+                        try:
+                            src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                            for src_dbxref_qualifier in src_dbxref_qualifiers:
+                                if 'taxon:' in src_dbxref_qualifier:
+                                    taxon_id = src_dbxref_qualifier.replace('taxon:', '')
+                        except KeyError:
+                            logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+
+            elif '.gff' in input_file:
+                gff_pathname = run_folder + '/' + input_folder + '/' + input_file
+
+                # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
+                try:
+                    region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
+                except IndexError:
+                    raise IndexError('No region feature in the GFF file of {0}, GFF file must have region features.'.format(input_folder))
+
+                try:
+                    region_feature.attributes['Dbxref']
+                except KeyError:
+                    raise KeyError('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(input_folder))
+
+                for dbxref in region_feature.attributes['Dbxref']:
+                    if 'taxon' in dbxref:
+                        taxon_id = dbxref.split('taxon:')[1]
+
+            elif '.pf' in input_file:
+                logger.info('No taxon ID associated to a PathoLogic Format. {0} will have a missing taxon_id'.format(input_folder))
+                taxon_id = "missing"
+        taxon_ids[input_folder] = taxon_id
+
+    return taxon_ids
+
+
 def pwt_input_files(multiprocess_input):
     """
     Check if files needed by Pathway Tools are available, if not create them.

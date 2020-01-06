@@ -70,7 +70,7 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
                             if patho_log_folder:
                                 patho_error_file.write(line)
 
-                    if 'Build done.' in  line:
+                    if 'Build done.' in line or 'PGDB build done.' in line:
                         if patho_log_folder:
                             patho_error_file.write(line)
                             resume_inference_line = next(input_file)

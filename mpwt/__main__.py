@@ -63,7 +63,7 @@ def run_mpwt():
     patho_inference = args['--patho']
     patho_hole_filler = args['--hf']
     patho_operon_predictor = args['--op']
-    patho_citations = args['--nc']
+    no_download_articles = args['--nc']
     dat_creation = args['--dat']
     move_dat = args['--md']
     size_reduction = args['-r']
@@ -116,7 +116,7 @@ def run_mpwt():
                     patho_inference=patho_inference,
                     patho_hole_filler=patho_hole_filler,
                     patho_operon_predictor=patho_operon_predictor,
-                    patho_citations=patho_citations,
+                    no_download_articles=no_download_articles,
                     dat_creation=dat_creation,
                     dat_extraction=move_dat,
                     size_reduction=size_reduction,

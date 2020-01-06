@@ -280,7 +280,7 @@ mpwt can be used in a python script with an import:
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
               patho_operon_predictor=optional_boolean,
-              patho_citations=optional_boolean,
+              no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
 			  size_reduction=optional_boolean,
@@ -303,7 +303,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --nc           | patho_citations(boolean)                       | Launch PathoLogic without loading PubMed citations                      |
+|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -386,7 +386,7 @@ Convert Genbank and GFF files into PathoLogic files then create PGDBs of studied
         mpwt.create_pathologic_file(input_folder='path/to/folder/input', output_folder='path/to/folder/pf')
         mpwt.multiprocess_pwt(input_folder='path/to/folder/pf', patho_inference=True)
 
-Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations:
+Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations (need Pathway Tools 23.5 or higher):
 
 ..
 
@@ -401,7 +401,7 @@ Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon P
                 patho_inference=True,
                 patho_hole_filler=True,
                 patho_operon_predictor=True,
-                patho_citations=True,
+                no_download_articles=True,
                 patho_log='path/to/folder/log')
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:

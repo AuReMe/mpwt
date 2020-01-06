@@ -5,6 +5,7 @@ Workflow of mpwt:
     -check the results (results_check)
 """
 
+import csv
 import logging
 import os
 import shutil
@@ -14,7 +15,7 @@ import time
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_dat, run_move_pgdb
 from mpwt.results_check import check_dat, check_pwt, permission_change
-from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script
+from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id
 from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
@@ -23,10 +24,10 @@ logger.setLevel(logging.CRITICAL)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
-                     patho_hole_filler=None, patho_operon_predictor=None, patho_citations=None,
+                     patho_hole_filler=None, patho_operon_predictor=None, no_download_articles=None,
                      dat_creation=None, dat_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
-                     taxon_file=None, turn_off_citations=None, verbose=None):
+                     taxon_file=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -37,7 +38,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_inference (bool): PathoLogic inference (True/False)
         patho_hole_filler (bool): PathoLogic hole filler (True/False)
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
-        patho_citations (bool): turning off loading of PubMed citations (True/False)
+        no_download_articles (bool): turning off loading of PubMed citations (True/False)
         dat_creation (bool): BioPAX/attributes-values files creation (True/False)
         dat_extraction (bool): BioPAX/attributes-values files extraction (True/False)
         size_reduction (bool): delete ptools-local data at the end (True/False)
@@ -72,16 +73,16 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         sys.exit('To use --ignore-error/ignore_error, you need to use the --patho/patho_inference argument.')
 
     # Check if taxon_file is used with patho_inference.
-    if taxon_file and not patho_inference:
-        sys.exit('To use --taxon-file/taxon_file, you need to use the --patho/patho_inference argument.')
+    if (taxon_file and not patho_inference) and (taxon_file and not input_folder):
+        sys.exit('To use --taxon-file/taxon_file, you need to use the --patho/patho_inference argument. Or you can use it with the -f argument to create the taxon file from data.')
 
     #Check if patho_operon_predictor is used with patho_inference.
     if patho_operon_predictor and not patho_inference:
         sys.exit('To use --op/patho_operon_predictor, you need to use the --patho/patho_inference argument.')
 
-    #Check if patho_citations is used with patho_inference.
-    if patho_citations and not patho_inference:
-        sys.exit('To use --nc/patho_citations, you need to use the --patho/patho_inference argument.')
+    #Check if no_download_articles is used with patho_inference.
+    if no_download_articles and not patho_inference:
+        sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
 
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
@@ -93,8 +94,21 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
+    # Create taxon file in the input folder.
+    if taxon_file and input_folder and not patho_inference:
+        taxon_file_pathname = input_folder + '/taxon_id.tsv'
+        if os.path.exists(taxon_file_pathname):
+            sys.exit('taxon ID file (' + taxon_file_pathname + ') already exists.')
+        else:
+            taxon_ids = read_taxon_id(input_folder)
+            with open(taxon_file_pathname, 'w') as taxon_id_file:
+                taxon_id_writer = csv.writer(taxon_id_file, delimiter='\t')
+                taxon_id_writer.writerow(['species', 'taxon_id'])
+                for species, taxon_id in taxon_ids.items():
+                    taxon_id_writer.writerow([species, taxon_id])
+
     # Turn off loading of pubmed entries.
-    if patho_citations:
+    if no_download_articles:
         utils.pubmed_citations(activate_citations=False)
 
     # Check input folder and create input files for PathoLogic.
@@ -217,7 +231,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     mpwt_pool.join()
 
     # Turn on loading of pubmed entries.
-    if patho_citations:
+    if no_download_articles:
         utils.pubmed_citations(activate_citations=True)
 
     end_time = time.time()
