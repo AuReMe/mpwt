@@ -384,9 +384,12 @@ def pubmed_citations(activate_citations):
     """
     ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
     new_ptools_file = ""
+
+    download_pubmed_entries_parameter = None
     with open(ptools_init_filepath, 'r') as ptools_init_file:
         for line in ptools_init_file.read().split('\n'):
             if '###Batch-PathoLogic-Download-Pubmed-Entries?' in line:
+                download_pubmed_entries_parameter = True
                 if activate_citations:
                     line = line.replace('F', 'T')
                 else:
@@ -395,6 +398,9 @@ def pubmed_citations(activate_citations):
                 new_ptools_file = new_ptools_file + line + '\n'
             else:
                 new_ptools_file = new_ptools_file + line
+
+    if not download_pubmed_entries_parameter:
+        sys.exit('There is no Batch-PathoLogic-Download-Pubmed-Entries parameter in ' + ptools_init_filepath +'. To use --nc/no_download_articles, mpwt needs Pathway Tools 23.5 or higher.')
 
     with open(ptools_init_filepath, 'w') as ptools_init_file:
         ptools_init_file.write(new_ptools_file)
