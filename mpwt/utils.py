@@ -388,12 +388,14 @@ def pubmed_citations(activate_citations):
     download_pubmed_entries_parameter = None
     with open(ptools_init_filepath, 'r') as ptools_init_file:
         for line in ptools_init_file.read().split('\n'):
-            if '###Batch-PathoLogic-Download-Pubmed-Entries?' in line:
+            if 'Batch-PathoLogic-Download-Pubmed-Entries?' in line:
+                if '#' in line:
+                    line = line.replace('#', '')
                 download_pubmed_entries_parameter = True
                 if activate_citations:
-                    line = line.replace('F', 'T')
+                    line = line.replace('nil', 'T')
                 else:
-                    line = line.replace('T', 'F')
+                    line = line.replace('T', 'nil')
             if line != '':
                 new_ptools_file = new_ptools_file + line + '\n'
             else:
