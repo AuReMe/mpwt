@@ -168,6 +168,14 @@ def permission_change(folder_pathname):
 
 
 def create_pathologic_file(input_folder, output_folder, number_cpu=None):
+    """
+    Create PathoLogic file from Genbank or GFF files.
+
+    Args:
+        input_folder (str): pathname to the folder containing Genbanks or GFFs
+        output_folder (str): pathname to the output folder containing the PathoLogic files
+        number_cpu (str): number of CPU
+    """
     if number_cpu:
         number_cpu_to_use = int(number_cpu)
     else:
@@ -177,20 +185,41 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
-    for input_name in os.listdir(input_folder):
+    input_names = os.listdir(input_folder)
+
+    if 'taxon_id.tsv' in input_names:
+        taxon_ids = {}
+        input_names.remove('taxon_id.tsv')
+        with open(input_folder + '/taxon_id.tsv') as taxon_file:
+            for row in csv.reader(taxon_file, delimiter='\t'):
+                taxon_ids[row[0]] = row[1]
+    else:
+        taxon_ids = None
+
+    for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
         input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
+        elif all([True for species_file in os.listdir(input_folder + '/' + input_name + '/') if '.pf' in species_file or '.fasta' in species_file]):
+            input_path = input_folder + '/' + input_name + '/'
         else:
             sys.exit('No .gff or .gbk file in ' + input_folder + '/' + input_name)
+
         output_path = output_folder + '/' + input_name
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        multiprocessing_input_data.append({'input_path': input_path, 'output_path': output_path,
-                                            'output_folder': output_folder, 'input_name': input_name})
+
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        multiprocessing_dict = {'input_path': input_path, 'output_path': output_path,
+                                'output_folder': output_folder, 'input_name': input_name}
+        if taxon_ids:
+            if input_name in taxon_ids:
+                multiprocessing_dict['taxon_id'] = taxon_ids[input_name]
+
+        multiprocessing_input_data.append(multiprocessing_dict)
 
     mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
 
@@ -198,7 +227,25 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     mpwt_pool.join()
 
 
+def write_taxon_id_file(input_name, taxon_id, output_folder):
+    if not os.path.exists(output_folder + '/taxon_id.tsv'):
+        with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+            taxon_writer.writerow(['species', 'taxon_id'])
+            taxon_writer.writerow([input_name, taxon_id])
+    else:
+        with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+            taxon_writer.writerow([input_name, taxon_id])
+
+
 def run_create_pathologic_file(multiprocessing_input_data):
+    """
+    Create PathoLogic files from a Genbank or a GFF file.
+
+    Args:
+        multiprocess_input (dictionary): contains multiprocess input (input folder, output_path, output folder and input_name)
+    """
     input_path = multiprocessing_input_data['input_path']
     output_folder = multiprocessing_input_data['output_folder']
     output_path = multiprocessing_input_data['output_path']
@@ -206,6 +253,10 @@ def run_create_pathologic_file(multiprocessing_input_data):
     taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
     if input_path.endswith('.gbk'):
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
         with open(input_path, "r") as gbk:
             first_seq_record = next(SeqIO.parse(gbk, "genbank"))
             src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
@@ -216,73 +267,69 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'taxon:' in src_dbxref_qualifier:
                             taxon_id = src_dbxref_qualifier.replace('taxon:', '')
                 except KeyError:
-                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(genbank_folder))
+                    logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(input_path))
             if taxon_id:
-                if not os.path.exists(output_folder + '/taxon_id.tsv'):
-                    with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                        taxon_writer.writerow(['species', 'taxon_id'])
-                        taxon_writer.writerow([input_name, taxon_id])
-                else:
-                    with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
-                        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                        taxon_writer.writerow([input_name, taxon_id])
+                write_taxon_id_file(input_name, taxon_id, output_folder)
 
-            for record in SeqIO.parse(input_path, 'genbank'):
-                element_id = record.id
-                records = [record]
-                SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
-                with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
-                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
-                    element_file.write(';; ' + element_id + '\n')
-                    element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
-                    for feature in record.features:
-                        if feature.type == 'CDS':
-                            gene_name = None
-                            gene_id = None
-                            if 'locus_tag' in feature.qualifiers:
-                                gene_id = feature.qualifiers['locus_tag'][0]
-                            if 'gene' in feature.qualifiers:
-                                gene_name = feature.qualifiers['gene'][0]
-                            if not gene_id and not gene_name:
-                                logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
-                                pass
-                            if gene_id:
-                                element_file.write('ID\t' + gene_id + '\n')
-                            else:
-                                if gene_name:
-                                    element_file.write('ID\t' + gene_name + '\n')
+        for record in SeqIO.parse(input_path, 'genbank'):
+            element_id = record.id
+            records = [record]
+            SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
+            with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                element_file.write(';; ' + element_id + '\n')
+                element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
+                for feature in record.features:
+                    if feature.type == 'CDS':
+                        gene_name = None
+                        gene_id = None
+                        if 'locus_tag' in feature.qualifiers:
+                            gene_id = feature.qualifiers['locus_tag'][0]
+                        if 'gene' in feature.qualifiers:
+                            gene_name = feature.qualifiers['gene'][0]
+                        if not gene_id and not gene_name:
+                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                            pass
+                        if gene_id:
+                            element_file.write('ID\t' + gene_id + '\n')
+                        else:
                             if gene_name:
-                                element_file.write('NAME\t' + gene_name + '\n')
-                            else:
-                                if gene_id:
-                                    element_file.write('NAME\t' + gene_id + '\n')
-                            element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
-                            element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
-                            if 'function' in feature.qualifiers:
-                                for function in feature.qualifiers['function']:
-                                    element_file.write('FUNCTION\t' + function + '\n')
-                            if 'EC_number' in feature.qualifiers:
-                                for ec in feature.qualifiers['EC_number']:
-                                    element_file.write('EC\t' + ec + '\n')
-                            if 'go_component' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            if 'go_function' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            if 'go_process' in feature.qualifiers:
-                                for go in feature.qualifiers['go_component']:
-                                    element_file.write('GO\t' + go + '\n')
-                            element_file.write('PRODUCT-TYPE\tP' + '\n')
+                                element_file.write('ID\t' + gene_name + '\n')
+                        if gene_name:
+                            element_file.write('NAME\t' + gene_name + '\n')
+                        else:
                             if gene_id:
-                                element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
-                            else:
-                                if gene_name:
-                                    element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
-                            element_file.write('//\n\n')
+                                element_file.write('NAME\t' + gene_id + '\n')
+                        element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
+                        element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                        if 'function' in feature.qualifiers:
+                            for function in feature.qualifiers['function']:
+                                element_file.write('FUNCTION\t' + function + '\n')
+                        if 'EC_number' in feature.qualifiers:
+                            for ec in feature.qualifiers['EC_number']:
+                                element_file.write('EC\t' + ec + '\n')
+                        if 'go_component' in feature.qualifiers:
+                            for go in feature.qualifiers['go_component']:
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_function' in feature.qualifiers:
+                            for go in feature.qualifiers['go_function']:
+                                element_file.write('GO\t' + go + '\n')
+                        if 'go_process' in feature.qualifiers:
+                            for go in feature.qualifiers['go_process']:
+                                element_file.write('GO\t' + go + '\n')
+                        element_file.write('PRODUCT-TYPE\tP' + '\n')
+                        if gene_id:
+                            element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                        else:
+                            if gene_name:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
+                        element_file.write('//\n\n')
 
     elif input_path.endswith('.gff'):
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
         gff_database = gffutils.create_db(input_path, ':memory:', force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
         regions = list(set([region.chrom for region in gff_database.features_of_type('region')]))
         try:
@@ -294,15 +341,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 if 'taxon' in dbxref:
                     taxon_id = dbxref.replace('taxon:', '')
         if taxon_id:
-            if not os.path.exists(output_folder + '/taxon_id.tsv'):
-                with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                    taxon_writer.writerow(['species', 'taxon_id'])
-                    taxon_writer.writerow([input_name, taxon_id])
-            else:
-                with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
-                    taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                    taxon_writer.writerow([input_name, taxon_id])
+            write_taxon_id_file(input_name, taxon_id, output_folder)
+
         for record in SeqIO.parse(input_path.replace('.gff', '.fasta'), 'fasta'):
             output_fasta = output_path + '/' + record.id + '.fasta'
             SeqIO.write(record, output_fasta, 'fasta')
@@ -327,7 +367,42 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if 'ec_number' in child.attributes:
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
+                            element_file.write('//\n\n')
 
-                element_file.write('//\n\n')
+    elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
+        taxon_id = multiprocessing_input_data['taxon_id']
+        write_taxon_id_file(input_name, taxon_id, output_folder)
+        shutil.copytree(input_path, output_path)
 
-        
+
+def pubmed_citations(activate_citations):
+    """
+    Activate or deactivate loading of PubMed citations.
+
+    Args:
+    activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
+    """
+    ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
+    new_ptools_file = ""
+
+    download_pubmed_entries_parameter = None
+    with open(ptools_init_filepath, 'r') as ptools_init_file:
+        for line in ptools_init_file.read().split('\n'):
+            if 'Batch-PathoLogic-Download-Pubmed-Entries?' in line:
+                if '#' in line:
+                    line = line.replace('#', '')
+                download_pubmed_entries_parameter = True
+                if activate_citations:
+                    line = line.replace('nil', 'T')
+                else:
+                    line = line.replace('T', 'nil')
+            if line != '':
+                new_ptools_file = new_ptools_file + line + '\n'
+            else:
+                new_ptools_file = new_ptools_file + line
+
+    if not download_pubmed_entries_parameter:
+        sys.exit('There is no Batch-PathoLogic-Download-Pubmed-Entries parameter in ' + ptools_init_filepath +'. To use --nc/no_download_articles, mpwt needs Pathway Tools 23.5 or higher.')
+
+    with open(ptools_init_filepath, 'w') as ptools_init_file:
+        ptools_init_file.write(new_ptools_file)

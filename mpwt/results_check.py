@@ -37,7 +37,7 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
         patho_error_file = open(patho_error_pathname, 'w')
         patho_resume_file = open(patho_resume_pathname, 'w')
         patho_resume_writer = csv.writer(patho_resume_file, delimiter='\t', lineterminator='\n')
-        patho_resume_writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number'])
+        patho_resume_writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number', 'pwt_non_fatal_error', 'pwt_warning'])
 
     failed_inferences = []
     passed_inferences = []
@@ -53,11 +53,17 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
             patho_error_file.write('\n')
 
         fatal_error_index = None
+        non_fatal_error_count = 0
+        warning_count = 0
 
         if os.path.exists(patho_log):
             with open(patho_log, 'r') as input_file:
                 for index, line in enumerate(input_file):
-                    if 'fatal error' in line or 'Error' in line:
+                    if ';;; Error:' in line:
+                        non_fatal_error_count += 1
+                    if 'Warning:' in line:
+                        warning_count += 1
+                    if 'fatal error' in line:
                         fatal_error_index = index
                         if species not in failed_inferences:
                             failed_inferences.append(species)
@@ -70,17 +76,23 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
                             if patho_log_folder:
                                 patho_error_file.write(line)
 
-                    if 'Build done.' in  line:
+                    if 'Build done.' in line or 'PGDB build done.' in line:
                         if patho_log_folder:
                             patho_error_file.write(line)
                             resume_inference_line = next(input_file)
                             patho_error_file.write(resume_inference_line)
+                            if non_fatal_error_count > 0:
+                                non_fatal_error_line = 'Number of non fatal errors: ' + str(non_fatal_error_count) + '. More information in ' + patho_log + '.\n'
+                                patho_error_file.write(non_fatal_error_line)
+                            if warning_count > 0:
+                                warning_line = 'Number of warning: ' + str(warning_count) + '. More information in ' + patho_log + '.\n'
+                                patho_error_file.write(warning_line)
                             gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
                             protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
                             pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
-                            patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number])
+                            patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number, non_fatal_error_count, warning_count])
 
                         passed_inferences.append(species)
                 if species not in passed_inferences and species not in failed_inferences:

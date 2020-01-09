@@ -65,6 +65,7 @@ def run_pwt(multiprocess_input):
     """
     species_input_folder_path = multiprocess_input['species_input_folder_path']
     patho_hole_filler = multiprocess_input['patho_hole_filler']
+    patho_operon_predictor = multiprocess_input['patho_operon_predictor']
 
     cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
 
@@ -72,6 +73,9 @@ def run_pwt(multiprocess_input):
 
     if patho_hole_filler:
         cmd_pwt.append('-hole-filler')
+
+    if patho_operon_predictor:
+        cmd_pwt.append('-operon-predictor')
 
     logger.info(' '.join(cmd_pwt))
 
@@ -190,7 +194,10 @@ def run_move_pgdb(move_data):
             for pgdb_file in os.listdir(pgdb_tmp_folder_path):
                 pgdb_file_pathname = pgdb_tmp_folder_path + '/' + pgdb_file
                 if '.dat' not in pgdb_file:
-                    os.remove(pgdb_file_pathname)
+                    if os.path.isfile(pgdb_file):
+                        os.remove(pgdb_file_pathname)
+                    elif os.path.isdir(pgdb_file):
+                        shutil.rmtree(pgdb_file_pathname)
         shutil.make_archive(output_folder + '/' + pgdb_folder_dbname, 'zip', pgdb_tmp_folder_path)
         shutil.rmtree(pgdb_folder_path)
     else:
@@ -198,4 +205,7 @@ def run_move_pgdb(move_data):
         if dat_extraction:
             for pgdb_file in os.listdir(output_species):
                 if '.dat' not in pgdb_file:
-                    os.remove(output_species+'/'+pgdb_file)
+                    if os.path.isfile(output_species+'/'+pgdb_file):
+                        os.remove(output_species+'/'+pgdb_file)
+                    elif os.path.isdir(output_species+'/'+pgdb_file):
+                        shutil.rmtree(output_species+'/'+pgdb_file)
