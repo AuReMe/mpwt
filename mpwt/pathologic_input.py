@@ -69,18 +69,24 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
         species_folders.remove('taxon_id.tsv')
 
     # Check if there is a Genbank, a GFF or a PathoLogic file inside each subfolder.
-    input_extensions = ['.gbk', '.gff', '.pf']
-    species_folders = list(set([species_folder for species_folder in species_folders
-                                    for species_file in os.listdir(input_folder+'/'+species_folder)
-                                        if any(input_extension in species_file for input_extension in input_extensions)]))
-    missing_input_files = list(set(run_ids) - set(species_folders))
-    if len(species_folders) == 0:
-        logger.critical('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(' '.join(missing_input_files)))
+    check_species_folders = []
+    for species_folder in species_folders:
+        for species_file in os.listdir(input_folder+'/'+species_folder):
+            species_filename, species_file_extension = os.path.splitext(species_file)
+            if species_file_extension in ['.gbk', '.gff']:
+                if species_filename == species_folder:
+                    check_species_folders.append(species_folder)
+            if any(input_extension in species_file for input_extension in ['.pf']):
+                check_species_folders.append(species_folder)
+
+    missing_input_files = list(set(run_ids) - set(check_species_folders))
+    if len(check_species_folders) == 0:
+        logger.critical('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(','.join(missing_input_files)))
         return None, None
 
     # Check the structure of the input folder.
     invalid_characters = ['.', '/']
-    for species_folder in species_folders:
+    for species_folder in check_species_folders:
         if os.path.isfile(input_folder+'/'+species_folder):
             logger.critical('Error: file inside the input_folder ({0}) instead of a subfolder. Check that you have a structure file of input_folder/species_1/species1.gbk and not input_folder/species_1.gbk.'.format(input_folder+'/'+species_folder))
             return None, None
@@ -89,8 +95,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
                 logger.critical('Error: . or / in genbank/gff name {0} \nGenbank name is used as an ID in Pathway Tools and Pathway Tools does not create PGDB with . in ID.'.format(species_folder))
                 return None, None
 
-    # Take run_ids and remove folder with error (with the intersection with species_folders) and if there is already present output.
-    clean_run_ids = set(run_ids).intersection(set(species_folders))
+    # Take run_ids and remove folder with error (with the intersection with check_species_folders) and if there is already present output.
+    clean_run_ids = set(run_ids).intersection(set(check_species_folders))
     if output_folder:
         already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
         new_run_ids = clean_run_ids - set(already_present_outputs)
@@ -105,7 +111,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
 
     else:
         new_run_ids = []
-        for species_folder in species_folders:
+        for species_folder in check_species_folders:
             new_run_ids.append(species_folder)
 
     # Check for PGDB in ptools-local to see if PGDB are already present but they haven't been exported.
@@ -157,67 +163,71 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
 
     known_element_types = [':CHRSM', ':PLASMID', ':MT', ':PT', ':CONTIG']
     known_codon_table = ['0', '1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23']
-    with open(input_folder + '/taxon_id.tsv') as pf_taxon_id:
-        taxon_id_reader = csv.DictReader(pf_taxon_id, delimiter='\t')
-        for data in taxon_id_reader:
-            species = data['species']
-            if pgdb_id == species:
-                if 'taxon_id' in data:
-                    if data['taxon_id'] != '':
-                        if not taxon_id_found:
-                            taxon_id = data['taxon_id']
-                            taxon_id_found = True
-                            logger.info('taxon_id.tsv: find taxon ID {0} for {1}'.format(taxon_id, pgdb_id))
+
+    try:
+        with open(input_folder + '/taxon_id.tsv') as taxon_id_file:
+            taxon_id_reader = csv.DictReader(taxon_id_file, delimiter='\t')
+            for data in taxon_id_reader:
+                species = data['species']
+                if pgdb_id == species:
+                    if 'taxon_id' in data:
+                        if data['taxon_id'] != '':
+                            if not taxon_id_found:
+                                taxon_id = data['taxon_id']
+                                taxon_id_found = True
+                                logger.info('taxon_id.tsv: find taxon ID {0} for {1}'.format(taxon_id, pgdb_id))
+                        else:
+                            raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
                     else:
                         raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
-                else:
-                    raise Exception('Missing taxon ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
-                if 'circular' in data:
-                    if data['circular'] != '':
-                        if data['circular'] == 'Y' or data['circular'] == 'N':
-                            circular = data['circular']
+                    if 'circular' in data:
+                        if data['circular'] != '':
+                            if data['circular'] == 'Y' or data['circular'] == 'N':
+                                circular = data['circular']
+                            else:
+                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, circular))
                         else:
-                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, circular))
+                            circular = None
                     else:
                         circular = None
-                else:
-                    circular = None
 
-                if 'element_type' in data:
-                    if data['element_type'] != '':
-                        if data['element_type'] in known_element_types:
-                            element_type = data['element_type']
+                    if 'element_type' in data:
+                        if data['element_type'] != '':
+                            if data['element_type'] in known_element_types:
+                                element_type = data['element_type']
+                            else:
+                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
                         else:
-                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
+                            element_type = None
                     else:
                         element_type = None
-                else:
-                    element_type = None
 
-                if 'codon_table' in data:
-                    if data['codon_table'] != '':
-                        if data['codon_table'] in known_codon_table:
-                            codon_table = data['codon_table']
+                    if 'codon_table' in data:
+                        if data['codon_table'] != '':
+                            if data['codon_table'] in known_codon_table:
+                                codon_table = data['codon_table']
+                            else:
+                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['codon_table'], ', '.join(known_codon_table)))
                         else:
-                            raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['codon_table'], ', '.join(known_codon_table)))
+                            codon_table = None
                     else:
                         codon_table = None
-                else:
-                    codon_table = None
 
-                if 'corresponding_file' in data:
-                    if data['corresponding_file'] != '':
-                        corresponding_file = data['corresponding_file']
-                        taxon_datas[corresponding_file] = [circular, element_type, codon_table]
+                    if 'corresponding_file' in data:
+                        if data['corresponding_file'] != '':
+                            corresponding_file = data['corresponding_file']
+                            taxon_datas[corresponding_file] = [circular, element_type, codon_table]
+                        else:
+                            taxon_datas['circular'] = circular
+                            taxon_datas['element_type'] = element_type
+                            taxon_datas['codon_table'] = codon_table
                     else:
-                        taxon_datas['circular'] = circular
-                        taxon_datas['element_type'] = element_type
-                        taxon_datas['codon_table'] = codon_table
-                else:
-                        taxon_datas['circular'] = circular
-                        taxon_datas['element_type'] = element_type
-                        taxon_datas['codon_table'] = codon_table
+                            taxon_datas['circular'] = circular
+                            taxon_datas['element_type'] = element_type
+                            taxon_datas['codon_table'] = codon_table
+    except FileNotFoundError:
+        raise FileNotFoundError('Missing taxon_id.tsv file in ' + input_folder)
 
     return taxon_id, taxon_datas
 
