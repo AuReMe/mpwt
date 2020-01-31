@@ -280,15 +280,17 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 element_file.write(';; ' + element_id + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 for feature in record.features:
-                    if feature.type == 'CDS':
+                    if feature.type in ['rRNA', 'tRNA', 'misc_RNA', 'CDS']:
                         gene_name = None
                         gene_id = None
+                        start_location = str(feature.location.start+1)
+                        end_location = str(feature.location.end)
                         if 'locus_tag' in feature.qualifiers:
                             gene_id = feature.qualifiers['locus_tag'][0]
                         if 'gene' in feature.qualifiers:
                             gene_name = feature.qualifiers['gene'][0]
                         if not gene_id and not gene_name:
-                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
                             pass
                         if gene_id:
                             element_file.write('ID\t' + gene_id + '\n')
@@ -300,8 +302,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         else:
                             if gene_id:
                                 element_file.write('NAME\t' + gene_id + '\n')
-                        element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
-                        element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                        element_file.write('STARTBASE\t' + start_location + '\n')
+                        element_file.write('ENDBASE\t' + end_location + '\n')
                         if 'function' in feature.qualifiers:
                             for function in feature.qualifiers['function']:
                                 element_file.write('FUNCTION\t' + function + '\n')
@@ -317,13 +319,50 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'go_process' in feature.qualifiers:
                             for go in feature.qualifiers['go_process']:
                                 element_file.write('GO\t' + go + '\n')
-                        element_file.write('PRODUCT-TYPE\tP' + '\n')
-                        if gene_id:
-                            element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
-                        else:
-                            if gene_name:
-                                element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
-                        element_file.write('//\n\n')
+                        if feature.type == 'rRNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tRRNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\trnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\trnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'misc_RNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tMISC-RNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\tmiscnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\tmiscnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'tRNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tTRNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\ttnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\ttnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'CDS':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tP' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
+                            element_file.write('//\n\n')
 
     elif input_path.endswith('.gff'):
 
@@ -358,8 +397,6 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             element_file.write('NAME\t' + feature.id + '\n')
                             element_file.write('STARTBASE\t' + str(feature.start) + '\n')
                             element_file.write('ENDBASE\t' + str(feature.stop) + '\n')
-                            element_file.write('PRODUCT-TYPE\tP' + '\n')
-                            element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
                             for child in gff_database.children(feature.id):
                                 if 'product' in child.attributes:
                                     for product in child.attributes['product']:
@@ -367,12 +404,25 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if 'ec_number' in child.attributes:
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
+                                if child.featuretype == 'CDS':
+                                    element_file.write('PRODUCT-TYPE\tP' + '\n')
+                                    element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
+                                elif child.featuretype == 'tRNA':
+                                    element_file.write('PRODUCT-TYPE\tTRNA' + '\n')
+                                    element_file.write('PRODUCT-ID\ttrna ' + feature.id + '\n')
+                                elif child.featuretype == 'rRNA':
+                                    element_file.write('PRODUCT-TYPE\tRRNA' + '\n')
+                                    element_file.write('PRODUCT-ID\rrna ' + feature.id + '\n')
+                                elif child.featuretype == 'pseudogene':
+                                    element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+
                             element_file.write('//\n\n')
 
     elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
         taxon_id = multiprocessing_input_data['taxon_id']
         write_taxon_id_file(input_name, taxon_id, output_folder)
         shutil.copytree(input_path, output_path)
+
 
 
 def pubmed_citations(activate_citations):
