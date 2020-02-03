@@ -198,15 +198,18 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
     for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
+        input_path_gbff = input_folder + '/' + input_name + '/' + input_name + '.gbff'
         input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
+        if os.path.exists(input_path_gbff):
+            input_path = input_path_gbff
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
         elif all([True for species_file in os.listdir(input_folder + '/' + input_name + '/') if '.pf' in species_file or '.fasta' in species_file]):
             input_path = input_folder + '/' + input_name + '/'
         else:
-            sys.exit('No .gff or .gbk file in ' + input_folder + '/' + input_name)
+            sys.exit('No .gff/.gbk/.gbff/.pf file in ' + input_folder + '/' + input_name)
 
         output_path = output_folder + '/' + input_name
 
@@ -252,7 +255,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
     input_name = multiprocessing_input_data['input_name']
     taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
-    if input_path.endswith('.gbk'):
+    if input_path.endswith('.gbk') or input_path.endswith('.gbff'):
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)

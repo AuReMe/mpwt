@@ -73,7 +73,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     for species_folder in species_folders:
         for species_file in os.listdir(input_folder+'/'+species_folder):
             species_filename, species_file_extension = os.path.splitext(species_file)
-            if species_file_extension in ['.gbk', '.gff']:
+            if species_file_extension in ['.gbk', '.gbff', '.gff']:
                 if species_filename == species_folder:
                     check_species_folders.append(species_folder)
             if any(input_extension in species_file for input_extension in ['.pf']):
@@ -81,7 +81,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
 
     missing_input_files = list(set(run_ids) - set(check_species_folders))
     if len(check_species_folders) == 0:
-        logger.critical('Missing Genbank/GFF file for: {0} \nCheck if you have a Genbank file and if it ends with .gbk or .gff'.format(','.join(missing_input_files)))
+        logger.critical('Missing Genbank/GFF/PF file for: {0} \nCheck for input files (.gbk/.gbff/.gff/.pf)'.format(','.join(missing_input_files)))
         return None, None
 
     # Check the structure of the input folder.
@@ -264,6 +264,8 @@ def create_dats_and_lisp(run_folder, taxon_file):
     pgdb_id = run_folder.split('/')[-2]
     gbk_name = pgdb_id + ".gbk"
     gbk_pathname = run_folder + gbk_name
+    gbff_name = pgdb_id + ".gbff"
+    gbff_pathname = run_folder + gbff_name
     gff_name = pgdb_id + ".gff"
     gff_pathname = run_folder + gff_name
 
@@ -274,10 +276,15 @@ def create_dats_and_lisp(run_folder, taxon_file):
     species_name = ""
     taxon_datas = {}
 
-    if os.path.isfile(gbk_pathname):
-        input_name = gbk_name
+    if os.path.isfile(gbk_pathname) or os.path.isfile(gbff_pathname):
+        if os.path.isfile(gbk_pathname):
+            input_name = gbk_name
+            input_path = gbk_pathname
+        else:
+            input_name = gbff_name
+            input_path = gbff_pathname
         # Take the species name and the taxon id from the genbank file.
-        with open(gbk_pathname, "r") as gbk:
+        with open(input_path, "r") as gbk:
             # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
             first_seq_record = next(SeqIO.parse(gbk, "genbank"))
             try:
@@ -355,7 +362,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
 
     # Create the genetic-elements dat file.
     with open(genetic_dat, 'w') as genetic_file:
-        if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname):
+        if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname) or os.path.isfile(gbff_pathname):
             genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
             genetic_writer.writerow(['NAME', ''])
             genetic_writer.writerow(['ANNOT-FILE', input_name])
