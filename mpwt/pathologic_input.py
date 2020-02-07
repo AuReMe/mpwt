@@ -175,12 +175,14 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
 
     known_element_types = [':CHRSM', ':PLASMID', ':MT', ':PT', ':CONTIG']
     known_codon_table = ['0', '1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23']
+    known_species = []
 
     try:
         with open(input_folder + '/taxon_id.tsv') as taxon_id_file:
             taxon_id_reader = csv.DictReader(taxon_id_file, delimiter='\t')
             for data in taxon_id_reader:
                 species = data['species']
+                known_species.append(species)
                 if pgdb_id == species:
                     if 'taxon_id' in data:
                         if data['taxon_id'] != '':
@@ -238,8 +240,12 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
                             taxon_datas['circular'] = circular
                             taxon_datas['element_type'] = element_type
                             taxon_datas['codon_table'] = codon_table
+
     except FileNotFoundError:
         raise FileNotFoundError('Missing taxon_id.tsv file in ' + input_folder)
+
+    if pgdb_id not in known_species:
+        raise Exception('Missing pgdb ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
     return taxon_id, taxon_datas
 
