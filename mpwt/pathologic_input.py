@@ -71,13 +71,25 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
     # Check if there is a Genbank, a GFF or a PathoLogic file inside each subfolder.
     check_species_folders = []
     for species_folder in species_folders:
+        species_input_files = []
         for species_file in os.listdir(input_folder+'/'+species_folder):
             species_filename, species_file_extension = os.path.splitext(species_file)
             if species_file_extension in ['.gbk', '.gbff', '.gff']:
                 if species_filename == species_folder:
                     check_species_folders.append(species_folder)
+                    species_input_files.append(species_file_extension)
             if any(input_extension in species_file for input_extension in ['.pf']):
                 check_species_folders.append(species_folder)
+                species_input_files.append(species_file_extension)
+        species_input_files = list(set(species_input_files))
+        if len(species_input_files) > 1:
+            logger.critical('Multiple input files for {0}, there must be only one type of files among: GenBank, GFF or multiple PF files'.format(species_folder))
+            return None, None
+        elif len(species_input_files) == 0:
+            logger.critical('Missing input file for {0}. A GenBank, GFF or multiple PF file are required.'.format(species_folder))
+            return None, None
+
+    check_species_folders = list(set(check_species_folders))
 
     missing_input_files = list(set(run_ids) - set(check_species_folders))
     if len(check_species_folders) == 0:
