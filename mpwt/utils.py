@@ -202,11 +202,11 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
         input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
-        if os.path.exists(input_path_gbff):
+        elif os.path.exists(input_path_gbff):
             input_path = input_path_gbff
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
-        elif all([True for species_file in os.listdir(input_folder + '/' + input_name + '/') if '.pf' in species_file or '.fasta' in species_file]):
+        elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_folder + '/' + input_name + '/')]):
             input_path = input_folder + '/' + input_name + '/'
         else:
             sys.exit('No .gff/.gbk/.gbff/.pf file in ' + input_folder + '/' + input_name)
@@ -421,7 +421,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
                             element_file.write('//\n\n')
 
-    elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
+    elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_path)]):
         taxon_id = multiprocessing_input_data['taxon_id']
         write_taxon_id_file(input_name, taxon_id, output_folder)
         shutil.copytree(input_path, output_path)
