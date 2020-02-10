@@ -131,14 +131,14 @@ def cleaning_input(input_folder, verbose=None):
 
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
-    genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
+    input_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
 
-    for genbank_path in genbank_paths:
-        if os.path.isdir(genbank_path):
-            lisp_script = genbank_path + 'dat_creation.lisp'
-            patho_log = genbank_path + 'pathologic.log'
-            genetic_dat = genbank_path + 'genetic-elements.dat'
-            organism_dat = genbank_path + 'organism-params.dat'
+    for input_path in input_paths:
+        if os.path.isdir(input_path):
+            lisp_script = input_path + 'dat_creation.lisp'
+            patho_log = input_path + 'pathologic.log'
+            genetic_dat = input_path + 'genetic-elements.dat'
+            organism_dat = input_path + 'organism-params.dat'
             if os.path.exists(lisp_script):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
@@ -147,7 +147,7 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
                 os.remove(organism_dat)
-            species = genbank_path.split('/')[-2]
+            species = input_path.split('/')[-2]
             logger.info('Remove ' + species + ' temporary datas.')
 
 
