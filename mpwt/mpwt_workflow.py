@@ -156,6 +156,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
             multiprocess_inputs = []
+            passed_inferences = []
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creation of BioPAX/attribute-values files.
@@ -178,8 +179,15 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if input_folder:
         if ignore_error:
             multiprocess_inputs = []
-            tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
-            tmp_run_dat_ids.extend(run_dat_ids)
+            if run_patho_dat_ids:
+                if passed_inferences:
+                    tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
+                else:
+                    tmp_run_dat_ids = []
+            else:
+                tmp_run_dat_ids = []
+            if run_dat_ids:
+                tmp_run_dat_ids.extend(run_dat_ids)
             run_dat_ids = tmp_run_dat_ids
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
@@ -189,6 +197,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                                                         dat_extraction=dat_extraction, output_folder=output_folder, size_reduction=size_reduction,
                                                         only_dat_creation=None, taxon_file=taxon_file)
             multiprocess_inputs.extend(multiprocess_dat_inputs)
+
+    if not multiprocess_inputs:
+        sys.exit('No PGDB to export in dat format.')
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:

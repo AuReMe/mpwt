@@ -10,7 +10,7 @@ import mpwt
 
 
 def test_create_dats_and_lisp():
-    mpwt.pathologic_input.create_dats_and_lisp('test/fatty_acid_beta_oxydation_I/', True)
+    mpwt.pathologic_input.create_dats_and_lisp('test/fatty_acid_beta_oxydation_I/', False)
 
     genetic_pathname = 'test/fatty_acid_beta_oxydation_I/genetic-elements.dat'
     organism_pathname = 'test/fatty_acid_beta_oxydation_I/organism-params.dat'

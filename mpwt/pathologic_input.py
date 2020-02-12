@@ -159,12 +159,14 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
     return os.path.isfile(lisp_pathname)
 
 
-def extract_taxon_id(run_folder, pgdb_id, taxon_id):
+def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
     """ Extract taxon ID from taxon_id.tsv file.
 
     Args:
         run_folder (str): ID of a species of the input folder
         pgdb_id (str): ID of a PGDB
+        taxon_id (str): Taxon ID for the corresponding species
+        taxon_file (bool): Boolean indicating if a taxon_file must be used
     Returns:
         taxon_id (str): Taxon ID for the corresponding species
         taxon_datas (dict): Name of element file (or 'one_input' if only one file)
@@ -244,7 +246,10 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id):
     except FileNotFoundError:
         raise FileNotFoundError('Missing taxon_id.tsv file in ' + input_folder)
 
-    if pgdb_id not in known_species:
+    if pgdb_id not in known_species and taxon_id == '':
+        raise Exception('Missing pgdb ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
+
+    if taxon_file and pgdb_id not in known_species:
         raise Exception('Missing pgdb ID for {0} in {1}.'.format(pgdb_id, input_folder + '/taxon_id.tsv'))
 
     return taxon_id, taxon_datas
@@ -322,9 +327,9 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except KeyError:
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
                     logger.info('Try to look in the taxon_id.tsv file')
-                    taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                    taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
             if taxon_file:
-                taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+                taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
@@ -353,7 +358,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
             if not taxon_id:
                 logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
                 logger.info('Try to look in the taxon_id.tsv file')
-            taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+            taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
     # Look for PF files.
     elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
@@ -366,7 +371,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 except FileNotFoundError:
                     raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
 
-        taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id)
+        taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
     lisp_pathname = run_folder + "dat_creation.lisp"
 
