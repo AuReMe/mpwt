@@ -137,31 +137,36 @@ def run_pwt_dat(multiprocess_input):
 
     error_status = None
     dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']
-    load_errors = ['Error']
+    load_errors = ['fatal error']
     load_lines = []
+
+    dat_log = species_input_folder_path + 'dat_creation.log'
 
     try:
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
-        for load_line in iter(load_subprocess.stdout.readline, ""):
-            load_line = load_line.decode('utf-8')
-            if any(dat_end in load_line for dat_end in dat_creation_ends):
-                load_subprocess.stdout.close()
-                load_subprocess.kill()
-                return
-            if any(error in load_line for error in load_errors):
-                error_status = True
-                load_subprocess.kill()
+        with open(dat_log, 'w') as  dat_file_writer:
+            for load_line in iter(load_subprocess.stdout.readline, ""):
+                load_line = load_line.decode('utf-8')
+                dat_file_writer.write(load_line)
+                if any(dat_end in load_line for dat_end in dat_creation_ends):
+                    load_subprocess.stdout.close()
+                    load_subprocess.kill()
+                    return
+                if any(error in load_line for error in load_errors):
+                    error_status = True
+                    load_subprocess.kill()
 
-            load_lines.append(load_line)
-            load_subprocess.poll()
-            return_code = load_subprocess.returncode
-            if return_code:
-                raise subprocess.CalledProcessError(return_code, cmd_dat)
+                load_lines.append(load_line)
+                load_subprocess.poll()
+                return_code = load_subprocess.returncode
+                if return_code:
+                    raise subprocess.CalledProcessError(return_code, cmd_dat)
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
         pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr, cmd_dat)
         error_status = True
+
     load_subprocess.stdout.close()
 
     return error_status

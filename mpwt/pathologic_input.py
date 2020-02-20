@@ -1,4 +1,6 @@
 """
+Check input folders and input files.
+
 Create PathoLogic input files:
 -organism-params.dat
 -genetic-elements.dats

@@ -137,12 +137,15 @@ def cleaning_input(input_folder, verbose=None):
         if os.path.isdir(input_path):
             lisp_script = input_path + 'dat_creation.lisp'
             patho_log = input_path + 'pathologic.log'
+            dat_log = input_path + 'dat_creation.log'
             genetic_dat = input_path + 'genetic-elements.dat'
             organism_dat = input_path + 'organism-params.dat'
             if os.path.exists(lisp_script):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
                 os.remove(patho_log)
+            if os.path.exists(dat_log):
+                os.remove(dat_log)
             if os.path.exists(genetic_dat):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
