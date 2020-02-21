@@ -94,6 +94,14 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
+    if input_folder:
+        if not os.path.exists(input_folder):
+            logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
+            return
+        if not os.path.isdir(input_folder):
+            logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
+            return
+
     # Create taxon file in the input folder.
     if taxon_file and input_folder and not patho_inference:
         taxon_file_pathname = input_folder + '/taxon_id.tsv'
