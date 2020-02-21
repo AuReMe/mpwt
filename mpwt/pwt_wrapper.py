@@ -136,10 +136,11 @@ def run_pwt_dat(multiprocess_input):
     logger.info(' '.join(cmd_dat))
 
     error_status = None
-    dat_creation_ends = ['Opening Navigator window.', 'No protein-coding genes with sequence data found.  Cannot continue.']
-    load_errors = ['fatal error']
+    dat_creation_ends = ['Opening Navigator window.']
+    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.  Cannot continue.']
     load_lines = []
 
+    # Name of the file containing the log from Pathway Tools terminal.
     dat_log = species_input_folder_path + 'dat_creation.log'
 
     try:
@@ -153,8 +154,9 @@ def run_pwt_dat(multiprocess_input):
                     load_subprocess.kill()
                     return
                 if any(error in load_line for error in load_errors):
-                    error_status = True
-                    load_subprocess.kill()
+                    if not load_line.startswith(';;;'):
+                        error_status = True
+                        load_subprocess.kill()
 
                 load_lines.append(load_line)
                 load_subprocess.poll()
