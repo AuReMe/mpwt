@@ -18,7 +18,7 @@ def test_create_dats_and_lisp():
 
     genetic_string_expected = 'NAME\t\nANNOT-FILE\tfatty_acid_beta_oxydation_I.gbk\n//\n'
     organism_string_expected = 'ID\tfatty_acid_beta_oxydation_I\nSTORAGE\tFILE\nNCBI-TAXON-ID\t511145\nNAME\tEscherichia coli str. K-12 substr. MG1655\n'
-    lisp_string_expected = '''(in-package :ecocyc)\n(select-organism :org-id 'fatty_acid_beta_oxydation_I)\n(let ((*progress-noter-enabled?* NIL))\n        (create-flat-files-for-current-kb))'''
+    lisp_string_expected = ''';; Most files should begin by specifying that they will be interpreted\n;; within the Lisp package called ecocyc.\n(in-package :ecocyc)\n;; Select the organism PGDB as the current PGDB\n(select-organism :org-id 'fatty_acid_beta_oxydation_I)\n;; Create attribute-values files without the progression pop-up\n(let ((*progress-noter-enabled?* NIL))\n        (create-flat-files-for-current-kb))'''
 
     with open(genetic_pathname, 'r') as genetic_file:
         genetic_string_found = genetic_file.read()

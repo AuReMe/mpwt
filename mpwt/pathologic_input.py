@@ -150,9 +150,17 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
         bool: True if lisp_pathname has been created
     """
     with open(lisp_pathname, 'w') as lisp_file:
+        lisp_file.write(';; Most files should begin by specifying that they will be interpreted')
+        lisp_file.write('\n')
+        lisp_file.write(';; within the Lisp package called ecocyc.')
+        lisp_file.write('\n')
         lisp_file.write('(in-package :ecocyc)')
         lisp_file.write('\n')
+        lisp_file.write(';; Select the organism PGDB as the current PGDB')
+        lisp_file.write('\n')
         lisp_file.write("(select-organism :org-id '" + pgdb_id + ')')
+        lisp_file.write('\n')
+        lisp_file.write(';; Create attribute-values files without the progression pop-up')
         lisp_file.write('\n')
         lisp_file.write('(let ((*progress-noter-enabled?* NIL))')
         lisp_file.write('\n')
