@@ -207,7 +207,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             multiprocess_inputs.extend(multiprocess_dat_inputs)
 
     if not multiprocess_inputs:
-        sys.exit('No PGDB to export in dat format.')
+        logger.critical('No PGDB to export in dat format or to move to output folder.')
+        return
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
