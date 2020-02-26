@@ -286,7 +286,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 element_file.write(';; ' + element_id + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 for feature in record.features:
-                    if feature.type in ['rRNA', 'tRNA', 'misc_RNA', 'CDS']:
+                    if feature.type in ['rRNA', 'tRNA', 'ncRNA', 'misc_RNA', 'CDS']:
                         gene_name = None
                         gene_id = None
                         start_location = str(feature.location.start+1)
@@ -313,6 +313,13 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'function' in feature.qualifiers:
                             for function in feature.qualifiers['function']:
                                 element_file.write('FUNCTION\t' + function + '\n')
+                        if 'product' in feature.qualifiers:
+                            for function in feature.qualifiers['product']:
+                                element_file.write('FUNCTION\t' + function + '\n')
+                        if 'db_xref' in feature.qualifiers:
+                            for db_xref in feature.qualifiers['db_xref']:
+                                if ':' in db_xref:
+                                    element_file.write('DBLINK\t' + db_xref + '\n')
                         if 'EC_number' in feature.qualifiers:
                             for ec in feature.qualifiers['EC_number']:
                                 element_file.write('EC\t' + ec + '\n')
@@ -325,6 +332,9 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'go_process' in feature.qualifiers:
                             for go in feature.qualifiers['go_process']:
                                 element_file.write('GO\t' + go + '\n')
+                        if 'gene_synonym' in feature.qualifiers:
+                            for gene_synonym in feature.qualifiers['gene_synonym']:
+                                element_file.write('SYNONYM\t' + gene_synonym + '\n')
                         if feature.type == 'rRNA':
                             if 'pseudo' in feature.qualifiers:
                                 element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
@@ -336,7 +346,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if gene_name:
                                     element_file.write('PRODUCT-ID\trnra ' + gene_name + '\n')
                             element_file.write('//\n\n')
-                        if feature.type == 'misc_RNA':
+                        if feature.type == 'misc_RNA' or feature.type == 'ncRNA':
                             if 'pseudo' in feature.qualifiers:
                                 element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
                             else:
@@ -410,6 +420,9 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if 'ec_number' in child.attributes:
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
+                                if 'db_xref' in child.attributes:
+                                    if ':' in db_xref:
+                                        element_file.write('DBLINK\t' + db_xref + '\n')
                                 if child.featuretype == 'CDS':
                                     element_file.write('PRODUCT-TYPE\tP' + '\n')
                                     element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
