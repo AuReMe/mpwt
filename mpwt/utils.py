@@ -299,9 +299,13 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
                             pass
                         if gene_id:
+                            if len(gene_id) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('ID\t' + gene_id + '\n')
                         else:
                             if gene_name:
+                                if len(gene_name) > 40:
+                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                                 element_file.write('ID\t' + gene_name + '\n')
                         if gene_name:
                             element_file.write('NAME\t' + gene_name + '\n')
@@ -409,6 +413,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 for feature in gff_database.features_of_type(tuple(gff_database.featuretypes())):
                     if feature.featuretype == 'gene':
                         if feature.chrom == region:
+                            if len(feature.id) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('ID\t' + feature.id + '\n')
                             element_file.write('NAME\t' + feature.id + '\n')
                             element_file.write('STARTBASE\t' + str(feature.start) + '\n')
