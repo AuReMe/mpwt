@@ -721,6 +721,21 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3.zip
     ..
 
+For developper
+--------------
+
+mpwt uses logging so you need to create the handler configuration if you want mpwt's log in your application:
+
+.. code:: python
+
+    import logging
+
+    from mpwt import multiprocess_pwt
+
+    logging.basicConfig()
+
+    multiprocess_pwt(...)
+
 Release Notes
 -------------
 
