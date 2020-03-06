@@ -18,9 +18,7 @@ from mpwt.results_check import check_dat, check_pwt, permission_change
 from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
-logger = logging.getLogger('mpwt')
-logger.setLevel(logging.CRITICAL)
+logger = logging.getLogger(__name__)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,

@@ -48,7 +48,7 @@ from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
-logger = logging.getLogger('mpwt')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.CRITICAL)
 
 
