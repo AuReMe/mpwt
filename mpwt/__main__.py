@@ -49,7 +49,7 @@ from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.CRITICAL)
+logging.getLogger("mpwt").setLevel(logging.CRITICAL)
 
 
 def run_mpwt():
@@ -77,6 +77,7 @@ def run_mpwt():
     topf = args['topf']
 
     if verbose:
+        logging.getLogger("mpwt").setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
     if topf:
