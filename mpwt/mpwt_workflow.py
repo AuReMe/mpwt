@@ -25,7 +25,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                      patho_hole_filler=None, patho_operon_predictor=None, no_download_articles=None,
                      dat_creation=None, dat_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
-                     taxon_file=None, verbose=None):
+                     pathway_score=None, taxon_file=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -42,6 +42,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         size_reduction (bool): delete ptools-local data at the end (True/False)
         number_cpu (int): number of CPU used (default=1)
         patho_log (str): pathname to mpwt log folder
+        ignore_error (bool): Ignore error during PathoLogic inference (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        taxon_file (str): pathname to the mpwt taxon ID file
         verbose (bool): verbose argument
     """
     if verbose:
@@ -82,6 +85,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if no_download_articles and not patho_inference:
         sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
 
+    #Check if no_download_articles is used with patho_inference.
+    if pathway_score and not patho_inference:
+        sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
+
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
         try:
@@ -116,6 +123,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Turn off loading of pubmed entries.
     if no_download_articles:
         utils.pubmed_citations(activate_citations=False)
+
+    # Modify pathway prediction score.
+    if pathway_score:
+        utils.modify_pathway_score(pathway_score)
 
     # Check input folder and create input files for PathoLogic.
     if input_folder:
@@ -251,6 +262,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Turn on loading of pubmed entries.
     if no_download_articles:
         utils.pubmed_citations(activate_citations=True)
+
+    # Remodify the pathway score to its original value.
+    if pathway_score:
+        utils.modify_pathway_score(0.35)
 
     end_time = time.time()
     times.append(end_time)

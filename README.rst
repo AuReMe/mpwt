@@ -272,7 +272,7 @@ mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
 
@@ -297,6 +297,7 @@ mpwt can be used in a python script with an import:
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
 			  ignore_error=optional_boolean,
+              pathway_score=pathway_score,
 			  taxon_file=optional_boolean,
 			  verbose=optional_boolean)
 
@@ -314,6 +315,8 @@ mpwt can be used in a python script with an import:
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations                      |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -413,6 +416,21 @@ Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon P
                 patho_operon_predictor=True,
                 no_download_articles=True,
                 patho_log='path/to/folder/log')
+
+Create PGDBs of studied organisms inside ptools-local with pathway prediction score of 1:
+
+..
+
+    .. code:: sh
+
+        mpwt -f path/to/folder/input --patho -p 1.0
+
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                patho_inference=True,
+                pathway_score=1.0)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:
 
