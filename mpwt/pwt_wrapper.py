@@ -11,7 +11,7 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 
-def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr, cmd):
+def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr, cmd, error_status):
     """
     Print error messages when there is a subprocess error during PathoLogic run.
 
@@ -34,20 +34,66 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
-        fatal_error_index = None
-        with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
-            for index, line in enumerate(pathologic_log):
-                if line != '':
-                    if 'fatal error' in line or 'Error' in line and not fatal_error_index:
-                        fatal_error_index = index
-                        logger.critical('=== Error in Pathologic.log ===')
-                        logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
-                        logger.critical('\t' + line)
-                    if fatal_error_index:
-                        if index > fatal_error_index:
-                            logger.critical('\t' + line)
+        patho_error_status = check_pathologic(species_input_folder_path, error_status)
+
+    if '-load' in cmd:
+        dat_error_status = check_dat_creation(species_input_folder_path, error_status)
 
     logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+
+    error_status = any([error_status, patho_error_status, dat_error_status])
+
+    return error_status
+
+
+def check_pathologic(species_input_folder_path, error_status):
+    """
+    Look for error and fatal error in pathologic.log after build.
+
+    Args:
+        species_input_folder_path (str): pathname to the species input folder
+    """
+    fatal_error_index = None
+    with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
+        for index, line in enumerate(pathologic_log):
+            if line != '':
+                if 'fatal error' in line or 'Error' in line and not fatal_error_index:
+                    fatal_error_index = index
+                    logger.critical('=== Error in pathologic.log for {0}==='.format(species_input_folder_path))
+                    logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
+                    logger.critical('\t' + line)
+                    error_status = True
+                if fatal_error_index:
+                    if index > fatal_error_index:
+                        logger.critical('\t' + line)
+
+    return error_status
+
+
+def check_dat_creation(species_input_folder_path, error_status):
+    """
+    Look for error and fatal error in dat_creation.log after build.
+
+    Args:
+        species_input_folder_path (str): pathname to the species input folder
+    """
+    fatal_error_index = None
+    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
+    with open(species_input_folder_path + '/dat_creation.log', 'r') as data_creation_log:
+        for index, line in enumerate(data_creation_log):
+            if line != '':
+                if not line.startswith(';;;'):
+                    if any(error in line for error in load_errors) and not fatal_error_index:
+                        fatal_error_index = index
+                        logger.critical('=== Error in dat_creation.log for {0}==='.format(species_input_folder_path))
+                        logger.critical('\t' + 'Error from the dat_creation.log file: {0}'.format(species_input_folder_path + '/dat_creation.log'))
+                        logger.critical('\t' + line)
+                        error_status = True
+                if fatal_error_index:
+                    if index > fatal_error_index:
+                        logger.critical('\t' + line)
+
+    return error_status
 
 
 def run_pwt(multiprocess_input):
@@ -86,7 +132,7 @@ def run_pwt(multiprocess_input):
     try:
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
         # Check internal error of Pathway Tools (Error with Genbank).
-        for patho_line in iter(patho_subprocess.stdout.readline, ""):
+        for patho_line in iter(patho_subprocess.stdout.readline, b''):
             patho_line = patho_line.decode('utf-8')
             if any(error in patho_line for error in errors):
                 logger.info('Error possibly with the genbank file.')
@@ -105,10 +151,13 @@ def run_pwt(multiprocess_input):
                 elif return_code != 0:
                     raise subprocess.CalledProcessError(return_code, cmd_pwt)
 
+        # Check pathologic.log for error.
+        error_status = check_pathologic(species_input_folder_path, error_status)
+
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        pwt_error(species_input_folder_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr, cmd_pwt)
-        error_status = True
+        error_status = pwt_error(species_input_folder_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr, cmd_pwt, error_status)
+
     patho_subprocess.stdout.close()
 
     return error_status
@@ -137,7 +186,7 @@ def run_pwt_dat(multiprocess_input):
 
     error_status = None
     dat_creation_ends = ['Opening Navigator window.']
-    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.  Cannot continue.']
+    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
@@ -146,7 +195,7 @@ def run_pwt_dat(multiprocess_input):
     try:
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
         with open(dat_log, 'w') as  dat_file_writer:
-            for load_line in iter(load_subprocess.stdout.readline, ""):
+            for load_line in iter(load_subprocess.stdout.readline, b''):
                 load_line = load_line.decode('utf-8')
                 dat_file_writer.write(load_line)
                 if any(dat_end in load_line for dat_end in dat_creation_ends):
@@ -164,10 +213,12 @@ def run_pwt_dat(multiprocess_input):
                 if return_code:
                     raise subprocess.CalledProcessError(return_code, cmd_dat)
 
+        # Check for error.
+        error_status = check_dat_creation(species_input_folder_path, error_status)
+
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr, cmd_dat)
-        error_status = True
+        error_status = pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr, cmd_dat, error_status)
 
     load_subprocess.stdout.close()
 
