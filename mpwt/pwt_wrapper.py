@@ -35,9 +35,13 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     # Look for error in pathologic.log.
     if '-patho' in cmd:
         patho_error_status = check_pathologic(species_input_folder_path, error_status)
+    else:
+        patho_error_status = None
 
     if '-load' in cmd:
         dat_error_status = check_dat_creation(species_input_folder_path, error_status)
+    else:
+        dat_error_status = None
 
     logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
