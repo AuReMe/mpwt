@@ -11,26 +11,27 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 
-def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdout, subprocess_stderr, cmd, error_status):
+def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_status, subprocess_returncode=None, subprocess_stderr=None):
     """
     Print error messages when there is a subprocess error during PathoLogic run.
 
     Args:
         species_input_folder_path (str): pathname to the species input folder
-        subprocess_returncode (int): code returns by subprocess
         subprocess_stdout (str): stdout returns by subprocess
         cmd (str): command used which generates the error
+        error_status (bool): error status of Pathway Tools
+        subprocess_returncode (int): code returns by subprocess
+        subprocess_stderr (str): stderr returns by subprocess
+    Returns:
+        boolean: True if there is an error during Pathway Tools run
     """
-    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+    if error_status:
+        logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = species_input_folder_path.split('/')[-2]
-    logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
+    if subprocess_returncode:
+        logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
         logger.critical('An error occurred :' + subprocess_stderr.decode('utf-8'))
-
-    logger.critical('=== Pathway Tools log ===')
-    for line in subprocess_stdout:
-        if line != '':
-            logger.critical('\t' + line)
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
@@ -43,9 +44,14 @@ def pwt_error(species_input_folder_path, subprocess_returncode, subprocess_stdou
     else:
         dat_error_status = None
 
-    logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
-
     error_status = any([error_status, patho_error_status, dat_error_status])
+
+    if error_status:
+        logger.critical('=== Pathway Tools log ===')
+        for line in subprocess_stdout:
+            if line != '':
+                logger.critical('\t' + line)
+        logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
 
     return error_status
 
@@ -56,12 +62,15 @@ def check_pathologic(species_input_folder_path, error_status):
 
     Args:
         species_input_folder_path (str): pathname to the species input folder
+    Returns:
+        boolean: True if there is an error during Pathway Tools run
     """
     fatal_error_index = None
+    pathologic_erros = ['fatal error', 'Error']
     with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
         for index, line in enumerate(pathologic_log):
             if line != '':
-                if 'fatal error' in line or 'Error' in line and not fatal_error_index:
+                if any(error in line for error in pathologic_erros) and not fatal_error_index:
                     fatal_error_index = index
                     logger.critical('=== Error in pathologic.log for {0}==='.format(species_input_folder_path))
                     logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
@@ -80,6 +89,8 @@ def check_dat_creation(species_input_folder_path, error_status):
 
     Args:
         species_input_folder_path (str): pathname to the species input folder
+    Returns:
+        boolean: True if there is an error during Pathway Tools run
     """
     fatal_error_index = None
     load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
@@ -130,37 +141,43 @@ def run_pwt(multiprocess_input):
     logger.info(' '.join(cmd_pwt))
 
     error_status = None
-    errors = ['Restart actions (select using :continue):', 'Error']
+    errors = ['Restart actions (select using :continue):']
     patho_lines = []
+
+    # Name of the file containing the log from Pathway Tools terminal.
+    pwt_log = species_input_folder_path + 'pwt_terminal.log'
 
     try:
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
-        # Check internal error of Pathway Tools (Error with Genbank).
-        for patho_line in iter(patho_subprocess.stdout.readline, b''):
-            patho_line = patho_line.decode('utf-8')
-            if any(error in patho_line for error in errors):
-                logger.info('Error possibly with the genbank file.')
-                error_status = True
-                patho_subprocess.kill()
+        # Check internal error of Pathway Tools.
+        with open(pwt_log, 'w') as  pwt_writer:
+            for patho_line in iter(patho_subprocess.stdout.readline, b''):
+                patho_line = patho_line.decode('utf-8')
+                pwt_writer.write(patho_line)
+                if any(error in patho_line for error in errors):
+                    logger.info('Error possibly with the genbank file.')
+                    error_status = True
+                    patho_subprocess.kill()
 
-            patho_lines.append(patho_line)
-            patho_subprocess.poll()
-            return_code = patho_subprocess.returncode
-            # Check if Pathway Tools has been killed with returncode.
-            # Also check if Pathway Tools has finished PathoLogic inference (returncode 0).
-            if return_code or return_code == 0:
-                if return_code == 0:
-                    patho_subprocess.stdout.close()
-                    return error_status
-                elif return_code != 0:
-                    raise subprocess.CalledProcessError(return_code, cmd_pwt)
-
-        # Check pathologic.log for error.
-        error_status = check_pathologic(species_input_folder_path, error_status)
+                patho_lines.append(patho_line)
+                patho_subprocess.poll()
+                return_code = patho_subprocess.returncode
+                # Check if Pathway Tools has been killed with returncode.
+                # Also check if Pathway Tools has finished PathoLogic inference (returncode 0).
+                if return_code or return_code == 0:
+                    if return_code == 0:
+                        patho_subprocess.stdout.close()
+                        return error_status
+                    elif return_code != 0:
+                        raise subprocess.CalledProcessError(return_code, cmd_pwt)
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        error_status = pwt_error(species_input_folder_path, subprocess_error.returncode, patho_lines, patho_subprocess.stderr, cmd_pwt, error_status)
+        error_status = True
+        error_status = pwt_check_error(species_input_folder_path, patho_lines, cmd_pwt, error_status, subprocess_error.returncode, patho_subprocess.stderr)
+
+    # Check pathologic.log for error.
+    error_status = pwt_check_error(species_input_folder_path, patho_lines, cmd_pwt, error_status)
 
     patho_subprocess.stdout.close()
 
@@ -209,6 +226,7 @@ def run_pwt_dat(multiprocess_input):
                 if any(error in load_line for error in load_errors):
                     if not load_line.startswith(';;;'):
                         error_status = True
+                        load_lines.append(load_line)
                         load_subprocess.kill()
 
                 load_lines.append(load_line)
@@ -218,11 +236,11 @@ def run_pwt_dat(multiprocess_input):
                     raise subprocess.CalledProcessError(return_code, cmd_dat)
 
         # Check for error.
-        error_status = check_dat_creation(species_input_folder_path, error_status)
+        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_dat, error_status)
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        error_status = pwt_error(species_input_folder_path, subprocess_error.returncode, load_lines, load_subprocess.stderr, cmd_dat, error_status)
+        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_dat, error_status, subprocess_error.returncode, load_subprocess.stderr)
 
     load_subprocess.stdout.close()
 
