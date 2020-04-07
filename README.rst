@@ -289,15 +289,15 @@ mpwt can be used in a python script with an import:
 			  output_folder=folder_output,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
-              patho_operon_predictor=optional_boolean,
-              no_download_articles=optional_boolean,
+			  patho_operon_predictor=optional_boolean,
+			  no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
 			  ignore_error=optional_boolean,
-              pathway_score=pathway_score,
+			  pathway_score=pathway_score,
 			  taxon_file=optional_boolean,
 			  verbose=optional_boolean)
 
@@ -314,7 +314,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations                      |
+|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)    |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
