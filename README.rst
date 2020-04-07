@@ -561,7 +561,7 @@ Useful functions
 
         mpwt --clean
 
-    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'dat_creation.log', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
+    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'dat_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
 
     .. code:: sh
 
@@ -653,7 +653,7 @@ If you encounter errors (and it is highly possible) there is some tips that can 
 
 For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
-There is also a pathologic.log and a dat_creation.log in each sub-folders.
+There is also a pathologic.log (created by Pathway Tools), a pwt_terminal.log (log of the terminal during PathoLogic process) and a dat_creation.log (log of the terminal during attributes-values files creation) in each sub-folders.
 
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
