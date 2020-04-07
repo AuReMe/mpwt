@@ -37,6 +37,18 @@ def find_ptools_path():
     return ptools_local_path
 
 
+def check_ptools_local_pwt():
+    ptools_path = find_ptools_path()
+
+    error = None
+
+    if not os.path.exists(ptools_path + '/ptools-init.dat'):
+        print('Missing ptools-init.dat file in ptools-local folder. Use "pathway-tools -config" to recreate it.')
+        error = True
+
+    return error
+
+
 def list_pgdb():
     """
     List all the PGDB inside the ptools-local folder.
@@ -137,6 +149,7 @@ def cleaning_input(input_folder, verbose=None):
         if os.path.isdir(input_path):
             lisp_script = input_path + 'dat_creation.lisp'
             patho_log = input_path + 'pathologic.log'
+            pwt_log = input_path + 'pwt_terminal.log'
             dat_log = input_path + 'dat_creation.log'
             genetic_dat = input_path + 'genetic-elements.dat'
             organism_dat = input_path + 'organism-params.dat'
@@ -144,6 +157,8 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
                 os.remove(patho_log)
+            if os.path.exists(pwt_log):
+                os.remove(pwt_log)
             if os.path.exists(dat_log):
                 os.remove(dat_log)
             if os.path.exists(genetic_dat):

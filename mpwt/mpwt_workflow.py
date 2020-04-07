@@ -61,6 +61,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = ptools_local_path + '/pgdbs/user/'
 
+    # Check if ptools-local is accessible.
+    error = utils.check_ptools_local_pwt()
+    if error:
+        sys.exit(1)
+
     # Check if patho_hole_filler or patho_log are launched with patho_inference.
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
         sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
