@@ -35,12 +35,14 @@ def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_sta
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
-        patho_error_status = check_pathologic(species_input_folder_path, error_status)
+        pathologic_erros = ['fatal error', 'Error']
+        patho_error_status = check_log(species_input_folder_path, 'pathologic.log', error_status, pathologic_erros)
     else:
         patho_error_status = None
 
     if '-load' in cmd:
-        dat_error_status = check_dat_creation(species_input_folder_path, error_status)
+        load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
+        dat_error_status = check_log(species_input_folder_path, 'dat_creation.log', error_status, load_errors)
     else:
         dat_error_status = None
 
@@ -56,57 +58,33 @@ def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_sta
     return error_status
 
 
-def check_pathologic(species_input_folder_path, error_status):
+def check_log(species_input_folder_path, log_filename, error_status, log_errors):
     """
     Look for error and fatal error in pathologic.log after build.
 
     Args:
         species_input_folder_path (str): pathname to the species input folder
+        log_filename (str): name of the log file
+        error_status (bool): True if there is an error during Pathway Tools run
+        log_errors (list): list of strings containing possible errors.
     Returns:
         boolean: True if there is an error during Pathway Tools run
     """
     fatal_error_index = None
-    pathologic_erros = ['fatal error', 'Error']
-    with open(species_input_folder_path + '/pathologic.log', 'r') as pathologic_log:
-        for index, line in enumerate(pathologic_log):
-            if line != '':
-                if any(error in line for error in pathologic_erros) and not fatal_error_index:
-                    fatal_error_index = index
-                    logger.critical('=== Error in pathologic.log for {0}==='.format(species_input_folder_path))
-                    logger.critical('\t' + 'Error from the pathologic.log file: {0}'.format(species_input_folder_path + '/pathologic.log'))
-                    logger.critical('\t' + line)
-                    error_status = True
-                if fatal_error_index:
-                    if index > fatal_error_index:
-                        logger.critical('\t' + line)
-
-    return error_status
-
-
-def check_dat_creation(species_input_folder_path, error_status):
-    """
-    Look for error and fatal error in dat_creation.log after build.
-
-    Args:
-        species_input_folder_path (str): pathname to the species input folder
-    Returns:
-        boolean: True if there is an error during Pathway Tools run
-    """
-    fatal_error_index = None
-    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
-    with open(species_input_folder_path + '/dat_creation.log', 'r') as data_creation_log:
-        for index, line in enumerate(data_creation_log):
+    log_file_path = species_input_folder_path + '/' + log_filename
+    with open(log_file_path, 'r') as log_file:
+        for index, line in enumerate(log_file):
             if line != '':
                 if not line.startswith(';;;'):
-                    if any(error in line for error in load_errors) and not fatal_error_index:
+                    if any(error in line for error in log_errors) and not fatal_error_index:
                         fatal_error_index = index
-                        logger.critical('=== Error in dat_creation.log for {0}==='.format(species_input_folder_path))
-                        logger.critical('\t' + 'Error from the dat_creation.log file: {0}'.format(species_input_folder_path + '/dat_creation.log'))
+                        logger.critical('=== Error in {0} for {1}==='.format(log_filename, species_input_folder_path))
+                        logger.critical('\t' + 'Error from the {0} file: {1}'.format(log_filename, log_file_path))
                         logger.critical('\t' + line)
                         error_status = True
-                if fatal_error_index:
-                    if index > fatal_error_index:
-                        logger.critical('\t' + line)
+                    if fatal_error_index:
+                        if index > fatal_error_index:
+                            logger.critical('\t' + line)
 
     return error_status
 
