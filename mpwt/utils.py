@@ -37,6 +37,18 @@ def find_ptools_path():
     return ptools_local_path
 
 
+def check_ptools_local_pwt():
+    ptools_path = find_ptools_path()
+
+    error = None
+
+    if not os.path.exists(ptools_path + '/ptools-init.dat'):
+        print('Missing ptools-init.dat file in ptools-local folder. Use "pathway-tools -config" to recreate it.')
+        error = True
+
+    return error
+
+
 def list_pgdb():
     """
     List all the PGDB inside the ptools-local folder.
@@ -131,23 +143,29 @@ def cleaning_input(input_folder, verbose=None):
 
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
-    genbank_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
+    input_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
 
-    for genbank_path in genbank_paths:
-        if os.path.isdir(genbank_path):
-            lisp_script = genbank_path + 'dat_creation.lisp'
-            patho_log = genbank_path + 'pathologic.log'
-            genetic_dat = genbank_path + 'genetic-elements.dat'
-            organism_dat = genbank_path + 'organism-params.dat'
+    for input_path in input_paths:
+        if os.path.isdir(input_path):
+            lisp_script = input_path + 'dat_creation.lisp'
+            patho_log = input_path + 'pathologic.log'
+            pwt_log = input_path + 'pwt_terminal.log'
+            dat_log = input_path + 'dat_creation.log'
+            genetic_dat = input_path + 'genetic-elements.dat'
+            organism_dat = input_path + 'organism-params.dat'
             if os.path.exists(lisp_script):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
                 os.remove(patho_log)
+            if os.path.exists(pwt_log):
+                os.remove(pwt_log)
+            if os.path.exists(dat_log):
+                os.remove(dat_log)
             if os.path.exists(genetic_dat):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
                 os.remove(organism_dat)
-            species = genbank_path.split('/')[-2]
+            species = input_path.split('/')[-2]
             logger.info('Remove ' + species + ' temporary datas.')
 
 
@@ -198,15 +216,18 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
     for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
+        input_path_gbff = input_folder + '/' + input_name + '/' + input_name + '.gbff'
         input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
+        elif os.path.exists(input_path_gbff):
+            input_path = input_path_gbff
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
-        elif all([True for species_file in os.listdir(input_folder + '/' + input_name + '/') if '.pf' in species_file or '.fasta' in species_file]):
+        elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_folder + '/' + input_name + '/')]):
             input_path = input_folder + '/' + input_name + '/'
         else:
-            sys.exit('No .gff or .gbk file in ' + input_folder + '/' + input_name)
+            sys.exit('No .gff/.gbk/.gbff/.pf file in ' + input_folder + '/' + input_name)
 
         output_path = output_folder + '/' + input_name
 
@@ -252,7 +273,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
     input_name = multiprocessing_input_data['input_name']
     taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
-    if input_path.endswith('.gbk'):
+    if input_path.endswith('.gbk') or input_path.endswith('.gbff'):
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
@@ -280,31 +301,44 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 element_file.write(';; ' + element_id + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 for feature in record.features:
-                    if feature.type == 'CDS':
+                    if feature.type in ['rRNA', 'tRNA', 'ncRNA', 'misc_RNA', 'CDS']:
                         gene_name = None
                         gene_id = None
+                        start_location = str(feature.location.start+1)
+                        end_location = str(feature.location.end)
                         if 'locus_tag' in feature.qualifiers:
                             gene_id = feature.qualifiers['locus_tag'][0]
                         if 'gene' in feature.qualifiers:
                             gene_name = feature.qualifiers['gene'][0]
                         if not gene_id and not gene_name:
-                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id)
+                            logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
                             pass
                         if gene_id:
+                            if len(gene_id) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('ID\t' + gene_id + '\n')
                         else:
                             if gene_name:
+                                if len(gene_name) > 40:
+                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                                 element_file.write('ID\t' + gene_name + '\n')
                         if gene_name:
                             element_file.write('NAME\t' + gene_name + '\n')
                         else:
                             if gene_id:
                                 element_file.write('NAME\t' + gene_id + '\n')
-                        element_file.write('STARTBASE\t' + str(feature.location.start+1) + '\n')
-                        element_file.write('ENDBASE\t' + str(feature.location.end) + '\n')
+                        element_file.write('STARTBASE\t' + start_location + '\n')
+                        element_file.write('ENDBASE\t' + end_location + '\n')
                         if 'function' in feature.qualifiers:
                             for function in feature.qualifiers['function']:
                                 element_file.write('FUNCTION\t' + function + '\n')
+                        if 'product' in feature.qualifiers:
+                            for function in feature.qualifiers['product']:
+                                element_file.write('FUNCTION\t' + function + '\n')
+                        if 'db_xref' in feature.qualifiers:
+                            for db_xref in feature.qualifiers['db_xref']:
+                                if ':' in db_xref:
+                                    element_file.write('DBLINK\t' + db_xref + '\n')
                         if 'EC_number' in feature.qualifiers:
                             for ec in feature.qualifiers['EC_number']:
                                 element_file.write('EC\t' + ec + '\n')
@@ -317,13 +351,53 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if 'go_process' in feature.qualifiers:
                             for go in feature.qualifiers['go_process']:
                                 element_file.write('GO\t' + go + '\n')
-                        element_file.write('PRODUCT-TYPE\tP' + '\n')
-                        if gene_id:
-                            element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
-                        else:
-                            if gene_name:
-                                element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
-                        element_file.write('//\n\n')
+                        if 'gene_synonym' in feature.qualifiers:
+                            for gene_synonym in feature.qualifiers['gene_synonym']:
+                                element_file.write('SYNONYM\t' + gene_synonym + '\n')
+                        if feature.type == 'rRNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tRRNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\trnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\trnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'misc_RNA' or feature.type == 'ncRNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tMISC-RNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\tmiscnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\tmiscnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'tRNA':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tTRNA' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\ttnra ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\ttnra ' + gene_name + '\n')
+                            element_file.write('//\n\n')
+                        if feature.type == 'CDS':
+                            if 'pseudo' in feature.qualifiers:
+                                element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            else:
+                                element_file.write('PRODUCT-TYPE\tP' + '\n')
+                            if gene_id:
+                                element_file.write('PRODUCT-ID\tprot ' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
+                            element_file.write('//\n\n')
 
     elif input_path.endswith('.gff'):
 
@@ -354,12 +428,12 @@ def run_create_pathologic_file(multiprocessing_input_data):
                 for feature in gff_database.features_of_type(tuple(gff_database.featuretypes())):
                     if feature.featuretype == 'gene':
                         if feature.chrom == region:
+                            if len(feature.id) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('ID\t' + feature.id + '\n')
                             element_file.write('NAME\t' + feature.id + '\n')
                             element_file.write('STARTBASE\t' + str(feature.start) + '\n')
                             element_file.write('ENDBASE\t' + str(feature.stop) + '\n')
-                            element_file.write('PRODUCT-TYPE\tP' + '\n')
-                            element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
                             for child in gff_database.children(feature.id):
                                 if 'product' in child.attributes:
                                     for product in child.attributes['product']:
@@ -367,12 +441,28 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 if 'ec_number' in child.attributes:
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
+                                if 'db_xref' in child.attributes:
+                                    if ':' in db_xref:
+                                        element_file.write('DBLINK\t' + db_xref + '\n')
+                                if child.featuretype == 'CDS':
+                                    element_file.write('PRODUCT-TYPE\tP' + '\n')
+                                    element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')
+                                elif child.featuretype == 'tRNA':
+                                    element_file.write('PRODUCT-TYPE\tTRNA' + '\n')
+                                    element_file.write('PRODUCT-ID\ttrna ' + feature.id + '\n')
+                                elif child.featuretype == 'rRNA':
+                                    element_file.write('PRODUCT-TYPE\tRRNA' + '\n')
+                                    element_file.write('PRODUCT-ID\rrna ' + feature.id + '\n')
+                                elif child.featuretype == 'pseudogene':
+                                    element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+
                             element_file.write('//\n\n')
 
-    elif all([True for species_file in os.listdir(input_path) if '.pf' in species_file or '.fasta' in species_file]):
+    elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_path)]):
         taxon_id = multiprocessing_input_data['taxon_id']
         write_taxon_id_file(input_name, taxon_id, output_folder)
         shutil.copytree(input_path, output_path)
+
 
 
 def pubmed_citations(activate_citations):
@@ -403,6 +493,40 @@ def pubmed_citations(activate_citations):
 
     if not download_pubmed_entries_parameter:
         sys.exit('There is no Batch-PathoLogic-Download-Pubmed-Entries parameter in ' + ptools_init_filepath +'. To use --nc/no_download_articles, mpwt needs Pathway Tools 23.5 or higher.')
+
+    with open(ptools_init_filepath, 'w') as ptools_init_file:
+        ptools_init_file.write(new_ptools_file)
+
+
+def modify_pathway_score(pathway_score):
+    """
+    Modify the Pathway-Prediction-Score-Cutoff of ptools-init.dat
+
+    Args:
+    pathway_score (float): score between 0 and 1 to accept or reject pathways
+    """
+    ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
+    new_ptools_file = ""
+
+    pathway_prediction_score_cutoff = None
+    with open(ptools_init_filepath, 'r') as ptools_init_file:
+        for line in ptools_init_file.read().split('\n'):
+            if 'Pathway-Prediction-Score-Cutoff' in line:
+                pathway_prediction_score_cutoff = True
+                if '#' in line:
+                    line = line.replace('#', '')
+                if pathway_score:
+                    if pathway_score == 0.35:
+                        line = '###' + line.split(' ')[0] + ' ' + str(pathway_score)
+                    else:
+                        line = line.split(' ')[0] + ' ' + str(pathway_score)
+            if line != '':
+                new_ptools_file = new_ptools_file + line + '\n'
+            else:
+                new_ptools_file = new_ptools_file + line
+
+    if not pathway_prediction_score_cutoff:
+        sys.exit('There is no Pathway-Prediction-Score-Cutoff parameter in ' + ptools_init_filepath +'.')
 
     with open(ptools_init_filepath, 'w') as ptools_init_file:
         ptools_init_file.write(new_ptools_file)

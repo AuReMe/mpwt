@@ -74,7 +74,7 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     taxon_id.tsv
     ..
 
-Genbank files must have the same name as the folder in which they are located and also finished with a .gbk or a .gff.
+Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff.
 
 For PF files, there is one file for each scaffold/contig and one corresponding fasta file.
 
@@ -272,7 +272,7 @@ mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
 
@@ -289,14 +289,15 @@ mpwt can be used in a python script with an import:
 			  output_folder=folder_output,
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
-              patho_operon_predictor=optional_boolean,
-              no_download_articles=optional_boolean,
+			  patho_operon_predictor=optional_boolean,
+			  no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
 			  ignore_error=optional_boolean,
+			  pathway_score=pathway_score,
 			  taxon_file=optional_boolean,
 			  verbose=optional_boolean)
 
@@ -313,7 +314,9 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations                      |
+|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)    |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -413,6 +416,21 @@ Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon P
                 patho_operon_predictor=True,
                 no_download_articles=True,
                 patho_log='path/to/folder/log')
+
+Create PGDBs of studied organisms inside ptools-local with pathway prediction score of 1:
+
+..
+
+    .. code:: sh
+
+        mpwt -f path/to/folder/input --patho -p 1.0
+
+    .. code:: python
+
+        import mpwt
+        mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
+                patho_inference=True,
+                pathway_score=1.0)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:
 
@@ -543,7 +561,7 @@ Useful functions
 
         mpwt --clean
 
-    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'pathologic.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
+    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'dat_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
 
     .. code:: sh
 
@@ -635,7 +653,7 @@ If you encounter errors (and it is highly possible) there is some tips that can 
 
 For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
-There is also a pathologic.log in each sub-folders.
+There is also a pathologic.log (created by Pathway Tools), a pwt_terminal.log (log of the terminal during PathoLogic process) and a dat_creation.log (log of the terminal during attributes-values files creation) in each sub-folders.
 
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
@@ -720,6 +738,21 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_2.zip
     ├── species_3.zip
     ..
+
+For developer
+-------------
+
+mpwt uses logging so you need to create the handler configuration if you want mpwt's log in your application:
+
+.. code:: python
+
+    import logging
+
+    from mpwt import multiprocess_pwt
+
+    logging.basicConfig()
+
+    multiprocess_pwt(...)
 
 Release Notes
 -------------

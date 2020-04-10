@@ -18,16 +18,14 @@ from mpwt.results_check import check_dat, check_pwt, permission_change
 from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id
 from multiprocessing import Pool
 
-logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
-logger = logging.getLogger('mpwt')
-logger.setLevel(logging.CRITICAL)
+logger = logging.getLogger(__name__)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None, no_download_articles=None,
                      dat_creation=None, dat_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
-                     taxon_file=None, verbose=None):
+                     pathway_score=None, taxon_file=None, verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -44,6 +42,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         size_reduction (bool): delete ptools-local data at the end (True/False)
         number_cpu (int): number of CPU used (default=1)
         patho_log (str): pathname to mpwt log folder
+        ignore_error (bool): Ignore error during PathoLogic inference (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        taxon_file (str): pathname to the mpwt taxon ID file
         verbose (bool): verbose argument
     """
     if verbose:
@@ -59,6 +60,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Find PGDB folder path.
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = ptools_local_path + '/pgdbs/user/'
+
+    # Check if ptools-local is accessible.
+    error = utils.check_ptools_local_pwt()
+    if error:
+        sys.exit(1)
 
     # Check if patho_hole_filler or patho_log are launched with patho_inference.
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
@@ -84,6 +90,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if no_download_articles and not patho_inference:
         sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
 
+    #Check if no_download_articles is used with patho_inference.
+    if pathway_score and not patho_inference:
+        sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
+
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
         try:
@@ -93,6 +103,14 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     else:
         number_cpu_to_use = 1
     mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    if input_folder:
+        if not os.path.exists(input_folder):
+            logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
+            return
+        if not os.path.isdir(input_folder):
+            logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
+            return
 
     # Create taxon file in the input folder.
     if taxon_file and input_folder and not patho_inference:
@@ -110,6 +128,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Turn off loading of pubmed entries.
     if no_download_articles:
         utils.pubmed_citations(activate_citations=False)
+
+    # Modify pathway prediction score.
+    if pathway_score:
+        utils.modify_pathway_score(pathway_score)
 
     # Check input folder and create input files for PathoLogic.
     if input_folder:
@@ -156,6 +178,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
             multiprocess_inputs = []
+            passed_inferences = []
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creation of BioPAX/attribute-values files.
@@ -178,8 +201,15 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if input_folder:
         if ignore_error:
             multiprocess_inputs = []
-            tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
-            tmp_run_dat_ids.extend(run_dat_ids)
+            if run_patho_dat_ids:
+                if passed_inferences:
+                    tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
+                else:
+                    tmp_run_dat_ids = []
+            else:
+                tmp_run_dat_ids = []
+            if run_dat_ids:
+                tmp_run_dat_ids.extend(run_dat_ids)
             run_dat_ids = tmp_run_dat_ids
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
@@ -189,6 +219,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                                                         dat_extraction=dat_extraction, output_folder=output_folder, size_reduction=size_reduction,
                                                         only_dat_creation=None, taxon_file=taxon_file)
             multiprocess_inputs.extend(multiprocess_dat_inputs)
+
+    if not multiprocess_inputs:
+        logger.critical('No PGDB to export in dat format or to move to output folder.')
+        return
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
@@ -233,6 +267,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Turn on loading of pubmed entries.
     if no_download_articles:
         utils.pubmed_citations(activate_citations=True)
+
+    # Remodify the pathway score to its original value.
+    if pathway_score:
+        utils.modify_pathway_score(0.35)
 
     end_time = time.time()
     times.append(end_time)

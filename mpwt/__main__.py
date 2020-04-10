@@ -7,7 +7,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -23,6 +23,7 @@ options:
     --hf    Use with --patho. Run the Hole Filler using Blast.
     --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
     --nc    Use with --patho. Turn off loading of Pubmed entries.
+    -p=FLOAT   Use with --patho. Modify PathoLogic pathway prediction score.
     --dat    Will create BioPAX/attribute-value dat files from PGDB.
     --md    Move only the dat files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
@@ -48,8 +49,8 @@ from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
-logger = logging.getLogger('mpwt')
-logger.setLevel(logging.CRITICAL)
+logger = logging.getLogger(__name__)
+logging.getLogger("mpwt").setLevel(logging.CRITICAL)
 
 
 def run_mpwt():
@@ -73,10 +74,12 @@ def run_mpwt():
     pgdb_list = args['--list']
     ignore_error = args['--ignore-error']
     taxon_file = args['--taxon-file']
+    pathway_score = args['-p']
     verbose = args['-v']
     topf = args['topf']
 
     if verbose:
+        logging.getLogger("mpwt").setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
     if topf:
@@ -123,6 +126,7 @@ def run_mpwt():
                     number_cpu=number_cpu,
                     patho_log=patho_log,
                     ignore_error=ignore_error,
+                    pathway_score=pathway_score,
                     taxon_file=taxon_file,
                     verbose=verbose)
 
