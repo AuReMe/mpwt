@@ -739,8 +739,8 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3.zip
     ..
 
-For developper
---------------
+For developer
+-------------
 
 mpwt uses logging so you need to create the handler configuration if you want mpwt's log in your application:
 
