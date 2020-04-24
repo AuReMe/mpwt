@@ -56,6 +56,11 @@ logger = logging.getLogger(__name__)
 logging.getLogger("mpwt").setLevel(logging.CRITICAL)
 
 VERSION = pkg_resources.get_distribution("mpwt").version
+LICENSE = """Copyright (C) AuReMe
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+Mpwt is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+"""
 
 def run_mpwt():
     """
@@ -84,7 +89,7 @@ def run_mpwt():
     version = args['--version']
 
     if version:
-        print("mpwt v" + VERSION )
+        print("Mpwt v" + VERSION  + "\n" + LICENSE)
         sys.exit()
 
     if verbose:
