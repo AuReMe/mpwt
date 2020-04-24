@@ -13,6 +13,7 @@ usage:
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
+    mpwt --version
     mpwt topf -f=DIR -o=DIR [--cpu=INT]
 
 options:
@@ -35,6 +36,7 @@ options:
     --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
+    --version     Version
     topf     Will convert Genbank and/or GFF files into PathoLogic Format file.
 
 """
@@ -43,6 +45,7 @@ import docopt
 import logging
 import os
 import sys
+import pkg_resources
 
 from mpwt import utils
 from mpwt.mpwt_workflow import multiprocess_pwt
@@ -52,6 +55,7 @@ logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
 logging.getLogger("mpwt").setLevel(logging.CRITICAL)
 
+VERSION = pkg_resources.get_distribution("mpwt").version
 
 def run_mpwt():
     """
@@ -77,6 +81,11 @@ def run_mpwt():
     pathway_score = args['-p']
     verbose = args['-v']
     topf = args['topf']
+    version = args['--version']
+
+    if version:
+        print("mpwt v" + VERSION )
+        sys.exit()
 
     if verbose:
         logging.getLogger("mpwt").setLevel(logging.DEBUG)
