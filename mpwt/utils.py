@@ -399,6 +399,46 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                     element_file.write('PRODUCT-ID\tprot ' + gene_name + '\n')
                             element_file.write('//\n\n')
 
+                    elif feature.type == 'mRNA':
+                         if 'pseudo' in feature.qualifiers:
+                            start_location = str(feature.location.start+1)
+                            end_location = str(feature.location.end)
+                            if 'locus_tag' in feature.qualifiers:
+                                gene_id = feature.qualifiers['locus_tag'][0]
+                            if 'gene' in feature.qualifiers:
+                                gene_name = feature.qualifiers['gene'][0]
+                            if not gene_id and not gene_name:
+                                logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
+                                pass
+                            if gene_id:
+                                if len(gene_id) > 40:
+                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
+                                element_file.write('ID\t' + gene_id + '\n')
+                            else:
+                                if gene_name:
+                                    if len(gene_name) > 40:
+                                        logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
+                                    element_file.write('ID\t' + gene_name + '\n')
+                            if gene_name:
+                                element_file.write('NAME\t' + gene_name + '\n')
+                            else:
+                                if gene_id:
+                                    element_file.write('NAME\t' + gene_id + '\n')
+                            element_file.write('STARTBASE\t' + start_location + '\n')
+                            element_file.write('ENDBASE\t' + end_location + '\n')
+                            element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
+                            if 'function' in feature.qualifiers:
+                                for function in feature.qualifiers['function']:
+                                    element_file.write('FUNCTION\t' + function + '\n')
+                            if 'product' in feature.qualifiers:
+                                for function in feature.qualifiers['product']:
+                                    element_file.write('FUNCTION\t' + function + '\n')
+                            if 'db_xref' in feature.qualifiers:
+                                for db_xref in feature.qualifiers['db_xref']:
+                                    if ':' in db_xref:
+                                        element_file.write('DBLINK\t' + db_xref + '\n')
+                            element_file.write('//\n\n')
+
     elif input_path.endswith('.gff'):
 
         if not os.path.exists(output_path):
