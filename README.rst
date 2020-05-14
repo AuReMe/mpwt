@@ -343,7 +343,7 @@ There is also another argument:
 
 .. code:: sh
 
-    mpwt topf -f input_folder -o output_folder -c cpu_number
+    mpwt topf -f input_folder -o output_folder --cpu cpu_number
 
 .. code:: python
 
