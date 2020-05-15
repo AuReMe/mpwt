@@ -305,6 +305,8 @@ def create_dats_and_lisp(run_folder, taxon_file):
     organism_dat = run_folder + 'organism-params.dat'
     genetic_dat = run_folder + 'genetic-elements.dat'
 
+    fasta_extensions = ['.fasta', '.fsa']
+
     taxon_id = ""
     species_name = ""
     taxon_datas = {}
@@ -344,11 +346,14 @@ def create_dats_and_lisp(run_folder, taxon_file):
     elif os.path.isfile(gff_pathname):
         input_name = gff_name
         # Check if there is a fasta file.
-        try:
-            with open(run_folder + input_name.replace('.gff', '.fasta'), 'r'):
-                gff_fasta = input_name.replace('.gff', '.fasta')
-        except FileNotFoundError:
-            raise FileNotFoundError('No fasta file with the GFF of {0}'.format(pgdb_id))
+        gff_fasta = None
+        for fasta_extension in fasta_extensions:
+            fasta_input_name = input_name.replace('.gff', fasta_extension)
+            if os.path.exists(run_folder + fasta_input_name):
+                gff_fasta = fasta_input_name
+        if not gff_fasta:
+            logger.critical('No fasta file (.fasta or .fsa) with the GFF of {0}'.format(pgdb_id))
+            return None
 
         # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
         try:
@@ -371,15 +376,18 @@ def create_dats_and_lisp(run_folder, taxon_file):
             taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
     # Look for PF files.
-    elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
+    elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file]):
         for species_file in os.listdir(run_folder):
             if '.pf' in species_file:
                 # Check if there is a fasta file.
-                try:
-                    pf_fasta = open(run_folder + species_file.replace('.pf', '.fasta'), 'r')
-                    pf_fasta.close()
-                except FileNotFoundError:
-                    raise FileNotFoundError('No fasta file with the Pathologic file of {0}'.format(pgdb_id))
+                pf_fasta = None
+                for fasta_extension in fasta_extensions:
+                    fasta_species_name = species_file.replace('.pf', fasta_extension)
+                    if os.path.exists(run_folder + fasta_species_name):
+                        pf_fasta = fasta_species_name
+                if not pf_fasta:
+                    logger.critical('No fasta file (.fasta or .fsa) with the Pathologic file of {0}'.format(pgdb_id))
+                    return None
 
         taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
@@ -411,7 +419,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                 codon_table = taxon_datas['codon_table']
                 genetic_writer.writerow(['CODON-TABLE', codon_table])
             genetic_writer.writerow(['//'])
-        elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file]):
+        elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file]):
             genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
             for species_file in os.listdir(run_folder):
                     if '.pf' in species_file:
@@ -430,7 +438,10 @@ def create_dats_and_lisp(run_folder, taxon_file):
                         genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ANNOT-FILE', species_file])
-                        genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                        if os.path.exists(run_folder + '/' + species_file.replace('.pf', '.fasta')):
+                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                        elif os.path.exists(run_folder + '/' + species_file.replace('.pf', '.fsa')):
+                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
                         if circular:
                             genetic_writer.writerow(['CIRCULAR?', circular])
                         if element_type:

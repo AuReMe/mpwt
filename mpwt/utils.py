@@ -43,7 +43,7 @@ def check_ptools_local_pwt():
     error = None
 
     if not os.path.exists(ptools_path + '/ptools-init.dat'):
-        print('Missing ptools-init.dat file in ptools-local folder. Use "pathway-tools -config" to recreate it.')
+        logger.critical('Missing ptools-init.dat file in ptools-local folder. Use "pathway-tools -config" to recreate it.')
         error = True
 
     return error
@@ -224,7 +224,7 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
             input_path = input_path_gbff
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
-        elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_folder + '/' + input_name + '/')]):
+        elif all([True if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file else False for species_file in os.listdir(input_folder + '/' + input_name + '/')]):
             input_path = input_folder + '/' + input_name + '/'
         else:
             sys.exit('No .gff/.gbk/.gbff/.pf file in ' + input_folder + '/' + input_name)
@@ -242,10 +242,13 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
         multiprocessing_input_data.append(multiprocessing_dict)
 
-    mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
+    check_boolean = mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
 
     mpwt_pool.close()
     mpwt_pool.join()
+
+    if not all(check_boolean):
+        sys.exit('Issue during PathoLogic files creation, check errors.')
 
 
 def write_taxon_id_file(input_name, taxon_id, output_folder):
@@ -275,6 +278,7 @@ def run_create_pathologic_file(multiprocessing_input_data):
     # Add taxon ID in taxon_id.tsv if available.
     if input_path.endswith('.gbk') or input_path.endswith('.gbff'):
 
+        logger.info('Creating PathoLogic file for ' + input_path)
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
@@ -457,9 +461,20 @@ def run_create_pathologic_file(multiprocessing_input_data):
         if taxon_id:
             write_taxon_id_file(input_name, taxon_id, output_folder)
 
-        for record in SeqIO.parse(input_path.replace('.gff', '.fasta'), 'fasta'):
-            output_fasta = output_path + '/' + record.id + '.fasta'
+        gff_fasta = None
+        if os.path.exists(input_path.replace('.gff', '.fasta')):
+            gff_fasta = input_path.replace('.gff', '.fasta')
+        elif os.path.exists(input_path.replace('.gff', '.fsa')):
+            gff_fasta = input_path.replace('.gff', '.fsa')
+        if not gff_fasta:
+            logger.critical('Error: No fasta file (.fasta or .fsa) for GFF file ' + input_path)
+            return None
+
+        for record in SeqIO.parse(gff_fasta, 'fasta'):
+            gff_fasta_extension = os.path.splitext(gff_fasta)[1]
+            output_fasta = output_path + '/' + record.id + gff_fasta_extension
             SeqIO.write(record, output_fasta, 'fasta')
+
         for region in regions:
             with open(output_path + '/' + region + '.pf', 'w') as element_file:
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
@@ -498,11 +513,12 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
                             element_file.write('//\n\n')
 
-    elif all([True if '.pf' in species_file or '.fasta' in species_file else False for species_file in os.listdir(input_path)]):
+    elif all([True if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file else False for species_file in os.listdir(input_path)]):
         taxon_id = multiprocessing_input_data['taxon_id']
         write_taxon_id_file(input_name, taxon_id, output_folder)
         shutil.copytree(input_path, output_path)
 
+    return True
 
 
 def pubmed_citations(activate_citations):

@@ -70,7 +70,7 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     │   └── scaffold_1.pf
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
-    │   └── scaffold_2.fasta
+    │   └── scaffold_2.fsa
     taxon_id.tsv
     ..
 
@@ -82,6 +82,13 @@ Pathway Tools will run on each Genbank/GFF/PF files. It will create the results 
 
 Genbank
 +++++++
+
+.. code-block:: text
+
+    Folder_input
+    ├── species_1
+    │   └── species_1.gbk
+    ..
 
 Genbank file example:
 
@@ -117,6 +124,14 @@ You can also look at the `example <http://bioinformatics.ai.sri.com/ptools/sampl
 GFF
 +++
 
+.. code-block:: text
+
+    Folder_input
+    ├── species_2
+    │   └── species_2.gff
+    │   └── species_2.fasta
+    ..
+
 GFF file example:
 
 .. code-block:: text
@@ -132,7 +147,7 @@ Lack of some annotations (EC, GO) can be the reason explaining these differences
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
 
-You have to provide a nucleotide sequence file associated with the GFF file containing the chromosome/scaffold/contig sequence.
+You have to provide a nucleotide sequence file (either '.fasta' or '.fsa' extensions) associated with the GFF file containing the chromosome/scaffold/contig sequence.
 
 .. code-block:: text
 
@@ -141,6 +156,17 @@ You have to provide a nucleotide sequence file associated with the GFF file cont
 
 PathoLogic Format
 +++++++++++++++++
+
+.. code-block:: text
+
+    Folder_input
+    ├── species_4
+    │   └── scaffold_1.pf
+    │   └── scaffold_1.fasta
+    │   └── scaffold_2.pf
+    │   └── scaffold_2.fsa
+    taxon_id.tsv
+    ..
 
 PF file example:
 
@@ -163,7 +189,7 @@ PF file example:
 
 Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf>`__ for more informations.
 
-You have to provide one nucleotide sequence for each pathologic containing one scaffold/contig.
+You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension) for each pathologic containing one scaffold/contig.
 
 .. code-block:: text
 
