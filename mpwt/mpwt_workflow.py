@@ -38,7 +38,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         dat_creation (bool): BioPAX/attributes-values files creation (True/False)
-        dat_extraction (bool): BioPAX/attributes-values files extraction (True/False)
+        dat_extraction (bool): move only BioPAX/attributes-values files to output folder (True/False)
         size_reduction (bool): delete ptools-local data at the end (True/False)
         number_cpu (int): number of CPU used (default=1)
         patho_log (str): pathname to mpwt log folder
@@ -93,6 +93,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     #Check if no_download_articles is used with patho_inference.
     if pathway_score and not patho_inference:
         sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
+
+    #Check if no_download_articles is used with patho_inference.
+    if dat_extraction and not output_folder:
+        sys.exit('To use --md/dat_extraction, you need to use the -o/output_folder argument.')
 
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:

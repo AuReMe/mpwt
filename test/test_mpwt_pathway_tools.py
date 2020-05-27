@@ -11,6 +11,11 @@ import mpwt
 import os
 import shutil
 import subprocess
+import logging
+
+logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+logger = logging.getLogger(__name__)
+logging.getLogger("mpwt").setLevel(logging.DEBUG)
 
 
 def reaction_extraction(pathway_file_pathname):
@@ -38,7 +43,7 @@ def test_multiprocess_pwt_import():
     mpwt.cleaning_input('test')
 
     mpwt.create_pathologic_file('test', 'test_pf')
-    mpwt.multiprocess_pwt('test_pf', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, verbose=True)
+    mpwt.multiprocess_pwt('test_pf', 'test_output', patho_inference=True, dat_creation=True, dat_extraction=True, size_reduction=False, number_cpu=3, verbose=True)
 
     pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I_gff/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_fabo_pathname)
@@ -66,7 +71,7 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '--patho'])
 
-    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--dat', '--md'])
+    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--dat', '--md', '--cpu', '3'])
 
     pgdbs = mpwt.list_pgdb()
     assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_i_gffcyc', 'fatty_acid_beta_oxydation_i_pfcyc', 'fatty_acid_beta_oxydation_icyc']
