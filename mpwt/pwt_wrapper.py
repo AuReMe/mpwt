@@ -130,7 +130,7 @@ def run_pwt(multiprocess_input):
         # Check internal error of Pathway Tools.
         with open(pwt_log, 'w') as  pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
-                patho_line = patho_line.decode('utf-8')
+                patho_line = patho_line.decode('cp1252')
                 pwt_writer.write(patho_line)
                 if any(error in patho_line for error in errors):
                     logger.info('Error possibly with the genbank file.')
@@ -195,7 +195,7 @@ def run_pwt_dat(multiprocess_input):
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
         with open(dat_log, 'w') as  dat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
-                load_line = load_line.decode('utf-8')
+                load_line = load_line.decode('cp1252')
                 dat_file_writer.write(load_line)
                 if any(dat_end in load_line for dat_end in dat_creation_ends):
                     load_subprocess.stdout.close()
