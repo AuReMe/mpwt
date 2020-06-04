@@ -164,5 +164,5 @@ def check_dat(multiprocess_input):
 
     expected_dat_number = str(len(dat_files))
     found_dat_number = str(len(dat_checks))
-    logger.info('{0}: {1} out of {2} dat files create.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+    logger.info('{0}: {1} out of {2} dat files created.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
 
