@@ -48,13 +48,14 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
     return new_compare_ids
 
 
-def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
+def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use):
     """ Check input structure and data in output folder and ptools-local.
 
     Args:
         run_ids (list): species IDs (folder and GBK/GFF file name)
         input_folder (str): pathname to the input folder
         output_folder (str): pathname to the output folder
+        number_cpu_to_use (int): number of CPU to use for multiprocessing
     Returns:
         list: input IDs for PathoLogic and BioPAX/dat creation
         list: input IDs for BioPAX/dat creation
@@ -130,9 +131,35 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder):
 
     # Check for PGDB in ptools-local to see if PGDB are already present but they haven't been exported.
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in utils.list_pgdb()]
-    if already_present_pgdbs != []:
+
+    # Check the already finished PGDBs.
+    if already_present_pgdbs:
+        pathologic_builds = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
+
+        # Check for unfinished build of PGDB using their pathologic.log file.
+        logger.info("Check and delete unfinished builds of Pathway Tools.")
+        unfinished_builds = []
+        finished_builds = []
+        for pathologic_build in pathologic_builds:
+            pathologic_build = pathologic_build.lower()
+            pathologic_file = input_folder + '/' + pathologic_build + '/' + 'pathologic.log'
+            if os.path.exists(pathologic_file):
+                with open(pathologic_file, 'r') as pathologic_log:
+                    pathologic_string = pathologic_log.read()
+                    if 'Build done.' in pathologic_string or 'PGDB build done.' in pathologic_string:
+                        finished_builds.append(pathologic_build)
+                    else:
+                        unfinished_builds.append(pathologic_build)
+
+        # Delete the unfinished PGDBs.
+        if unfinished_builds:
+            utils.remove_pgdbs([unfinished_build + 'cyc' for unfinished_build in unfinished_builds], number_cpu_to_use)
+
+        already_present_pgdbs = list(set(already_present_pgdbs) - set(unfinished_builds))
+
         run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
         run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
+
         for run_dat_id in run_dat_ids:
             logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launched on this species.".format(run_dat_id))
         return run_patho_dat_ids, run_dat_ids
