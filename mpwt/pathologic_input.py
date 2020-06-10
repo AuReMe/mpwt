@@ -141,15 +141,15 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
         unfinished_builds = []
         finished_builds = []
         for pathologic_build in pathologic_builds:
-            pathologic_build = pathologic_build.lower()
+            pathologic_build_lower = pathologic_build.lower()
             pathologic_file = input_folder + '/' + pathologic_build + '/' + 'pathologic.log'
             if os.path.exists(pathologic_file):
                 with open(pathologic_file, 'r') as pathologic_log:
                     pathologic_string = pathologic_log.read()
                     if 'Build done.' in pathologic_string or 'PGDB build done.' in pathologic_string:
-                        finished_builds.append(pathologic_build)
+                        finished_builds.append(pathologic_build_lower)
                     else:
-                        unfinished_builds.append(pathologic_build)
+                        unfinished_builds.append(pathologic_build_lower)
 
         # Delete the unfinished PGDBs.
         if unfinished_builds:
