@@ -333,9 +333,6 @@ def run_create_pathologic_file(multiprocessing_input_data):
                                 element_file.write('NAME\t' + gene_id + '\n')
                         element_file.write('STARTBASE\t' + start_location + '\n')
                         element_file.write('ENDBASE\t' + end_location + '\n')
-                        if 'function' in feature.qualifiers:
-                            for function in feature.qualifiers['function']:
-                                element_file.write('FUNCTION\t' + function + '\n')
                         if 'product' in feature.qualifiers:
                             for function in feature.qualifiers['product']:
                                 element_file.write('FUNCTION\t' + function + '\n')
@@ -431,9 +428,6 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             element_file.write('STARTBASE\t' + start_location + '\n')
                             element_file.write('ENDBASE\t' + end_location + '\n')
                             element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
-                            if 'function' in feature.qualifiers:
-                                for function in feature.qualifiers['function']:
-                                    element_file.write('FUNCTION\t' + function + '\n')
                             if 'product' in feature.qualifiers:
                                 for function in feature.qualifiers['product']:
                                     element_file.write('FUNCTION\t' + function + '\n')
