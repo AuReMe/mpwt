@@ -317,20 +317,17 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if not gene_id and not gene_name:
                             logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
                             pass
-                        if gene_id:
-                            if len(gene_id) > 40:
-                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
-                            element_file.write('ID\t' + gene_id + '\n')
-                        else:
-                            if gene_name:
-                                if len(gene_name) > 40:
-                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
-                                element_file.write('ID\t' + gene_name + '\n')
                         if gene_name:
+                            if len(gene_name) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('NAME\t' + gene_name + '\n')
                         else:
                             if gene_id:
+                                if len(gene_id) > 40:
+                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                                 element_file.write('NAME\t' + gene_id + '\n')
+                        if gene_id and gene_id != gene_name:
+                            element_file.write('ID\t' + gene_id + '\n')
                         element_file.write('STARTBASE\t' + start_location + '\n')
                         element_file.write('ENDBASE\t' + end_location + '\n')
                         if 'product' in feature.qualifiers:
