@@ -308,8 +308,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                     if feature.type in ['rRNA', 'tRNA', 'ncRNA', 'misc_RNA', 'CDS']:
                         gene_name = None
                         gene_id = None
-                        start_location = str(feature.location.start+1)
-                        end_location = str(feature.location.end)
+                        start_location = str(feature.location.start+1).replace('<', '').replace('>', '')
+                        end_location = str(feature.location.end).replace('<', '').replace('>', '')
                         if 'locus_tag' in feature.qualifiers:
                             gene_id = feature.qualifiers['locus_tag'][0]
                         if 'gene' in feature.qualifiers:
@@ -402,8 +402,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
                     elif feature.type == 'mRNA':
                          if 'pseudo' in feature.qualifiers:
-                            start_location = str(feature.location.start+1)
-                            end_location = str(feature.location.end)
+                            start_location = str(feature.location.start+1).replace('<', '').replace('>', '')
+                            end_location = str(feature.location.end).replace('<', '').replace('>', '')
                             if 'locus_tag' in feature.qualifiers:
                                 gene_id = feature.qualifiers['locus_tag'][0]
                             if 'gene' in feature.qualifiers:
