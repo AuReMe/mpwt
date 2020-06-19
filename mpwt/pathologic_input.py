@@ -89,7 +89,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
             logger.critical('Multiple input files for {0}, there must be only one type of files among: GenBank, GFF or multiple PF files'.format(species_folder))
             return None, None
         elif len(species_input_files) == 0:
-            logger.critical('Missing input file for {0}. A GenBank, GFF or multiple PF file are required.'.format(species_folder))
+            logger.critical('Missing input file for {0}. A GenBank file, GFF file or multiple PF files are required.'.format(species_folder))
             return None, None
 
     check_species_folders = list(set(check_species_folders))
