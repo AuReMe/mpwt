@@ -270,14 +270,26 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
                     if 'corresponding_file' in data:
                         if data['corresponding_file'] != '':
                             corresponding_file = data['corresponding_file']
-                            taxon_datas[corresponding_file] = [circular, element_type, codon_table]
+                            taxon_datas[corresponding_file] = {}
+                            if circular is not None:
+                                taxon_datas[corresponding_file]['circular'] = circular
+                            if element_type is not None:
+                                taxon_datas[corresponding_file]['element_type'] = element_type
+                            if codon_table is not None:
+                                taxon_datas[corresponding_file]['codon_table'] = codon_table
                         else:
-                            taxon_datas['circular'] = circular
-                            taxon_datas['element_type'] = element_type
-                            taxon_datas['codon_table'] = codon_table
+                            if circular is not None:
+                                taxon_datas['circular'] = circular
+                            if element_type is not None:
+                                taxon_datas['element_type'] = element_type
+                            if codon_table is not None:
+                                taxon_datas['codon_table'] = codon_table
                     else:
+                        if circular is not None:
                             taxon_datas['circular'] = circular
+                        if element_type is not None:
                             taxon_datas['element_type'] = element_type
+                        if codon_table is not None:
                             taxon_datas['codon_table'] = codon_table
 
     except FileNotFoundError:
@@ -451,17 +463,6 @@ def create_dats_and_lisp(run_folder, taxon_file):
             for species_file in os.listdir(run_folder):
                     if '.pf' in species_file:
                         species_file_name = os.path.splitext(species_file)[0]
-                        if species_file_name in taxon_datas:
-                            circular = taxon_datas[species_file_name][0]
-                            element_type = taxon_datas[species_file_name][1]
-                            codon_table = taxon_datas[species_file_name][2]
-                        else:
-                            if 'circular' in taxon_datas:
-                                circular = taxon_datas['circular']
-                            if 'element_type' in taxon_datas:
-                                element_type = taxon_datas['element_type']
-                            if 'codon_table' in taxon_datas:
-                                codon_table = taxon_datas['codon_table']
                         genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
                         genetic_writer.writerow(['ANNOT-FILE', species_file])
@@ -469,12 +470,27 @@ def create_dats_and_lisp(run_folder, taxon_file):
                             genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
                         elif os.path.exists(run_folder + '/' + species_file.replace('.pf', '.fsa')):
                             genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
-                        if circular:
-                            genetic_writer.writerow(['CIRCULAR?', circular])
-                        if element_type:
-                            genetic_writer.writerow(['TYPE', element_type])
-                        if codon_table:
-                            genetic_writer.writerow(['CODON-TABLE', codon_table])
+
+                        if species_file_name in taxon_datas:
+                            if 'circular' in taxon_datas[species_file_name]:
+                                circular = taxon_datas[species_file_name]['circular']
+                                genetic_writer.writerow(['CIRCULAR?', circular])
+                            if 'element_type' in taxon_datas[species_file_name]:
+                                element_type = taxon_datas[species_file_name]['element_type']
+                                genetic_writer.writerow(['TYPE', element_type])
+                            if 'codon_table' in taxon_datas[species_file_name]:
+                                codon_table = taxon_datas[species_file_name]['codon_table']
+                                genetic_writer.writerow(['CODON-TABLE', codon_table])
+                        else:
+                            if 'circular' in taxon_datas:
+                                circular = taxon_datas['circular']
+                                genetic_writer.writerow(['CIRCULAR?', circular])
+                            if 'element_type' in taxon_datas:
+                                element_type = taxon_datas['element_type']
+                                genetic_writer.writerow(['TYPE', element_type])
+                            if 'codon_table' in taxon_datas:
+                                codon_table = taxon_datas['codon_table']
+                                genetic_writer.writerow(['CODON-TABLE', codon_table])
                         genetic_writer.writerow(['//'])
     # Create the lisp script.
     check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
