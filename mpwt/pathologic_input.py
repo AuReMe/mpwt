@@ -250,7 +250,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
                             if data['element_type'] in known_element_types:
                                 element_type = data['element_type']
                             else:
-                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
+                                raise Exception('taxon_id.tsv: wrong element_type for {0}, {1} instead of {2}'.format(pgdb_id, data['element_type'], ', '.join(known_element_types)))
                         else:
                             element_type = None
                     else:
@@ -261,7 +261,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
                             if data['codon_table'] in known_codon_table:
                                 codon_table = data['codon_table']
                             else:
-                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of {2}'.format(pgdb_id, data['codon_table'], ', '.join(known_codon_table)))
+                                raise Exception('taxon_id.tsv: wrong codon_table for {0}, {1} instead of {2}'.format(pgdb_id, data['codon_table'], ', '.join(known_codon_table)))
                         else:
                             codon_table = None
                     else:
