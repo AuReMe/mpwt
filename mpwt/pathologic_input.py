@@ -239,7 +239,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
                             if data['circular'] == 'Y' or data['circular'] == 'N':
                                 circular = data['circular']
                             else:
-                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, circular))
+                                raise Exception('taxon_id.tsv: wrong circular for {0}, {1} instead of Y or N'.format(pgdb_id, data['circular']))
                         else:
                             circular = None
                     else:
