@@ -142,11 +142,9 @@ def cleaning_input(input_folder, verbose=None):
         logger.setLevel(logging.DEBUG)
 
     if not os.path.exists(input_folder):
-        logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
-        return
+        sys.exit('mpwt can not run: ' + input_folder + ' does not exist.')
     if not os.path.isdir(input_folder):
-        logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
-        return
+        sys.exit('mpwt can not run: ' + input_folder + ' is not a directory.')
 
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
