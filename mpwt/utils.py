@@ -141,6 +141,13 @@ def cleaning_input(input_folder, verbose=None):
     if verbose:
         logger.setLevel(logging.DEBUG)
 
+    if not os.path.exists(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
+        return
+    if not os.path.isdir(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
+        return
+
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
     input_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
@@ -202,6 +209,13 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     multiprocessing_input_data = []
 
     mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    if not os.path.exists(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
+        return
+    if not os.path.isdir(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
+        return
 
     input_names = os.listdir(input_folder)
 
