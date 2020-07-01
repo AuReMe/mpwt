@@ -38,10 +38,10 @@ def test_create_dats_and_lisp():
 def test_check_input_and_existing_pgdb():
     mpwt.remove_pgdbs('fatty_acid_beta_oxydation_icyc,fatty_acid_beta_oxydation_i_gffcyc,fatty_acid_beta_oxydation_i_pfcyc')
 
-    run_patho_ids, run_dat_ids = mpwt.pathologic_input.check_input_and_existing_pgdb(['fatty_acid_beta_oxydation_I', 'fatty_acid_beta_oxydation_I_pf', 'fatty_acid_beta_oxydation_I_gff'], 'test', None)
+    run_patho_ids, run_dat_ids = mpwt.pathologic_input.check_input_and_existing_pgdb(['fatty_acid_beta_oxydation_I', 'fatty_acid_beta_oxydation_I_pf', 'fatty_acid_beta_oxydation_I_gff'], 'test', None, 1)
     assert sorted(run_patho_ids) == sorted(['fatty_acid_beta_oxydation_I', 'fatty_acid_beta_oxydation_I_pf', 'fatty_acid_beta_oxydation_I_gff'])
     assert not run_dat_ids
 
-    run_patho_ids, run_dat_ids = mpwt.pathologic_input.check_input_and_existing_pgdb(['wrong.gbk.id.gbk'], 'test_wrong_id', None)
+    run_patho_ids, run_dat_ids = mpwt.pathologic_input.check_input_and_existing_pgdb(['wrong.gbk.id.gbk'], 'test_wrong_id', None, 1)
     assert not run_patho_ids
     assert not run_dat_ids

@@ -155,7 +155,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                                                     only_dat_creation=None, taxon_file=taxon_file)
 
             logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
-            mpwt_pool.map(pwt_input_files, multiprocess_inputs)
+            input_error_status = mpwt_pool.map(pwt_input_files, multiprocess_inputs)
+            if any(input_error_status):
+                sys.exit('Error during PathoLogic input files creation.')
 
             input_time = time.time()
             times.append(input_time)
