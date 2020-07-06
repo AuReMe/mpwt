@@ -1,6 +1,9 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
+.. image:: https://img.shields.io/badge/doi-10.1093/bioinformatics/bty588-blueviolet.svg
+	:target: https://academic.oup.com/bioinformatics/article/34/17/i934/5093211
+
 mpwt: Pathway Tools multiprocessing wrapper
 ===========================================
 
