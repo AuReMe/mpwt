@@ -1,8 +1,11 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-mpwt: Pathway Tools multiprocessing wrapper
-===========================================
+.. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
+	:target: https://www.biorxiv.org/content/10.1101/803056v1
+
+mpwt: Multiprocessing Pathway Tools
+===================================
 
 mpwt is a python package for running Pathway Tools on multiple genomes using multiprocessing.
 

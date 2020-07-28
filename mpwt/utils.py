@@ -141,6 +141,11 @@ def cleaning_input(input_folder, verbose=None):
     if verbose:
         logger.setLevel(logging.DEBUG)
 
+    if not os.path.exists(input_folder):
+        sys.exit('mpwt can not run: ' + input_folder + ' does not exist.')
+    if not os.path.isdir(input_folder):
+        sys.exit('mpwt can not run: ' + input_folder + ' is not a directory.')
+
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
     input_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
@@ -202,6 +207,13 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     multiprocessing_input_data = []
 
     mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    if not os.path.exists(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' does not exist.')
+        return
+    if not os.path.isdir(input_folder):
+        logger.critical('mpwt can not run: ' + input_folder + ' is not a directory.')
+        return
 
     input_names = os.listdir(input_folder)
 
@@ -308,8 +320,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
                     if feature.type in ['rRNA', 'tRNA', 'ncRNA', 'misc_RNA', 'CDS']:
                         gene_name = None
                         gene_id = None
-                        start_location = str(feature.location.start+1)
-                        end_location = str(feature.location.end)
+                        start_location = str(feature.location.start+1).replace('<', '').replace('>', '')
+                        end_location = str(feature.location.end).replace('<', '').replace('>', '')
                         if 'locus_tag' in feature.qualifiers:
                             gene_id = feature.qualifiers['locus_tag'][0]
                         if 'gene' in feature.qualifiers:
@@ -317,25 +329,19 @@ def run_create_pathologic_file(multiprocessing_input_data):
                         if not gene_id and not gene_name:
                             logger.critical('No locus_tag and no gene qualifiers in feature of record: ' + record.id + ' at position ' + start_location + '-' +end_location)
                             pass
-                        if gene_id:
-                            if len(gene_id) > 40:
-                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
-                            element_file.write('ID\t' + gene_id + '\n')
-                        else:
-                            if gene_name:
-                                if len(gene_name) > 40:
-                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
-                                element_file.write('ID\t' + gene_name + '\n')
                         if gene_name:
+                            if len(gene_name) > 40:
+                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('NAME\t' + gene_name + '\n')
                         else:
                             if gene_id:
+                                if len(gene_id) > 40:
+                                    logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + feature.type + ' of file ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                                 element_file.write('NAME\t' + gene_id + '\n')
+                        if gene_id and gene_id != gene_name:
+                            element_file.write('ID\t' + gene_id + '\n')
                         element_file.write('STARTBASE\t' + start_location + '\n')
                         element_file.write('ENDBASE\t' + end_location + '\n')
-                        if 'function' in feature.qualifiers:
-                            for function in feature.qualifiers['function']:
-                                element_file.write('FUNCTION\t' + function + '\n')
                         if 'product' in feature.qualifiers:
                             for function in feature.qualifiers['product']:
                                 element_file.write('FUNCTION\t' + function + '\n')
@@ -405,8 +411,8 @@ def run_create_pathologic_file(multiprocessing_input_data):
 
                     elif feature.type == 'mRNA':
                          if 'pseudo' in feature.qualifiers:
-                            start_location = str(feature.location.start+1)
-                            end_location = str(feature.location.end)
+                            start_location = str(feature.location.start+1).replace('<', '').replace('>', '')
+                            end_location = str(feature.location.end).replace('<', '').replace('>', '')
                             if 'locus_tag' in feature.qualifiers:
                                 gene_id = feature.qualifiers['locus_tag'][0]
                             if 'gene' in feature.qualifiers:
@@ -431,9 +437,6 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             element_file.write('STARTBASE\t' + start_location + '\n')
                             element_file.write('ENDBASE\t' + end_location + '\n')
                             element_file.write('PRODUCT-TYPE\tPSEUDO' + '\n')
-                            if 'function' in feature.qualifiers:
-                                for function in feature.qualifiers['function']:
-                                    element_file.write('FUNCTION\t' + function + '\n')
                             if 'product' in feature.qualifiers:
                                 for function in feature.qualifiers['product']:
                                     element_file.write('FUNCTION\t' + function + '\n')
