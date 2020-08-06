@@ -4,6 +4,8 @@
 .. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
 	:target: https://www.biorxiv.org/content/10.1101/803056v1
 
+.. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
+
 mpwt: Multiprocessing Pathway Tools
 ===================================
 
@@ -24,7 +26,7 @@ Requirements
 mpwt works only on **Python 3** and it has been tested on Python 3.6.
 It requires some python packages (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
-You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
+You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__. The last version supported by mpwt is shown in the badge Pathway Tools.
 
 Pathway Tools needs **Blast**, so it must be install on your system. Depending on your system, Pathway Tools needs a file named **.ncbirc** to locate Blast, for more informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
@@ -304,6 +306,11 @@ mpwt can be used with the command line:
     mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
+
+.. image:: https://github.com/AuReMe/mpwt/mpwt_steps.svg
+
+This picture show a typical run of mpwt with the different options. The '*' is incremental, for each step you look at, you must add all the previous options to have the complete command.
+For example, if you want to have only the PGDBs in an output folder the command is: mpwt -f input_folder --patho -o output_folder
 
 mpwt can be used in a python script with an import:
 
