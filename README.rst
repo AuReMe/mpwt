@@ -1,8 +1,10 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
+
+.. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
+
 .. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
 	:target: https://www.biorxiv.org/content/10.1101/803056v1
-.. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
 
 mpwt: Multiprocessing Pathway Tools
 ===================================
@@ -305,7 +307,7 @@ mpwt can be used with the command line:
 
 Optional argument are identified by [].
 
-.. image:: https://github.com/AuReMe/mpwt/blob/master/mpwt_steps.svg
+.. image:: https://raw.githubusercontent.com/AuReMe/mpwt/master/mpwt_steps.svg?sanitize=true
 
 This picture show a typical run of mpwt with the different options. The '*' is incremental, for each step you look at, you must add all the previous options to have the complete command.
 For example, if you want to have only the PGDBs in an output folder the command is: mpwt -f input_folder --patho -o output_folder
