@@ -1,10 +1,11 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
-
 .. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
 	:target: https://www.biorxiv.org/content/10.1101/803056v1
+
+.. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
+    :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
 ===================================
