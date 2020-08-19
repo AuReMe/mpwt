@@ -89,7 +89,7 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
     return error_status
 
 
-def run_pwt(multiprocess_input):
+def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor):
     """
     Create PGDB using files created during 'create_dats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
@@ -98,14 +98,12 @@ def run_pwt(multiprocess_input):
     pathway-tools -no-web-cel-overview -no-cel-overview -no-patch-download -disable-metadata-saving -nologfile -patho
 
     Args:
-        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
+        species_input_folder_path (str): path to input folder
+        patho_hole_filler (bool): boolean to use or not PathoLogic Hole Filler
+        patho_operon_predictor (bool): boolean to use or not PathoLogic Operon Predictor
     Returns:
         boolean: True if there is an error during Pathway Tools run
     """
-    species_input_folder_path = multiprocess_input['species_input_folder_path']
-    patho_hole_filler = multiprocess_input['patho_hole_filler']
-    patho_operon_predictor = multiprocess_input['patho_operon_predictor']
-
     cmd_options = ['-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile']
 
     cmd_pwt = ['pathway-tools', *cmd_options, '-patho', species_input_folder_path]
@@ -162,7 +160,7 @@ def run_pwt(multiprocess_input):
     return error_status
 
 
-def run_pwt_dat(multiprocess_input):
+def run_pwt_dat(species_input_folder_path):
     """
     Create dat file using a lisp script created during 'create_dats_and_lisp'.
     Kill the subprocess when the command reach the Navigator Window opening proposition.
@@ -171,12 +169,10 @@ def run_pwt_dat(multiprocess_input):
     pathway-tools -no-patch-download -disable-metadata-saving -nologfile -load
 
     Args:
-        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
+        species_input_folder_path (str): path to input folder
     Returns:
         boolean: True if there is an error during lisp script execution
     """
-    species_input_folder_path = multiprocess_input['species_input_folder_path']
-
     lisp_path = species_input_folder_path + 'dat_creation.lisp'
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
@@ -225,21 +221,19 @@ def run_pwt_dat(multiprocess_input):
     return error_status
 
 
-def run_move_pgdb(move_data):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
     pgdb_folder_path: path to the PGDB of the species (in ptools-local).
 
     Args:
-        move_data (dictionary): contains multiprocess input (PGDB ID, ptools-local PGDB pathname, ...)
+        pgdb_folder_dbname (str): species ID
+        pgdb_folder_path (str): path to species PGDB folder
+        dat_extraction (bool): to extract or not the attribute-values files (.dat files)
+        output_folder (str): path to output folder
+        size_reduction (bool): to compress or not the results
     """
-    pgdb_folder_dbname = move_data['pgdb_folders'][0]
-    pgdb_folder_path = move_data['pgdb_folders'][1]
-    dat_extraction = move_data['dat_extraction']
-    output_folder = move_data['output_folder']
-    size_reduction = move_data['size_reduction']
-
     output_species = output_folder + '/' + pgdb_folder_dbname +'/'
 
     if dat_extraction:

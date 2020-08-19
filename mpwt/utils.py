@@ -246,15 +246,15 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        multiprocessing_dict = {'input_path': input_path, 'output_path': output_path,
-                                'output_folder': output_folder, 'input_name': input_name}
         if taxon_ids:
             if input_name in taxon_ids:
-                multiprocessing_dict['taxon_id'] = taxon_ids[input_name]
+                taxon_id = taxon_ids[input_name]
+        else:
+            taxon_id = None
 
-        multiprocessing_input_data.append(multiprocessing_dict)
+        multiprocessing_input_data.append([input_path, output_path, output_folder, input_name, taxon_id])
 
-    check_boolean = mpwt_pool.map(run_create_pathologic_file, multiprocessing_input_data)
+    check_boolean = mpwt_pool.starmap(run_create_pathologic_file, multiprocessing_input_data)
 
     mpwt_pool.close()
     mpwt_pool.join()
@@ -275,21 +275,20 @@ def write_taxon_id_file(input_name, taxon_id, output_folder):
             taxon_writer.writerow([input_name, taxon_id])
 
 
-def run_create_pathologic_file(multiprocessing_input_data):
+def run_create_pathologic_file(input_path, output_path, output_folder, input_name, taxon_id):
     """
     Create PathoLogic files from a Genbank or a GFF file.
 
     Args:
         multiprocess_input (dictionary): contains multiprocess input (input folder, output_path, output folder and input_name)
+        input_path (str): path to species input folder
+        output_path (str): path to output species folder
+        output_folder (str): path to output folder
+        input_name (str): species name
+        taxon_id (dictionary): dictionary with the taxon_id for each species, if taxon_id.tsv does not exit None
     """
-    input_path = multiprocessing_input_data['input_path']
-    output_folder = multiprocessing_input_data['output_folder']
-    output_path = multiprocessing_input_data['output_path']
-    input_name = multiprocessing_input_data['input_name']
-    taxon_id = None
     # Add taxon ID in taxon_id.tsv if available.
     if input_path.endswith('.gbk') or input_path.endswith('.gbff'):
-
         logger.info('Creating PathoLogic file for ' + input_path)
         if not os.path.exists(output_path):
             os.makedirs(output_path)
@@ -517,7 +516,6 @@ def run_create_pathologic_file(multiprocessing_input_data):
                             element_file.write('//\n\n')
 
     elif all([True if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file else False for species_file in os.listdir(input_path)]):
-        taxon_id = multiprocessing_input_data['taxon_id']
         write_taxon_id_file(input_name, taxon_id, output_folder)
         shutil.copytree(input_path, output_path)
 

@@ -14,13 +14,13 @@ from mpwt.utils import permission_change
 logger = logging.getLogger(__name__)
 
 
-def check_pwt(multiprocess_inputs, patho_log_folder):
+def check_pwt(multiprocess_run_pwts, patho_log_folder):
     """
     Check PathoLogic's log.
     Create two log files (log_error.txt which contains Pathway Tools log and resume_inference.tsv which contains summary of metabolic networks).
 
     Args:
-        multiprocess_inputs (list): list of dictionary contaning multiprocess input data
+        multiprocess_run_pwts (list): list of dictionary contaning multiprocess input data
         patho_log_folder (str): pathname to the PathoLogic log folder.
 
     Returns:
@@ -42,8 +42,8 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
     failed_inferences = []
     passed_inferences = []
 
-    for multiprocess_input in multiprocess_inputs:
-        species_input_folder_path = multiprocess_input['species_input_folder_path']
+    for multiprocess_run_pwt in multiprocess_run_pwts:
+        species_input_folder_path = multiprocess_run_pwt[0]
         species = species_input_folder_path.split('/')[-2]
         patho_log = species_input_folder_path + '/pathologic.log'
 
@@ -140,17 +140,17 @@ def check_pwt(multiprocess_inputs, patho_log_folder):
 
     return passed_inferences
 
-def check_dat(multiprocess_input):
+def check_dat(run_dat_id, species_pgdb_folder):
     """
     Check dats creation.
 
     Args:
-        multiprocess_input (dictionary): contains multiprocess input (mpwt argument: input folder, output folder, ...)
+        run_dat_id (str): species ID
+        species_pgdb_folder (str): path to species PGDB folder
     """
-    pgdb_folder = multiprocess_input['pgdb_folders']
-    pgdb_folder_dbname = pgdb_folder[0].lower() + 'cyc'
+    pgdb_folder_dbname = run_dat_id.lower() + 'cyc'
 
-    dats_path = pgdb_folder[1] +'/1.0/data/'
+    dats_path = species_pgdb_folder +'/1.0/data/'
 
     dat_files = ["classes.dat", "compound-links.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "gene-links.dat", "genes.dat", "pathway-links.dat",
                 "pathways.dat", "promoters.dat", "protein-features.dat", "protein-links.dat", "proteins.dat", "protligandcplxes.dat", "pubs.dat",

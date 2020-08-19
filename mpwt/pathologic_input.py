@@ -566,7 +566,7 @@ def read_taxon_id(run_folder):
     return taxon_ids
 
 
-def pwt_input_files(multiprocess_input):
+def pwt_input_files(run_folder, taxon_file):
     """
     Check if files needed by Pathway Tools are available, if not create them.
     Check if there is a pathologic.log from a previous run. If yes, delete it.
@@ -574,9 +574,6 @@ def pwt_input_files(multiprocess_input):
     Args:
         multiprocess_input (dict): multiprocess dictionary input
     """
-    run_folder = multiprocess_input['species_input_folder_path']
-    taxon_file = multiprocess_input['taxon_file']
-
     required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
 
@@ -675,13 +672,13 @@ def retrieve_complete_id(pgdb_id_folder):
     Retrieve the ID of the PGDB from the genetic-elements.dat file.
 
     Args:
-        pgdb_id_folder (tuple): second tuple argument is the pathname to the PGDB
+        pgdb_id_folder (list): second tuple argument is the pathname to the PGDB
     Returns:
-        tuple: (new PGDB ID (according to input file), pathname to PGDB folder)
+        list: (new PGDB ID (according to input file), pathname to PGDB folder)
     """
     with open(pgdb_id_folder[1] + '/1.0/input/genetic-elements.dat') as organism_file:
         for line in organism_file:
             if 'ANNOT-FILE' in line and ';;' not in line:
                 pgdb_id_complete = line.split('\t')[1].replace('.gff','').replace('.gbk','').strip()
 
-    return (pgdb_id_complete, pgdb_id_folder[1])
+    return [pgdb_id_complete, pgdb_id_folder[1]]
