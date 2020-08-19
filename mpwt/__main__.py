@@ -14,7 +14,7 @@ usage:
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
     mpwt --version
-    mpwt topf -f=DIR -o=DIR [--cpu=INT]
+    mpwt topf -f=DIR -o=DIR [--cpu=INT] [--clean]
 
 options:
     -h --help     Show help.
@@ -79,6 +79,7 @@ def run_mpwt():
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
+    clean_arg = args['--clean']
     pgdb_to_deletes = args['--delete']
     pgdb_list = args['--list']
     ignore_error = args['--ignore-error']
@@ -96,18 +97,13 @@ def run_mpwt():
         logging.getLogger("mpwt").setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
-    if topf:
-        if input_folder and output_folder:
-            utils.create_pathologic_file(input_folder, output_folder, number_cpu)
-        return
-
     if pgdb_list:
         pgdbs = utils.list_pgdb()
         if pgdbs == []:
             logger.critical('No PGDB inside ptools-local.')
         else:
             logger.critical(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
-        return
+        sys.exit()
 
     # Delete PGDB if use of --delete argument.
     # Use a set to remove redudant PGDB.
@@ -115,7 +111,7 @@ def run_mpwt():
         utils.remove_pgdbs(list(set(pgdb_to_deletes.split(','))), number_cpu)
         return
 
-    if args['--clean']:
+    if clean_arg:
         if verbose:
             logger.info('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
 
@@ -127,6 +123,11 @@ def run_mpwt():
             utils.cleaning(number_cpu, verbose)
         if not patho_inference and not dat_creation and not move_dat and not output_folder:
             sys.exit()
+
+    if topf:
+        if input_folder and output_folder:
+            utils.create_pathologic_file(input_folder, output_folder, number_cpu)
+        sys.exit()
 
     multiprocess_pwt(input_folder=input_folder,
                     output_folder=output_folder,
