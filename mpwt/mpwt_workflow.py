@@ -159,10 +159,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             multiprocess_run_pwts = []
             multiprocess_run_pwt_dats = []
             multiprocess_run_move_pgdbs = []
-            for run_id in run_ids:
-                input_folder_path = input_folder + '/' + run_id + '/'
-                species_pgdb_folder = pgdbs_folder_path + run_id.lower() + 'cyc/'
-                input_run_move_pgdbs = [run_id, species_pgdb_folder]
+            for run_patho_dat_id in run_patho_dat_ids:
+                input_folder_path = input_folder + '/' + run_patho_dat_id + '/'
+                species_pgdb_folder = pgdbs_folder_path + run_patho_dat_id.lower() + 'cyc/'
+                input_run_move_pgdbs = [run_patho_dat_id, species_pgdb_folder]
                 input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
                 multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
                 multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference])
@@ -200,8 +200,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             steps.append('PathoLogic inference')
             logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
-            multiprocess_pwt_input_files = []
-            multiprocess_run_pwts = []
             multiprocess_run_pwt_dats = []
             multiprocess_run_move_pgdbs = []
             passed_inferences = []
@@ -250,8 +248,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
                 input_folder_path = input_folder + '/' + run_dat_id + '/'
                 species_pgdb_folder = pgdbs_folder_path + run_dat_id.lower() + 'cyc/'
-                input_run_move_pgdbs = [run_dat_id, species_pgdb_folder]
                 multiprocess_run_pwt_dats.append([input_folder_path])
+                input_run_move_pgdbs = [run_dat_id, species_pgdb_folder]
                 input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
                 multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
