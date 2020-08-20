@@ -304,7 +304,7 @@ mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--tp] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
 
@@ -327,6 +327,7 @@ mpwt can be used in a python script with an import:
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
 			  patho_operon_predictor=optional_boolean,
+			  patho_transporter_inference=patho_transporter_inference,
 			  no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
@@ -350,6 +351,8 @@ mpwt can be used in a python script with an import:
 |          --hf           | patho_hole_filler(boolean)                     | Launch PathoLogic Hole Filler with Blast                                |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --tp           | patho_transporter_inference(boolean)           | Launch PathoLogic Transport Inference Parser                            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)    |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -436,13 +439,13 @@ Convert Genbank and GFF files into PathoLogic files then create PGDBs of studied
         mpwt.create_pathologic_file(input_folder='path/to/folder/input', output_folder='path/to/folder/pf')
         mpwt.multiprocess_pwt(input_folder='path/to/folder/pf', patho_inference=True)
 
-Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations (need Pathway Tools 23.5 or higher):
+Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor, Transport Inference Parser and create logs:
 
 ..
 
     .. code:: sh
 
-        mpwt -f path/to/folder/input --patho --hf --op --nc --log path/to/folder/log
+        mpwt -f path/to/folder/input --patho --hf --op --tp --log path/to/folder/log
 
     .. code:: python
 
@@ -451,7 +454,7 @@ Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon P
                 patho_inference=True,
                 patho_hole_filler=True,
                 patho_operon_predictor=True,
-                no_download_articles=True,
+                patho_transporter_inference=True,
                 patho_log='path/to/folder/log')
 
 Create PGDBs of studied organisms inside ptools-local with pathway prediction score of 1:

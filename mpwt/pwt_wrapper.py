@@ -89,7 +89,7 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
     return error_status
 
 
-def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor):
+def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference):
     """
     Create PGDB using files created during 'create_dats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
@@ -101,6 +101,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         species_input_folder_path (str): path to input folder
         patho_hole_filler (bool): boolean to use or not PathoLogic Hole Filler
         patho_operon_predictor (bool): boolean to use or not PathoLogic Operon Predictor
+        patho_transporter_inference (bool): boolean to use or not PathoLogic Transport Inference Parser
     Returns:
         boolean: True if there is an error during Pathway Tools run
     """
@@ -113,6 +114,9 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
 
     if patho_operon_predictor:
         cmd_pwt.append('-operon-predictor')
+
+    if patho_transporter_inference:
+        cmd_pwt.append('-tip')
 
     logger.info(' '.join(cmd_pwt))
 

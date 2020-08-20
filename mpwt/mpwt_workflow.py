@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
-                     patho_hole_filler=None, patho_operon_predictor=None, no_download_articles=None,
+                     patho_hole_filler=None, patho_operon_predictor=None,
+                     patho_transporter_inference=None, no_download_articles=None,
                      dat_creation=None, dat_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
                      pathway_score=None, taxon_file=None, verbose=None):
@@ -36,6 +37,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_inference (bool): PathoLogic inference (True/False)
         patho_hole_filler (bool): PathoLogic hole filler (True/False)
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
+        patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         dat_creation (bool): BioPAX/attributes-values files creation (True/False)
         dat_extraction (bool): move only BioPAX/attributes-values files to output folder (True/False)
@@ -89,6 +91,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     #Check if no_download_articles is used with patho_inference.
     if no_download_articles and not patho_inference:
         sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
+
+    #Check if patho_transporter_inference is used with patho_inference.
+    if patho_transporter_inference and not patho_inference:
+        sys.exit('To use --tp/patho_transporter_inference, you need to use the --patho/patho_inference argument.')
 
     #Check if no_download_articles is used with patho_inference.
     if pathway_score and not patho_inference:
@@ -159,7 +165,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 input_run_move_pgdbs = [run_id, species_pgdb_folder]
                 input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
                 multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
-                multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor])
+                multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference])
                 multiprocess_run_pwt_dats.append([input_folder_path])
                 multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
