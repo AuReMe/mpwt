@@ -166,6 +166,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
             input_error_status = mpwt_pool.starmap(pwt_input_files, multiprocess_pwt_input_files)
             if any(input_error_status):
+                close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                 sys.exit('Error during PathoLogic input files creation.')
 
             input_time = time.time()
@@ -185,6 +186,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                     if ignore_error:
                         logger.critical('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
                     else:
+                        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                         sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
             patho_time = time.time()
@@ -248,10 +250,12 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
     if not multiprocess_run_pwt_dats:
+        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
         logger.critical('No PGDB to export to move to output folder.')
         return
 
     if not multiprocess_run_move_pgdbs:
+        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
         logger.critical('No PGDB to export in dat format or to move to output folder.')
         return
 
@@ -266,6 +270,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             if ignore_error:
                 logger.critical('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
             else:
+                close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                 sys.exit('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
         dat_time = time.time()
@@ -292,16 +297,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
 
-    mpwt_pool.close()
-    mpwt_pool.join()
-
-    # Turn on loading of pubmed entries.
-    if no_download_articles:
-        utils.pubmed_citations(activate_citations=True)
-
-    # Remodify the pathway score to its original value.
-    if pathway_score:
-        utils.modify_pathway_score(0.35)
+    close_mpwt(mpwt_pool, no_download_articles, pathway_score)
 
     end_time = time.time()
     times.append(end_time)
@@ -327,3 +323,22 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         permission_change(patho_log)
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+
+
+def close_mpwt(mpwt_pool, no_download_articles, pathway_score):
+    """End multiprocessing Pool and restore ptools-init.dat
+
+    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
+    no_download_articles (bool): turning off loading of PubMed citations (True/False)
+    pathway_score (float): score between 0 and 1 to accept or reject pathway
+    """
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+    # Turn on loading of pubmed entries.
+    if no_download_articles:
+        utils.pubmed_citations(activate_citations=True)
+
+    # Remodify the pathway score to its original value.
+    if pathway_score:
+        utils.modify_pathway_score(0.35)
