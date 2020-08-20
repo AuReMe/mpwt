@@ -24,8 +24,8 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-mpwt works only on **Python 3** and it has been tested on Python 3.6. Since the 0.5.7 version, mpwt needs at least Python 3.3.
-It requires some python packages (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
+mpwt needs at least **Python3.6**.
+mpwt has three python depedencies (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__. The last version supported by mpwt is shown in the badge Pathway Tools.
 
@@ -35,7 +35,7 @@ Pathway Tools needs **Blast**, so it must be install on your system. Depending o
 
 On Linux and MacOS: ``export PATH=$PATH:your/install/directory/pathway-tools``.
 
-Consider adding Pathway Tools in ``$PATH`` permanently by running
+Consider adding Pathway Tools in ``$PATH`` permanently by running:
 
 .. code:: sh
 
@@ -146,9 +146,9 @@ GFF file example:
     ##sequence-region scaffold_1 1 XXXXXX
     scaffold_1	RefSeq	region	1	XXXXXXX	.	+	.	ID=region_id;Dbxref=taxon:XXXXXX
     scaffold_1	RefSeq	gene	START	STOP	.	-	.	ID=gene_id
-    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id
+    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id;ec_number=X.X.X.X"
 
-**Warning**: it seems that metabolic networks from GFF file have less reactions/pathways/compounds than metabolic networks from Genbank file.
+**Warning**: it seems that metabolic networks from GFF file have less reactions/pathways/compounds than metabolic networks from Genbank file or PathoLogic File.
 Lack of some annotations (EC, GO) can be the reason explaining these differences.
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
