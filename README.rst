@@ -24,7 +24,7 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-mpwt works only on **Python 3** and it has been tested on Python 3.6.
+mpwt works only on **Python 3** and it has been tested on Python 3.6. Since the 0.5.7 version, mpwt needs at least Python 3.3.
 It requires some python packages (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__. The last version supported by mpwt is shown in the badge Pathway Tools.

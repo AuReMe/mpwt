@@ -264,6 +264,14 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
 
 def write_taxon_id_file(input_name, taxon_id, output_folder):
+    """
+    Write taxon_id.tsv file.
+
+    Args:
+        input_name (str): name of the species
+        taxon_id (str): taxon_id linked to the species
+        output_folder (str): path to output folder
+    """
     if not os.path.exists(output_folder + '/taxon_id.tsv'):
         with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
             taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
@@ -280,7 +288,6 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
     Create PathoLogic files from a Genbank or a GFF file.
 
     Args:
-        multiprocess_input (dictionary): contains multiprocess input (input folder, output_path, output folder and input_name)
         input_path (str): path to species input folder
         output_path (str): path to output species folder
         output_folder (str): path to output folder

@@ -572,7 +572,8 @@ def pwt_input_files(run_folder, taxon_file):
     Check if there is a pathologic.log from a previous run. If yes, delete it.
 
     Args:
-        multiprocess_input (dict): multiprocess dictionary input
+        run_folder (str): path to the input folder
+        taxon_file (str): path to the taxon_id.tsv file
     """
     required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
