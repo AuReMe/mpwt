@@ -52,9 +52,6 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     else:
         taxon_ids = None
 
-    # Initiate the output taxon_id.tsv file.
-    open(output_folder + '/taxon_id.tsv', 'w').close()
-
     # For each input, search for a GenBank, a GFF or PathoLogic files.
     for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
@@ -77,6 +74,10 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
             os.makedirs(output_folder)
 
         if taxon_ids:
+            # Initiate the output taxon_id.tsv file.
+            with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+                taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+                taxon_writer.writerow(['species', 'taxon_id'])
             if input_name in taxon_ids:
                 taxon_id = taxon_ids[input_name]
         else:
@@ -96,22 +97,16 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
 def write_taxon_id_file(input_name, taxon_id, output_folder):
     """
-    Write taxon_id.tsv file.
+    Add species to taxon_id.tsv file.
 
     Args:
         input_name (str): name of the species
         taxon_id (str): taxon_id linked to the species
         output_folder (str): path to output folder
     """
-    if not os.path.exists(output_folder + '/taxon_id.tsv'):
-        with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-            taxon_writer.writerow(['species', 'taxon_id'])
-            taxon_writer.writerow([input_name, taxon_id])
-    else:
-        with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
-            taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-            taxon_writer.writerow([input_name, taxon_id])
+    with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+        taxon_writer.writerow([input_name, taxon_id])
 
 
 def run_create_pathologic_file(input_path, output_path, output_folder, input_name, taxon_id):
