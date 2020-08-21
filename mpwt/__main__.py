@@ -48,7 +48,7 @@ import os
 import sys
 import pkg_resources
 
-from mpwt import utils
+from mpwt import utils, to_pathologic
 from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
@@ -128,7 +128,7 @@ def run_mpwt():
 
     if topf:
         if input_folder and output_folder:
-            utils.create_pathologic_file(input_folder, output_folder, number_cpu)
+            to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
         sys.exit()
 
     multiprocess_pwt(input_folder=input_folder,
