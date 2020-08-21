@@ -14,7 +14,7 @@ import time
 
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_dat, run_move_pgdb
-from mpwt.results_check import check_dat, check_pwt, permission_change
+from mpwt.results_check import check_dat, check_pwt
 from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id, retrieve_complete_id
 from multiprocessing import Pool
 
@@ -292,8 +292,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if output_folder:
         logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
         mpwt_pool.starmap(run_move_pgdb, multiprocess_run_move_pgdbs)
-        # Give access to the file for user outside the container.
-        permission_change(output_folder)
 
         move_time = time.time()
         times.append(move_time)
@@ -323,8 +321,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                     else:
                         step_duration = step_time - times[index-1]
                     input_file.write('Step {0} takes: {1:.2f}s.\n'.format(steps[index] , step_duration))
-
-        permission_change(patho_log)
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
 

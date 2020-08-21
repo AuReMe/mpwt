@@ -9,8 +9,6 @@ import os
 import logging
 import sys
 
-from mpwt.utils import permission_change
-
 logger = logging.getLogger(__name__)
 
 
@@ -134,9 +132,6 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
                     output_file.write('Build failed: ' + str(number_failed_inference) + '\n')
                     output_file.write('Species: ' + ', '.join(failed_inferences) + '\n\n')
                 output_file.write(save)
-
-    if patho_log_folder:
-        permission_change(patho_log_folder)
 
     return passed_inferences
 
