@@ -17,6 +17,8 @@ There is no guarantee that this script will work, it is a Work In Progress in ea
 mpwt: Pipeline summary
 ======================
 
+The following picture shows the main argument of mpwt:
+
 .. image:: mpwt_pipeline.svg
 
 .. contents:: Table of contents
