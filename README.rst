@@ -14,7 +14,7 @@ mpwt is a python package for running Pathway Tools on multiple genomes using mul
 
 There is no guarantee that this script will work, it is a Work In Progress in early state.
 
-mpwt: pipeline summary
+mpwt: Pipeline summary
 ======================
 
 .. image:: mpwt_pipeline.svg
