@@ -14,6 +14,11 @@ mpwt is a python package for running Pathway Tools on multiple genomes using mul
 
 There is no guarantee that this script will work, it is a Work In Progress in early state.
 
+mpwt: pipeline summary
+======================
+
+.. image:: mpwt_pipeline.svg
+
 .. contents:: Table of contents
    :backlinks: top
    :local:
@@ -307,11 +312,6 @@ mpwt can be used with the command line:
     mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--tp] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
-
-.. image:: https://raw.githubusercontent.com/AuReMe/mpwt/master/mpwt_steps.svg?sanitize=true
-
-This picture show a typical run of mpwt with the different options. The '*' is incremental, for each step you look at, you must add all the previous options to have the complete command.
-For example, if you want to have only the PGDBs in an output folder the command is: mpwt -f input_folder --patho -o output_folder
 
 mpwt can be used in a python script with an import:
 
