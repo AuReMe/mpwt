@@ -307,6 +307,8 @@ The species_name is extracted from the Genbank/GFF/PF files.
 Command Line and Python arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+By using the python multiprocessing library, mpwt launches parallel PathoLogic processes on physical cores. Regarding memory requirements, they depend on the genome but we advise to use at least 2 GB per core.
+
 mpwt can be used with the command line:
 
 .. code:: sh
@@ -390,7 +392,7 @@ There is also another argument:
 .. code:: python
 
     import mpwt
-    mpwt.create_pathologic_file(input_folder, output_folder, cpu_number)
+    mpwt.to_pathologic.create_pathologic_file(input_folder, output_folder, cpu_number)
 
 This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
 
@@ -471,8 +473,8 @@ Create PGDBs of studied organisms inside ptools-local with pathway prediction sc
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                patho_inference=True,
-                pathway_score=1.0)
+                            patho_inference=True,
+                            pathway_score=1.0)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:
 
@@ -486,11 +488,11 @@ Create PGDBs of studied organisms inside ptools-local and create dat files:
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                patho_inference=True,
+                            patho_inference=True,
                             dat_creation=True)
 
 Create PGDBs of studied organisms inside ptools-local.
-Then move the files to the output folder.
+Then move all the PGDB files to the output folder.
 
 ..
 
@@ -503,7 +505,7 @@ Then move the files to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             output_folder='path/to/folder/output',
-                patho_inference=True)
+                            patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 Then move the dat files to the output folder.
@@ -520,9 +522,9 @@ Then move the dat files to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             output_folder='path/to/folder/output',
-                patho_inference=True,
+                            patho_inference=True,
                             dat_creation=True,
-                dat_extraction=True)
+                            dat_extraction=True)
 
 
 Create dat files for the PGDB inside ptools-local.
@@ -539,7 +541,7 @@ And move them to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                             dat_creation=True,
-                dat_extraction=True)
+                            dat_extraction=True)
 
 Move PGDB from ptools-local to the output folder:
 
@@ -579,14 +581,22 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(input_folder,
-                              output_folder,
-                              patho_inference=optional_boolean,
-                              dat_creation=optional_boolean,
-                              dat_extraction=optional_boolean,
-                              size_reduction=optional_boolean,
-                              number_cpu=int,
-                              verbose=optional_boolean)
+        mpwt.multiprocess_pwt(input_folder=folder_input,
+                output_folder=folder_output,
+                patho_inference=optional_boolean,
+                patho_hole_filler=optional_boolean,
+                patho_operon_predictor=optional_boolean,
+                patho_transporter_inference=patho_transporter_inference,
+                no_download_articles=optional_boolean,
+                dat_creation=optional_boolean,
+                dat_extraction=optional_boolean,
+                size_reduction=optional_boolean,
+                number_cpu=int,
+                patho_log=optional_folder_pathname,
+                ignore_error=optional_boolean,
+                pathway_score=pathway_score,
+                taxon_file=optional_boolean,
+                verbose=optional_boolean)
 
 - Delete all the previous PGDB and the metadata files
 
@@ -595,7 +605,7 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.cleaning()
+        mpwt.cleaning(number_cpu=optional_int, verbose=optional_boolean)
 
     This can also be used with a command line argument:
 
