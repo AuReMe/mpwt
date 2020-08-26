@@ -701,7 +701,7 @@ Useful functions
 Errors
 ~~~~~~
 
-If you encounter errors (and it is highly possible) there is some tips that can help you resolved them.
+If you encounter errors (and it is highly possible) there is informations that can help you resolved them.
 
 For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
@@ -823,7 +823,7 @@ Acknowledgements
 
 `Clémence Frioux <https://github.com/cfrioux>`__ for her work and feedbacks.
 
-Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway Tools and on Genbank format.
+Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the `Bioinformatics Research Group of SRI International <http://bioinformatics.ai.sri.com/>`__ for their help on Pathway Tools and on Genbank format.
 
 GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
 

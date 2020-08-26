@@ -176,7 +176,7 @@ def pubmed_citations(activate_citations):
     Activate or deactivate loading of PubMed citations.
 
     Args:
-    activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
+        activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
     """
     ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
     new_ptools_file = ""
@@ -209,7 +209,7 @@ def modify_pathway_score(pathway_score):
     Modify the Pathway-Prediction-Score-Cutoff of ptools-init.dat
 
     Args:
-    pathway_score (float): score between 0 and 1 to accept or reject pathways
+        pathway_score (float): score between 0 and 1 to accept or reject pathways
     """
     ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
     new_ptools_file = ""
