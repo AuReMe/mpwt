@@ -146,10 +146,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Check input folder and create input files for PathoLogic.
     if input_folder:
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-        if output_folder:
-            if not os.path.exists(output_folder):
-                logger.info('No output directory, it will be created.')
-                os.mkdir(output_folder)
         run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
 
         # Launch PathoLogic inference on species with no PGDBs.
@@ -291,6 +287,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Move PGDBs or attribute-values/dat files.
     if output_folder:
         logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
+        if not os.path.exists(output_folder):
+            logger.info('No output directory, it will be created.')
+            os.mkdir(output_folder)
         mpwt_pool.starmap(run_move_pgdb, multiprocess_run_move_pgdbs)
 
         move_time = time.time()

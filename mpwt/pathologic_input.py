@@ -113,21 +113,26 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
     # Take run_ids and remove folder with error (with the intersection with check_species_folders) and if there is already present output.
     clean_run_ids = set(run_ids).intersection(set(check_species_folders))
     if output_folder:
-        already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
-        new_run_ids = clean_run_ids - set(already_present_outputs)
-        new_run_ids = list(new_run_ids)
-        for pgdb in already_present_outputs:
-            if pgdb in clean_run_ids:
-                logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
+        if os.path.exists(output_folder):
+            if os.path.isdir(output_folder):
+                already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
+                new_run_ids = clean_run_ids - set(already_present_outputs)
+                new_run_ids = list(new_run_ids)
+                for pgdb in already_present_outputs:
+                    if pgdb in clean_run_ids:
+                        logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
 
-        if len(new_run_ids) == 0:
-            logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
-            return None, None
+                if len(new_run_ids) == 0:
+                    logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
+                    return None, None
+            else:
+                logger.info(output_folder + " is not a valid output folder.")
+                return None, None
+        else:
+            new_run_ids = list(clean_run_ids)
 
     else:
-        new_run_ids = []
-        for species_folder in check_species_folders:
-            new_run_ids.append(species_folder)
+        new_run_ids = list(clean_run_ids)
 
     # Check for PGDB in ptools-local to see if PGDB are already present but they haven't been exported.
     already_present_pgdbs = [pgdb_species_folder[:-3] for pgdb_species_folder in utils.list_pgdb()]
@@ -146,7 +151,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
             if os.path.exists(pathologic_file):
                 with open(pathologic_file, 'r') as pathologic_log:
                     pathologic_string = pathologic_log.read()
-                    if 'Build done.' in pathologic_string or 'PGDB build done.' in pathologic_string:
+                    if 'Done' in pathologic_string:
                         finished_builds.append(pathologic_build_lower)
                     else:
                         unfinished_builds.append(pathologic_build_lower)
@@ -205,6 +210,7 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
         taxon_id (str): Taxon ID for the corresponding species
         taxon_file (bool): Boolean indicating if a taxon_file must be used
     Returns:
+        taxon_error (bool): Error status (True: error, False: no error).
         taxon_id (str): Taxon ID for the corresponding species
         taxon_datas (dict): Name of element file (or 'one_input' if only one file)
     """
@@ -223,6 +229,9 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
     with open(input_folder + '/taxon_id.tsv') as taxon_id_file:
         taxon_id_reader = csv.DictReader(taxon_id_file, delimiter='\t')
         for data in taxon_id_reader:
+            if 'species' not in data:
+                logger.critical('Missing "species" header in taxon_id.tsv file {0}.'.format(input_folder + '/taxon_id.tsv'))
+                return True, None, None
             species = data['species']
             known_species.append(species)
             if pgdb_id == species:

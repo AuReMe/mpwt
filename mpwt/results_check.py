@@ -55,6 +55,7 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
         warning_count = 0
 
         if os.path.exists(patho_log):
+            pgdb_build_done = False
             with open(patho_log, 'r') as input_file:
                 for index, line in enumerate(input_file):
                     if ';;; Error:' in line:
@@ -75,6 +76,7 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
                                 patho_error_file.write(line)
 
                     if 'Build done.' in line or 'PGDB build done.' in line:
+                        pgdb_build_done = True
                         if patho_log_folder:
                             patho_error_file.write(line)
                             resume_inference_line = next(input_file)
@@ -90,9 +92,12 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
                             pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
+
+                    if 'Done' in line:
+                        passed_inferences.append(species)
+                        if patho_log_folder and pgdb_build_done:
                             patho_resume_writer.writerow([species, gene_number, protein_number, pathway_number, reaction_number, compound_number, non_fatal_error_count, warning_count])
 
-                        passed_inferences.append(species)
                 if species not in passed_inferences and species not in failed_inferences:
                     failed_inferences.append(species)
                     if patho_log_folder:
