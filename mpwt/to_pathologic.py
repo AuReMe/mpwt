@@ -52,6 +52,14 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     else:
         taxon_ids = None
 
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Initiate the output taxon_id.tsv file.
+    with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+        taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
+        taxon_writer.writerow(['species', 'taxon_id'])
+
     # For each input, search for a GenBank, a GFF or PathoLogic files.
     for input_name in input_names:
         input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
@@ -70,14 +78,7 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
 
         output_path = output_folder + '/' + input_name
 
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-
         if taxon_ids:
-            # Initiate the output taxon_id.tsv file.
-            with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
-                taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
-                taxon_writer.writerow(['species', 'taxon_id'])
             if input_name in taxon_ids:
                 taxon_id = taxon_ids[input_name]
         else:
@@ -104,7 +105,9 @@ def write_taxon_id_file(input_name, taxon_id, output_folder):
         taxon_id (str): taxon_id linked to the species
         output_folder (str): path to output folder
     """
-    with open(output_folder + '/taxon_id.tsv', 'a') as taxon_id_file:
+    taxon_id_path = output_folder + '/taxon_id.tsv'
+
+    with open(taxon_id_path, 'a') as taxon_id_file:
         taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
         taxon_writer.writerow([input_name, taxon_id])
 
