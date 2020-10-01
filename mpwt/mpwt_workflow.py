@@ -14,15 +14,16 @@ import time
 
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_dat, run_move_pgdb
-from mpwt.results_check import check_dat, check_pwt, permission_change
-from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id
+from mpwt.results_check import check_dat, check_pwt
+from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id, retrieve_complete_id
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
 
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
-                     patho_hole_filler=None, patho_operon_predictor=None, no_download_articles=None,
+                     patho_hole_filler=None, patho_operon_predictor=None,
+                     patho_transporter_inference=None, no_download_articles=None,
                      dat_creation=None, dat_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
                      pathway_score=None, taxon_file=None, verbose=None):
@@ -36,6 +37,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_inference (bool): PathoLogic inference (True/False)
         patho_hole_filler (bool): PathoLogic hole filler (True/False)
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
+        patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         dat_creation (bool): BioPAX/attributes-values files creation (True/False)
         dat_extraction (bool): move only BioPAX/attributes-values files to output folder (True/False)
@@ -90,6 +92,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if no_download_articles and not patho_inference:
         sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
 
+    #Check if patho_transporter_inference is used with patho_inference.
+    if patho_transporter_inference and not patho_inference:
+        sys.exit('To use --tp/patho_transporter_inference, you need to use the --patho/patho_inference argument.')
+
     #Check if no_download_articles is used with patho_inference.
     if pathway_score and not patho_inference:
         sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
@@ -140,23 +146,29 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Check input folder and create input files for PathoLogic.
     if input_folder:
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
-        if output_folder:
-            if not os.path.exists(output_folder):
-                logger.info('No output directory, it will be created.')
-                os.mkdir(output_folder)
         run_patho_dat_ids, run_dat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
 
         # Launch PathoLogic inference on species with no PGDBs.
         if run_patho_dat_ids:
             # Create the list containing all the data used by the multiprocessing call.
-            multiprocess_inputs = create_mpwt_input(run_ids=run_patho_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                    patho_hole_filler=patho_hole_filler, patho_operon_predictor=patho_operon_predictor,
-                                                    dat_extraction=dat_extraction, output_folder=output_folder, size_reduction=size_reduction,
-                                                    only_dat_creation=None, taxon_file=taxon_file)
+            multiprocess_pwt_input_files = []
+            multiprocess_run_pwts = []
+            multiprocess_run_pwt_dats = []
+            multiprocess_run_move_pgdbs = []
+            for run_patho_dat_id in run_patho_dat_ids:
+                input_folder_path = input_folder + '/' + run_patho_dat_id + '/'
+                species_pgdb_folder = pgdbs_folder_path + run_patho_dat_id.lower() + 'cyc/'
+                input_run_move_pgdbs = [run_patho_dat_id, species_pgdb_folder]
+                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+                multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
+                multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference])
+                multiprocess_run_pwt_dats.append([input_folder_path])
+                multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
             logger.info('~~~~~~~~~~Creation of input data from Genbank/GFF/PF~~~~~~~~~~')
-            input_error_status = mpwt_pool.map(pwt_input_files, multiprocess_inputs)
+            input_error_status = mpwt_pool.starmap(pwt_input_files, multiprocess_pwt_input_files)
             if any(input_error_status):
+                close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                 sys.exit('Error during PathoLogic input files creation.')
 
             input_time = time.time()
@@ -167,15 +179,16 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             # Launch PathoLogic.
             if patho_inference:
                 logger.info('~~~~~~~~~~Inference on the data~~~~~~~~~~')
-                error_status = mpwt_pool.map(run_pwt, multiprocess_inputs)
+                error_status = mpwt_pool.starmap(run_pwt, multiprocess_run_pwts)
 
                 # Check PathoLogic build.
                 logger.info('~~~~~~~~~~Check inference~~~~~~~~~~')
-                passed_inferences = check_pwt(multiprocess_inputs, patho_log)
+                passed_inferences = check_pwt(multiprocess_run_pwts, patho_log)
                 if any(error_status):
                     if ignore_error:
                         logger.critical('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
                     else:
+                        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                         sys.exit('Error during inference. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
             patho_time = time.time()
@@ -183,7 +196,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             steps.append('PathoLogic inference')
             logger.info('----------End of PathoLogic inference: {0:.2f}s----------'.format(times[-1] - times[-2]))
         else:
-            multiprocess_inputs = []
+            multiprocess_run_pwt_dats = []
+            multiprocess_run_move_pgdbs = []
             passed_inferences = []
 
     # Create path for lisp if there is no folder given.
@@ -197,16 +211,24 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
         # Create a lisp script file for each PGDB in the ptools-local folder.
         dat_run_ids = create_only_dat_lisp(pgdbs_folder_path, tmp_folder)
+        multiprocess_run_pwt_dats = []
+        multiprocess_run_move_pgdbs = []
+        for dat_run_id in dat_run_ids:
+            input_folder_path = input_folder + '/' + dat_run_id + '/'
+            species_pgdb_folder = pgdbs_folder_path + dat_run_id.lower() + 'cyc/'
+            input_run_move_pgdbs = [dat_run_id, species_pgdb_folder]
+            if only_dat_creation:
+                input_run_move_pgdbs = retrieve_complete_id(input_run_move_pgdbs)
+            input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+            multiprocess_run_pwt_dats.append([input_folder_path])
+            multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
-        multiprocess_inputs = create_mpwt_input(run_ids=dat_run_ids, input_folder=tmp_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                patho_hole_filler=patho_hole_filler, patho_operon_predictor=patho_operon_predictor,
-                                                dat_extraction=dat_extraction, output_folder=output_folder, size_reduction=size_reduction,
-                                                only_dat_creation=only_dat_creation, taxon_file=taxon_file)
     # Add species that have data in PGDB but are not present in output folder.
     # Or if ignore_error has been used, select only PathoLogic build that have succeed + species in input with PGDB and not in output.
     if input_folder:
         if ignore_error:
-            multiprocess_inputs = []
+            multiprocess_run_pwt_dats = []
+            multiprocess_run_move_pgdbs = []
             if run_patho_dat_ids:
                 if passed_inferences:
                     tmp_run_dat_ids = list(set(passed_inferences).intersection(set(run_patho_dat_ids)))
@@ -220,27 +242,35 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
                 create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
-            multiprocess_dat_inputs = create_mpwt_input(run_ids=run_dat_ids, input_folder=input_folder, pgdbs_folder_path=pgdbs_folder_path,
-                                                        patho_hole_filler=patho_hole_filler, patho_operon_predictor=patho_operon_predictor,
-                                                        dat_extraction=dat_extraction, output_folder=output_folder, size_reduction=size_reduction,
-                                                        only_dat_creation=None, taxon_file=taxon_file)
-            multiprocess_inputs.extend(multiprocess_dat_inputs)
+                input_folder_path = input_folder + '/' + run_dat_id + '/'
+                species_pgdb_folder = pgdbs_folder_path + run_dat_id.lower() + 'cyc/'
+                multiprocess_run_pwt_dats.append([input_folder_path])
+                input_run_move_pgdbs = [run_dat_id, species_pgdb_folder]
+                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+                multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
-    if not multiprocess_inputs:
+    if not multiprocess_run_pwt_dats:
+        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
+        logger.critical('No PGDB to export to move to output folder.')
+        return
+
+    if not multiprocess_run_move_pgdbs:
+        close_mpwt(mpwt_pool, no_download_articles, pathway_score)
         logger.critical('No PGDB to export in dat format or to move to output folder.')
         return
 
     # Create BioPAX/attributes-values dat files.
     if (input_folder and dat_creation) or dat_creation:
         logger.info('~~~~~~~~~~Creation of the .dat files~~~~~~~~~~')
-        dat_error_status = mpwt_pool.map(run_pwt_dat, multiprocess_inputs)
+        dat_error_status = mpwt_pool.starmap(run_pwt_dat, multiprocess_run_pwt_dats)
         logger.info('~~~~~~~~~~Check .dat~~~~~~~~~~')
-        for multiprocess_input in multiprocess_inputs:
-            check_dat(multiprocess_input)
+        for multiprocess_run_move_pgdb in multiprocess_run_move_pgdbs:
+            check_dat(multiprocess_run_move_pgdb[0], multiprocess_run_move_pgdb[1])
         if any(dat_error_status):
             if ignore_error:
                 logger.critical('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
             else:
+                close_mpwt(mpwt_pool, no_download_articles, pathway_score)
                 sys.exit('Error during dat creation. Process stopped. Look at the command log. Also by using --log argument, you can have additional information.')
 
         dat_time = time.time()
@@ -257,9 +287,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Move PGDBs or attribute-values/dat files.
     if output_folder:
         logger.info('~~~~~~~~~~Moving result files~~~~~~~~~~')
-        mpwt_pool.map(run_move_pgdb, multiprocess_inputs)
-        # Give access to the file for user outside the container.
-        permission_change(output_folder)
+        if not os.path.exists(output_folder):
+            logger.info('No output directory, it will be created.')
+            os.mkdir(output_folder)
+        mpwt_pool.starmap(run_move_pgdb, multiprocess_run_move_pgdbs)
 
         move_time = time.time()
         times.append(move_time)
@@ -267,16 +298,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
 
-    mpwt_pool.close()
-    mpwt_pool.join()
-
-    # Turn on loading of pubmed entries.
-    if no_download_articles:
-        utils.pubmed_citations(activate_citations=True)
-
-    # Remodify the pathway score to its original value.
-    if pathway_score:
-        utils.modify_pathway_score(0.35)
+    close_mpwt(mpwt_pool, no_download_articles, pathway_score)
 
     end_time = time.time()
     times.append(end_time)
@@ -299,6 +321,23 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                         step_duration = step_time - times[index-1]
                     input_file.write('Step {0} takes: {1:.2f}s.\n'.format(steps[index] , step_duration))
 
-        permission_change(patho_log)
-
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+
+
+def close_mpwt(mpwt_pool, no_download_articles, pathway_score):
+    """End multiprocessing Pool and restore ptools-init.dat
+
+    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
+    no_download_articles (bool): turning off loading of PubMed citations (True/False)
+    pathway_score (float): score between 0 and 1 to accept or reject pathway
+    """
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+    # Turn on loading of pubmed entries.
+    if no_download_articles:
+        utils.pubmed_citations(activate_citations=True)
+
+    # Remodify the pathway score to its original value.
+    if pathway_score:
+        utils.modify_pathway_score(0.35)

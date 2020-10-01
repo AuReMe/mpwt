@@ -14,6 +14,13 @@ mpwt is a python package for running Pathway Tools on multiple genomes using mul
 
 There is no guarantee that this script will work, it is a Work In Progress in early state.
 
+mpwt: Pipeline summary
+======================
+
+The following picture shows the main argument of mpwt:
+
+.. image:: mpwt_pipeline.svg
+
 .. contents:: Table of contents
    :backlinks: top
    :local:
@@ -24,8 +31,8 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-mpwt works only on **Python 3** and it has been tested on Python 3.6.
-It requires some python packages (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
+mpwt needs at least **Python3.6**.
+mpwt requires three python depedencies (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__. The last version supported by mpwt is shown in the badge Pathway Tools.
 
@@ -35,7 +42,7 @@ Pathway Tools needs **Blast**, so it must be install on your system. Depending o
 
 On Linux and MacOS: ``export PATH=$PATH:your/install/directory/pathway-tools``.
 
-Consider adding Pathway Tools in ``$PATH`` permanently by running
+Consider adding Pathway Tools in ``$PATH`` permanently by running:
 
 .. code:: sh
 
@@ -146,9 +153,9 @@ GFF file example:
     ##sequence-region scaffold_1 1 XXXXXX
     scaffold_1	RefSeq	region	1	XXXXXXX	.	+	.	ID=region_id;Dbxref=taxon:XXXXXX
     scaffold_1	RefSeq	gene	START	STOP	.	-	.	ID=gene_id
-    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id
+    scaffold_1	RefSeq	CDS	START	STOP	.	-	0	ID=cds_id;Parent=gene_id;ec_number=X.X.X.X"
 
-**Warning**: it seems that metabolic networks from GFF file have less reactions/pathways/compounds than metabolic networks from Genbank file.
+**Warning**: it seems that metabolic networks from GFF file have less reactions/pathways/compounds than metabolic networks from Genbank file or PathoLogic File.
 Lack of some annotations (EC, GO) can be the reason explaining these differences.
 
 Look at the `NCBI GFF format <https://www.ncbi.nlm.nih.gov/genbank/genomes_gff/>`__ for more informations.
@@ -300,18 +307,15 @@ The species_name is extracted from the Genbank/GFF/PF files.
 Command Line and Python arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+By using the python multiprocessing library, mpwt launches parallel PathoLogic processes on physical cores. Regarding memory requirements, they depend on the genome but we advise to use at least 2 GB per core.
+
 mpwt can be used with the command line:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--tp] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
 
 Optional argument are identified by [].
-
-.. image:: https://raw.githubusercontent.com/AuReMe/mpwt/master/mpwt_steps.svg?sanitize=true
-
-This picture show a typical run of mpwt with the different options. The '*' is incremental, for each step you look at, you must add all the previous options to have the complete command.
-For example, if you want to have only the PGDBs in an output folder the command is: mpwt -f input_folder --patho -o output_folder
 
 mpwt can be used in a python script with an import:
 
@@ -327,6 +331,7 @@ mpwt can be used in a python script with an import:
 			  patho_inference=optional_boolean,
 			  patho_hole_filler=optional_boolean,
 			  patho_operon_predictor=optional_boolean,
+			  patho_transporter_inference=patho_transporter_inference,
 			  no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
@@ -350,6 +355,8 @@ mpwt can be used in a python script with an import:
 |          --hf           | patho_hole_filler(boolean)                     | Launch PathoLogic Hole Filler with Blast                                |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --tp           | patho_transporter_inference(boolean)           | Launch PathoLogic Transport Inference Parser                            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)    |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -385,7 +392,7 @@ There is also another argument:
 .. code:: python
 
     import mpwt
-    mpwt.create_pathologic_file(input_folder, output_folder, cpu_number)
+    mpwt.to_pathologic.create_pathologic_file(input_folder, output_folder, cpu_number)
 
 This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
 
@@ -436,13 +443,13 @@ Convert Genbank and GFF files into PathoLogic files then create PGDBs of studied
         mpwt.create_pathologic_file(input_folder='path/to/folder/input', output_folder='path/to/folder/pf')
         mpwt.multiprocess_pwt(input_folder='path/to/folder/pf', patho_inference=True)
 
-Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor and without loading PubMed citations (need Pathway Tools 23.5 or higher):
+Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon Predictor, Transport Inference Parser and create logs:
 
 ..
 
     .. code:: sh
 
-        mpwt -f path/to/folder/input --patho --hf --op --nc --log path/to/folder/log
+        mpwt -f path/to/folder/input --patho --hf --op --tp --log path/to/folder/log
 
     .. code:: python
 
@@ -451,7 +458,7 @@ Create PGDBs of studied organisms inside ptools-local with Hole Filler, Operon P
                 patho_inference=True,
                 patho_hole_filler=True,
                 patho_operon_predictor=True,
-                no_download_articles=True,
+                patho_transporter_inference=True,
                 patho_log='path/to/folder/log')
 
 Create PGDBs of studied organisms inside ptools-local with pathway prediction score of 1:
@@ -466,8 +473,8 @@ Create PGDBs of studied organisms inside ptools-local with pathway prediction sc
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                patho_inference=True,
-                pathway_score=1.0)
+                            patho_inference=True,
+                            pathway_score=1.0)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files:
 
@@ -481,11 +488,11 @@ Create PGDBs of studied organisms inside ptools-local and create dat files:
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
-                patho_inference=True,
+                            patho_inference=True,
                             dat_creation=True)
 
 Create PGDBs of studied organisms inside ptools-local.
-Then move the files to the output folder.
+Then move all the PGDB files to the output folder.
 
 ..
 
@@ -498,7 +505,7 @@ Then move the files to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             output_folder='path/to/folder/output',
-                patho_inference=True)
+                            patho_inference=True)
 
 Create PGDBs of studied organisms inside ptools-local and create dat files.
 Then move the dat files to the output folder.
@@ -515,9 +522,9 @@ Then move the dat files to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             output_folder='path/to/folder/output',
-                patho_inference=True,
+                            patho_inference=True,
                             dat_creation=True,
-                dat_extraction=True)
+                            dat_extraction=True)
 
 
 Create dat files for the PGDB inside ptools-local.
@@ -534,7 +541,7 @@ And move them to the output folder.
         import mpwt
         mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
                             dat_creation=True,
-                dat_extraction=True)
+                            dat_extraction=True)
 
 Move PGDB from ptools-local to the output folder:
 
@@ -574,14 +581,22 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.multiprocess_pwt(input_folder,
-                              output_folder,
-                              patho_inference=optional_boolean,
-                              dat_creation=optional_boolean,
-                              dat_extraction=optional_boolean,
-                              size_reduction=optional_boolean,
-                              number_cpu=int,
-                              verbose=optional_boolean)
+        mpwt.multiprocess_pwt(input_folder=folder_input,
+                output_folder=folder_output,
+                patho_inference=optional_boolean,
+                patho_hole_filler=optional_boolean,
+                patho_operon_predictor=optional_boolean,
+                patho_transporter_inference=patho_transporter_inference,
+                no_download_articles=optional_boolean,
+                dat_creation=optional_boolean,
+                dat_extraction=optional_boolean,
+                size_reduction=optional_boolean,
+                number_cpu=int,
+                patho_log=optional_folder_pathname,
+                ignore_error=optional_boolean,
+                pathway_score=pathway_score,
+                taxon_file=optional_boolean,
+                verbose=optional_boolean)
 
 - Delete all the previous PGDB and the metadata files
 
@@ -590,7 +605,7 @@ Useful functions
     .. code:: python
 
         import mpwt
-        mpwt.cleaning()
+        mpwt.cleaning(number_cpu=optional_int, verbose=optional_boolean)
 
     This can also be used with a command line argument:
 
@@ -686,7 +701,7 @@ Useful functions
 Errors
 ~~~~~~
 
-If you encounter errors (and it is highly possible) there is some tips that can help you resolved them.
+If you encounter errors (and it is highly possible) there is informations that can help you resolved them.
 
 For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
@@ -808,7 +823,7 @@ Acknowledgements
 
 `Clémence Frioux <https://github.com/cfrioux>`__ for her work and feedbacks.
 
-Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the Bioinformatics Research Group of SRI International for their help on Pathway Tools and on Genbank format.
+Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika Kothari from the `Bioinformatics Research Group of SRI International <http://bioinformatics.ai.sri.com/>`__ for their help on Pathway Tools and on Genbank format.
 
 GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
 

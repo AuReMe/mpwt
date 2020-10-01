@@ -7,14 +7,14 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--nc] [--dat] [--md] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
     mpwt --version
-    mpwt topf -f=DIR -o=DIR [--cpu=INT]
+    mpwt topf -f=DIR -o=DIR [--cpu=INT] [--clean]
 
 options:
     -h --help     Show help.
@@ -23,6 +23,7 @@ options:
     --patho    Will run an inference of Pathologic on the input files.
     --hf    Use with --patho. Run the Hole Filler using Blast.
     --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
+    --tp    Use with --patho. Run the Transport Inference Parser of Pathway-Tools.
     --nc    Use with --patho. Turn off loading of Pubmed entries.
     -p=FLOAT   Use with --patho. Modify PathoLogic pathway prediction score.
     --dat    Will create BioPAX/attribute-value dat files from PGDB.
@@ -47,7 +48,7 @@ import os
 import sys
 import pkg_resources
 
-from mpwt import utils
+from mpwt import utils, to_pathologic
 from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
@@ -73,12 +74,14 @@ def run_mpwt():
     patho_inference = args['--patho']
     patho_hole_filler = args['--hf']
     patho_operon_predictor = args['--op']
+    patho_transporter_inference = args['--tp']
     no_download_articles = args['--nc']
     dat_creation = args['--dat']
     move_dat = args['--md']
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
+    clean_arg = args['--clean']
     pgdb_to_deletes = args['--delete']
     pgdb_list = args['--list']
     ignore_error = args['--ignore-error']
@@ -96,18 +99,13 @@ def run_mpwt():
         logging.getLogger("mpwt").setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
-    if topf:
-        if input_folder and output_folder:
-            utils.create_pathologic_file(input_folder, output_folder, number_cpu)
-        return
-
     if pgdb_list:
         pgdbs = utils.list_pgdb()
         if pgdbs == []:
             logger.critical('No PGDB inside ptools-local.')
         else:
             logger.critical(str(len(pgdbs)) + ' PGDB inside ptools-local:\n' + '\t'.join(pgdbs))
-        return
+        sys.exit()
 
     # Delete PGDB if use of --delete argument.
     # Use a set to remove redudant PGDB.
@@ -115,7 +113,7 @@ def run_mpwt():
         utils.remove_pgdbs(list(set(pgdb_to_deletes.split(','))), number_cpu)
         return
 
-    if args['--clean']:
+    if clean_arg:
         if verbose:
             logger.info('~~~~~~~~~~Remove local PGDB~~~~~~~~~~')
 
@@ -128,11 +126,17 @@ def run_mpwt():
         if not patho_inference and not dat_creation and not move_dat and not output_folder:
             sys.exit()
 
+    if topf:
+        if input_folder and output_folder:
+            to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
+        sys.exit()
+
     multiprocess_pwt(input_folder=input_folder,
                     output_folder=output_folder,
                     patho_inference=patho_inference,
                     patho_hole_filler=patho_hole_filler,
                     patho_operon_predictor=patho_operon_predictor,
+                    patho_transporter_inference=patho_transporter_inference,
                     no_download_articles=no_download_articles,
                     dat_creation=dat_creation,
                     dat_extraction=move_dat,

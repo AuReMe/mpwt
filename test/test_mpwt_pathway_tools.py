@@ -74,7 +74,7 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--dat', '--md', '--cpu', '3'])
 
     pgdbs = mpwt.list_pgdb()
-    assert sorted(pgdbs) == ['fatty_acid_beta_oxydation_i_gffcyc', 'fatty_acid_beta_oxydation_i_pfcyc', 'fatty_acid_beta_oxydation_icyc']
+    assert set(['fatty_acid_beta_oxydation_i_gffcyc', 'fatty_acid_beta_oxydation_i_pfcyc', 'fatty_acid_beta_oxydation_icyc']).issubset(set(pgdbs))
 
     pathway_fabo_pathname = "test_output/fatty_acid_beta_oxydation_I_gff/pathways.dat"
     expected_tca_reactions = reaction_extraction(pathway_fabo_pathname)
