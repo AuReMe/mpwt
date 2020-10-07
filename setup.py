@@ -30,7 +30,7 @@ setup(name='mpwt',
       packages=['mpwt'],
       install_requires=[
             'biopython>=1.70',
-            'chardet>=3.0.4'
+            'chardet>=3.0.4',
             'docopt>=0.6.2',
             'gffutils>=0.9',
       ],
