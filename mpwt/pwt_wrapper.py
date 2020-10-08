@@ -134,7 +134,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         with open(pwt_log, 'w') as  pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(patho_line)['encoding']
-                patho_line = patho_line.decode(encoding)
+                patho_line = patho_line.decode(encoding, errors='replace')
                 pwt_writer.write(patho_line)
                 if any(error in patho_line for error in errors):
                     logger.info('Error possibly with the genbank file.')
@@ -198,7 +198,7 @@ def run_pwt_dat(species_input_folder_path):
         with open(dat_log, 'w') as  dat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(load_line)['encoding']
-                load_line = load_line.decode(encoding)
+                load_line = load_line.decode(encoding, errors='replace')
                 dat_file_writer.write(load_line)
                 if any(dat_end in load_line for dat_end in dat_creation_ends):
                     load_subprocess.stdout.close()
