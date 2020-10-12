@@ -56,7 +56,7 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
         os.makedirs(output_folder)
 
     # Initiate the output taxon_id.tsv file.
-    with open(output_folder + '/taxon_id.tsv', 'w') as taxon_id_file:
+    with open(output_folder + '/taxon_id.tsv', 'w', encoding='utf-8') as taxon_id_file:
         taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
         taxon_writer.writerow(['species', 'taxon_id'])
 
@@ -147,7 +147,7 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
             element_id = record.id
             records = [record]
             SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
-            with open(output_path + '/' + element_id + '.pf', 'w') as element_file:
+            with open(output_path + '/' + element_id + '.pf', 'w', encoding='utf-8') as element_file:
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 element_file.write(';; ' + element_id + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
@@ -314,7 +314,7 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
             SeqIO.write(record, output_fasta, 'fasta')
 
         for region in regions:
-            with open(output_path + '/' + region + '.pf', 'w') as element_file:
+            with open(output_path + '/' + region + '.pf', 'w', encoding='utf-8') as element_file:
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 element_file.write(';; ' + region + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
