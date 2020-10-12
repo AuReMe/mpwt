@@ -133,7 +133,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     pwt_log = species_input_folder_path + 'pwt_terminal.log'
 
     try:
-        patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
+        patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, preexec_fn=os.setsid, universal_newlines="")
         # Check internal error of Pathway Tools.
         with open(pwt_log, 'w', encoding='utf-8') as  pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
@@ -144,6 +144,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
                     logger.info('Error possibly with the genbank file.')
                     error_status = True
                     patho_subprocess.kill()
+                    os.killpg(os.getpgid(patho_subprocess.pid), signal.SIGKILL)
 
                 patho_lines.append(patho_line)
                 patho_subprocess.poll()
@@ -214,6 +215,7 @@ def run_pwt_dat(species_input_folder_path):
                         error_status = True
                         load_lines.append(load_line)
                         load_subprocess.kill()
+                        os.killpg(os.getpgid(load_subprocess.pid), signal.SIGKILL)
 
                 load_lines.append(load_line)
                 load_subprocess.poll()
