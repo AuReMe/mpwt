@@ -9,6 +9,7 @@ import chardet
 import logging
 import os
 import shutil
+import signal
 import subprocess
 import sys
 
@@ -197,7 +198,7 @@ def run_pwt_dat(species_input_folder_path):
     dat_log = species_input_folder_path + 'dat_creation.log'
 
     try:
-        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
+        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, preexec_fn=os.setsid, universal_newlines="")
         with open(dat_log, 'w', encoding='utf-8') as  dat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(load_line)['encoding']
@@ -206,6 +207,7 @@ def run_pwt_dat(species_input_folder_path):
                 if any(dat_end in load_line for dat_end in dat_creation_ends):
                     load_subprocess.stdout.close()
                     load_subprocess.kill()
+                    os.killpg(os.getpgid(load_subprocess.pid), signal.SIGKILL)
                     return
                 if any(error in load_line for error in load_errors):
                     if not load_line.startswith(';;;'):
