@@ -9,10 +9,10 @@ with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as read
 setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
-      version='0.5.7',
+      version='0.5.8',
       url='https://github.com/AuReMe/mpwt',
-      author='A. Belcour',
-      author_email='arnaud.belcour@gmail.com',
+      author='Arnaud Belcour',
+      python_requires='>=3.6',
       classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
