@@ -32,8 +32,8 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
         patho_error_pathname = patho_log_folder + '/log_error.txt'
         patho_resume_pathname = patho_log_folder + '/resume_inference.tsv'
 
-        patho_error_file = open(patho_error_pathname, 'w')
-        patho_resume_file = open(patho_resume_pathname, 'w')
+        patho_error_file = open(patho_error_pathname, 'w', encoding='utf-8')
+        patho_resume_file = open(patho_resume_pathname, 'w', encoding='utf-8')
         patho_resume_writer = csv.writer(patho_resume_file, delimiter='\t', lineterminator='\n')
         patho_resume_writer.writerow(['species', 'gene_number', 'protein_number', 'pathway_number', 'reaction_number', 'compound_number', 'pwt_non_fatal_error', 'pwt_warning'])
 
@@ -128,7 +128,7 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
         patho_resume_file.close()
         with open(patho_error_pathname,'r') as contents:
             save = contents.read()
-        with open(patho_error_pathname, 'w') as output_file:
+        with open(patho_error_pathname, 'w', encoding='utf-8') as output_file:
                 output_file.write('Inference statistics:\n')
                 if number_passed_inference > 0:
                     output_file.write('Build done: ' + str(number_passed_inference) + '\n')

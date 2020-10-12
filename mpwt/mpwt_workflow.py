@@ -129,7 +129,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             sys.exit('taxon ID file (' + taxon_file_pathname + ') already exists.')
         else:
             taxon_ids = read_taxon_id(input_folder)
-            with open(taxon_file_pathname, 'w') as taxon_id_file:
+            with open(taxon_file_pathname, 'w', encoding='utf-8') as taxon_id_file:
                 taxon_id_writer = csv.writer(taxon_id_file, delimiter='\t')
                 taxon_id_writer.writerow(['species', 'taxon_id'])
                 for species, taxon_id in taxon_ids.items():

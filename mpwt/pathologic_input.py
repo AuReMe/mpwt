@@ -181,7 +181,7 @@ def create_dat_creation_script(pgdb_id, lisp_pathname):
     Returns:
         bool: True if lisp_pathname has been created
     """
-    with open(lisp_pathname, 'w') as lisp_file:
+    with open(lisp_pathname, 'w', encoding='utf-8') as lisp_file:
         lisp_file.write(';; Most files should begin by specifying that they will be interpreted')
         lisp_file.write('\n')
         lisp_file.write(';; within the Lisp package called ecocyc.')
@@ -461,7 +461,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
     lisp_pathname = run_folder + "dat_creation.lisp"
 
     # Create the organism-params dat file.
-    with open(organism_dat, 'w') as organism_file:
+    with open(organism_dat, 'w', encoding='utf-8') as organism_file:
         organism_writer = csv.writer(organism_file, delimiter='\t', lineterminator='\n')
         organism_writer.writerow(['ID', pgdb_id])
         organism_writer.writerow(['STORAGE', "FILE"])
@@ -469,7 +469,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
         organism_writer.writerow(['NAME', species_name])
 
     # Create the genetic-elements dat file.
-    with open(genetic_dat, 'w') as genetic_file:
+    with open(genetic_dat, 'w', encoding='utf-8') as genetic_file:
         if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname) or os.path.isfile(gbff_pathname):
             genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
             genetic_writer.writerow(['NAME', ''])

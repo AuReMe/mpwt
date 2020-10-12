@@ -200,7 +200,7 @@ def pubmed_citations(activate_citations):
     if not download_pubmed_entries_parameter:
         sys.exit('There is no Batch-PathoLogic-Download-Pubmed-Entries parameter in ' + ptools_init_filepath +'. To use --nc/no_download_articles, mpwt needs Pathway Tools 23.5 or higher.')
 
-    with open(ptools_init_filepath, 'w') as ptools_init_file:
+    with open(ptools_init_filepath, 'w', encoding='utf-8') as ptools_init_file:
         ptools_init_file.write(new_ptools_file)
 
 
@@ -234,5 +234,5 @@ def modify_pathway_score(pathway_score):
     if not pathway_prediction_score_cutoff:
         sys.exit('There is no Pathway-Prediction-Score-Cutoff parameter in ' + ptools_init_filepath +'.')
 
-    with open(ptools_init_filepath, 'w') as ptools_init_file:
+    with open(ptools_init_filepath, 'w', encoding='utf-8') as ptools_init_file:
         ptools_init_file.write(new_ptools_file)

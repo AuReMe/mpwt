@@ -1,12 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 Wrapping Pathway Tools for PathoLogic and attribute-values dat files creation.
 Move results files to an output folder.
 """
-
+import chardet
 import logging
 import os
 import shutil
+import signal
 import subprocess
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -128,20 +133,26 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     pwt_log = species_input_folder_path + 'pwt_terminal.log'
 
     try:
-        patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
-        # Check internal error of Pathway Tools.
-        with open(pwt_log, 'w') as  pwt_writer:
+        # Launch Pathway Tools PathoLogic.
+        # Use start_new_session to group process ID to kill this process and its childs (with os.killpg).
+        patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
+        with open(pwt_log, 'w', encoding='utf-8') as  pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
-                patho_line = patho_line.decode('cp1252')
+                encoding = chardet.detect(patho_line)['encoding']
+                patho_line = patho_line.decode(encoding, errors='replace')
                 pwt_writer.write(patho_line)
+
+                # An error occured, kill Pathway Tools.
                 if any(error in patho_line for error in errors):
                     logger.info('Error possibly with the genbank file.')
                     error_status = True
                     patho_subprocess.kill()
+                    os.killpg(os.getpgid(patho_subprocess.pid), signal.SIGKILL)
 
                 patho_lines.append(patho_line)
                 patho_subprocess.poll()
                 return_code = patho_subprocess.returncode
+
                 # Check if Pathway Tools has been killed with returncode.
                 # Also check if Pathway Tools has finished PathoLogic inference (returncode 0).
                 if return_code or return_code == 0:
@@ -192,20 +203,29 @@ def run_pwt_dat(species_input_folder_path):
     dat_log = species_input_folder_path + 'dat_creation.log'
 
     try:
-        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
-        with open(dat_log, 'w') as  dat_file_writer:
+        # Launch Pathway Tools lisp command.
+        # Use start_new_session to group process ID to kill this process and its childs (with os.killpg).
+        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
+        with open(dat_log, 'w', encoding='utf-8') as  dat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
-                load_line = load_line.decode('cp1252')
+                encoding = chardet.detect(load_line)['encoding']
+                load_line = load_line.decode(encoding, errors='replace')
                 dat_file_writer.write(load_line)
+
+                # Lisp commnd has finished, kill Pathway Toosl trying to open navigator.
                 if any(dat_end in load_line for dat_end in dat_creation_ends):
                     load_subprocess.stdout.close()
                     load_subprocess.kill()
+                    os.killpg(os.getpgid(load_subprocess.pid), signal.SIGKILL)
                     return
+
+                # There is an error, kill lisp command and return the error.
                 if any(error in load_line for error in load_errors):
                     if not load_line.startswith(';;;'):
                         error_status = True
                         load_lines.append(load_line)
                         load_subprocess.kill()
+                        os.killpg(os.getpgid(load_subprocess.pid), signal.SIGKILL)
 
                 load_lines.append(load_line)
                 load_subprocess.poll()
@@ -245,6 +265,8 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
     else:
         pgdb_tmp_folder_path = pgdb_folder_path
 
+    # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
+    # It will also delete the PGDB folder in ptools-local.
     if size_reduction:
         if dat_extraction:
             for pgdb_file in os.listdir(pgdb_tmp_folder_path):
@@ -256,6 +278,7 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
                         shutil.rmtree(pgdb_file_pathname)
         shutil.make_archive(output_folder + '/' + pgdb_folder_dbname, 'zip', pgdb_tmp_folder_path)
         shutil.rmtree(pgdb_folder_path)
+
     else:
         shutil.copytree(pgdb_tmp_folder_path, output_species)
         if dat_extraction:
