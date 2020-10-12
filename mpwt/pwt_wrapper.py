@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 Wrapping Pathway Tools for PathoLogic and attribute-values dat files creation.
 Move results files to an output folder.
@@ -131,7 +134,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     try:
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, universal_newlines="")
         # Check internal error of Pathway Tools.
-        with open(pwt_log, 'w') as  pwt_writer:
+        with open(pwt_log, 'w', encoding='utf-8') as  pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(patho_line)['encoding']
                 patho_line = patho_line.decode(encoding, errors='replace')
@@ -195,7 +198,7 @@ def run_pwt_dat(species_input_folder_path):
 
     try:
         load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, universal_newlines="")
-        with open(dat_log, 'w') as  dat_file_writer:
+        with open(dat_log, 'w', encoding='utf-8') as  dat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(load_line)['encoding']
                 load_line = load_line.decode(encoding, errors='replace')
