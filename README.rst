@@ -399,7 +399,7 @@ This argument reads the input data inside the input folder. Then it converts Gen
 It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
 
 PathoLogic Hole Filler
-::::::::::::::::::::::
+++++++++++++++++++++++
 
 The --hf/patho_hole_filler option uses the Hole Filler ([Karp2019arXiv]_):
 
@@ -416,21 +416,21 @@ This option ise more precisely described in [Green2004]_:
 4. Candidate evaluation – Determine the probability that each candidate protein has the activity required by the missing reaction.
 
 Operon Predictor
-::::::::::::::::
+++++++++++++++++
 
 The --op/patho_operon_predictor identifies operon ([Karp2019 arXiv]_):
 
     The Pathway Tools operon predictor identifies operon boundaries by examining pairs of adjacent genes A and B and using information such as intergenic distance, and whether it can identify a functional relationship between A and B, such as membership in the same pathway, membership in the same multimeric protein complex, or whether A is atransporter for a substrate within a metabolic pathway in which B is an enzyme.
 
 Transport Inference
-:::::::::::::::::::
++++++++++++++++++++
 
 The --tp/patho_transporter_inference tries to answer the question "What chemicals can the organism import or export?" ([Karp2019 arXiv]_):
 
     To answer such queries, Pathway Tools uses an ontology-based representation of transporter function in which transport events are represented as reactions in which the transported compound(s) are substrates. Each substrate is labeled with the cellular compartment in which it resides, and each substrate is a controlled-vocabulary term from the extensive set of chemical compounds in MetaCyc. The TIP program converts the free-text descriptions of transporter functions found in genome annotations (examples: “phosphate ABC transporter”and “sodium/proline symporter”) into computable transport reactions.
 
 Pathway prediction score cutoff
-:::::::::::::::::::::::::::::::
++++++++++++++++++++++++++++++++
 
 The -p/pathway_score determines the cutoff for pathway prediction.
 
