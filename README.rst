@@ -10,7 +10,7 @@
 mpwt: Multiprocessing Pathway Tools
 ===================================
 
-mpwt is a python package for running Pathway Tools [Karp et al. 2019]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp et al. 2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
+mpwt is a python package for running Pathway Tools [Karp2019]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
 
 There is no guarantee that this script will work, it is a Work In Progress in early state.
 
@@ -401,13 +401,13 @@ It can be used to avoid issues with parsing Genbank and GFF files. But it is an 
 PathoLogic Hole Filler
 ::::::::::::::::::::::
 
-The --hf/patho_hole_filler option uses the Hole Filler ([Karp et al. 2019 arXiv]_):
+The --hf/patho_hole_filler option uses the Hole Filler ([Karp2019arXiv]_):
 
 .code::
 
     The pathway hole-filling program PHFiller (a component of PathoLogic) generates hypotheses as to which genes code for these missing enzymes by using the following method. Given a reaction that is a pathway hole, the program first queries the UniProt database to find all known sequences for enzymes that catalyze that same reaction in other organisms. The program then uses the BLAST tool to compare that set of sequences against the full proteome of the organism in which we are seeking hole fillers. It scores the resulting BLAST hits using a Bayesian classifier that considers information such as genome localization (that is, is a potential hole filler in the same operon as another gene in the same metabolic pathway?). At a stringent probability-score cutoff, our method finds potential hole fillers forapproximately 45% of the pathway holes in a microbial genome [59].
 
-This option ise more precisely described in [Green & Karp 2004]_:
+This option ise more precisely described in [Green2004]_:
 
 1. Sequence retrieval – Retrieve from Swiss-Prot and PIR sequences for enzymes that catalyze the desired reaction in other organisms. Because these sequences are not necessarily homologs, we will refer to enzymes with the same function in a variety of organisms as isozymes. For Swiss-Prot, the program retrieves Swiss-Prot IDs directly from the ENZYME database. For PIR sequences, the program retrieves IDs from the MetaCyc PGDB. Sequences are then retrieved directly from the most recent version of each database.
 
@@ -420,7 +420,7 @@ This option ise more precisely described in [Green & Karp 2004]_:
 Operon Predictor
 ::::::::::::::::
 
-The --op/patho_operon_predictor identifies operon ([Karp et al. 2019 arXiv]_):
+The --op/patho_operon_predictor identifies operon ([Karp2019 arXiv]_):
 
 ..code::
 
@@ -429,7 +429,7 @@ The --op/patho_operon_predictor identifies operon ([Karp et al. 2019 arXiv]_):
 Transport Inference
 :::::::::::::::::::
 
-The --tp/patho_transporter_inference tries to answer the question "What chemicals can the organism import or export?" ([Karp et al. 2019 arXiv]_):
+The --tp/patho_transporter_inference tries to answer the question "What chemicals can the organism import or export?" ([Karp2019 arXiv]_):
 
 ..code::
 
@@ -444,7 +444,7 @@ This cutoff is defined in ptools-init.dat as:
 During the pathway prediction process, pathways are assigned a score between 0 and 1 based on the evidence for the presence of that pathway.
 Pathways whose score does not exceed this cutoff value will usually be rejected (although certain rules may cause them to be predicted as present).
 
-This pathway prediction score has also been cited in [Karp et al. 2018]_:
+This pathway prediction score has also been cited in [Karp2018]_:
 
 .. code::
 
@@ -868,15 +868,15 @@ Changes between version are listed on the `release page <https://github.com/AuRe
 Bibliography
 ------------
 
-.. [Karp et al. 2019] Karp, P. D., Midford, P. E., Billington, R., Kothari, A., Krummenacker, M., Latendresse, M., Ong, W. K., Subhraveti, P., Caspi, R., Fulcher, C., Keseler, I. M., & Paley, S. M. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in bioinformatics, bbz104. Advance online publication (2019). https://doi.org/10.1093/bib/bbz104
+.. [Karp2019] Karp, P. D., Midford, P. E., Billington, R., Kothari, A., Krummenacker, M., Latendresse, M., Ong, W. K., Subhraveti, P., Caspi, R., Fulcher, C., Keseler, I. M., & Paley, S. M. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in bioinformatics, bbz104. Advance online publication (2019). https://doi.org/10.1093/bib/bbz104
 
-.. [Karp et al. 2018] Karp, P. D., Weaver, D. & Latendresse, M. How accurate is automated gap filling of metabolic models?. BMC Systems Biology 12(1), 73 (2018). https://doi.org/10.1186/s12918-018-0593-7
+.. [Karp2018] Karp, P. D., Weaver, D. & Latendresse, M. How accurate is automated gap filling of metabolic models?. BMC Systems Biology 12(1), 73 (2018). https://doi.org/10.1186/s12918-018-0593-7
 
-.. [Karp et al. 2019 arXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools version 23.0: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv (2019). https://arxiv.org/abs/1510.03964
+.. [Karp2019arXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools version 23.0: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv (2019). https://arxiv.org/abs/1510.03964
 
-.. [Karp et al. 2011] Karp, P. D., Latendresse, M., & Caspi, R. The pathway tools pathway prediction algorithm. Standards in genomic sciences 5(3), 424–429 (2011). https://doi.org/10.4056/sigs.1794338
+.. [Karp2011] Karp, P. D., Latendresse, M., & Caspi, R. The pathway tools pathway prediction algorithm. Standards in genomic sciences 5(3), 424–429 (2011). https://doi.org/10.4056/sigs.1794338
 
-.. [Green & Karp 2004] Green, M.L., Karp, P.D. A Bayesian method for identifying missing enzymes in predicted metabolic pathway databases. BMC Bioinformatics 5, 76 (2004). https://doi.org/10.1186/1471-2105-5-76
+.. [Green2004] Green, M.L., Karp, P.D. A Bayesian method for identifying missing enzymes in predicted metabolic pathway databases. BMC Bioinformatics 5, 76 (2004). https://doi.org/10.1186/1471-2105-5-76
 
 Citation
 --------
