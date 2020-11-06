@@ -403,8 +403,6 @@ PathoLogic Hole Filler
 
 The --hf/patho_hole_filler option uses the Hole Filler ([Karp2019arXiv]_):
 
-.code::
-
     The pathway hole-filling program PHFiller (a component of PathoLogic) generates hypotheses as to which genes code for these missing enzymes by using the following method. Given a reaction that is a pathway hole, the program first queries the UniProt database to find all known sequences for enzymes that catalyze that same reaction in other organisms. The program then uses the BLAST tool to compare that set of sequences against the full proteome of the organism in which we are seeking hole fillers. It scores the resulting BLAST hits using a Bayesian classifier that considers information such as genome localization (that is, is a potential hole filler in the same operon as another gene in the same metabolic pathway?). At a stringent probability-score cutoff, our method finds potential hole fillers forapproximately 45% of the pathway holes in a microbial genome [59].
 
 This option ise more precisely described in [Green2004]_:
@@ -422,16 +420,12 @@ Operon Predictor
 
 The --op/patho_operon_predictor identifies operon ([Karp2019 arXiv]_):
 
-..code::
-
     The Pathway Tools operon predictor identifies operon boundaries by examining pairs of adjacent genes A and B and using information such as intergenic distance, and whether it can identify a functional relationship between A and B, such as membership in the same pathway, membership in the same multimeric protein complex, or whether A is atransporter for a substrate within a metabolic pathway in which B is an enzyme.
 
 Transport Inference
 :::::::::::::::::::
 
 The --tp/patho_transporter_inference tries to answer the question "What chemicals can the organism import or export?" ([Karp2019 arXiv]_):
-
-..code::
 
     To answer such queries, Pathway Tools uses an ontology-based representation of transporter function in which transport events are represented as reactions in which the transported compound(s) are substrates. Each substrate is labeled with the cellular compartment in which it resides, and each substrate is a controlled-vocabulary term from the extensive set of chemical compounds in MetaCyc. The TIP program converts the free-text descriptions of transporter functions found in genome annotations (examples: “phosphate ABC transporter”and “sodium/proline symporter”) into computable transport reactions.
 
@@ -445,8 +439,6 @@ During the pathway prediction process, pathways are assigned a score between 0 a
 Pathways whose score does not exceed this cutoff value will usually be rejected (although certain rules may cause them to be predicted as present).
 
 This pathway prediction score has also been cited in [Karp2018]_:
-
-.. code::
 
     A very strict pathway score cutoff of 1.0 was supplied to PathoLogic to predict into BlongCyc (from MetaCyc) only the pathways that have gene annotations associated with all pathway reactions, to minimize the effects of pathway inference on biomass goal reachability.
     PathoLogic inference of a metabolic pathway causes all reactions within the pathway to be imported from the MetaCyc database into the new PGDB, including reactions lacking gene assignments — using the 1.0 cutoff means that no reactions lacking gene assignments were imported from MetaCyc during pathway inference.
