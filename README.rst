@@ -399,7 +399,7 @@ This argument reads the input data inside the input folder. Then it converts Gen
 It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
 
 PathoLogic Hole Filler
------------------------
+######################
 
 The --hf/patho_hole_filler option uses the Hole Filler ([Karp et al. 2019 arXiv]_):
 
@@ -418,7 +418,7 @@ This option ise more precisely described in [Green & Karp 2004]_:
 4. Candidate evaluation – Determine the probability that each candidate protein has the activity required by the missing reaction.
 
 Operon Predictor
-----------------
+################
 
 The --op/patho_operon_predictor identifies operon ([Karp et al. 2019 arXiv]_):
 
@@ -427,7 +427,7 @@ The --op/patho_operon_predictor identifies operon ([Karp et al. 2019 arXiv]_):
     The Pathway Tools operon predictor identifies operon boundaries by examining pairs of adjacent genes A and B and using information such as intergenic distance, and whether it can identify a functional relationship between A and B, such as membership in the same pathway, membership in the same multimeric protein complex, or whether A is atransporter for a substrate within a metabolic pathway in which B is an enzyme.
 
 Transport Inference
--------------------
+###################
 
 The --tp/patho_transporter_inference tries to answer the question "What chemicals can the organism import or export?" ([Karp et al. 2019 arXiv]_):
 
@@ -436,7 +436,7 @@ The --tp/patho_transporter_inference tries to answer the question "What chemical
     To answer such queries, Pathway Tools uses an ontology-based representation of transporter function in which transport events are represented as reactions in which the transported compound(s) are substrates. Each substrate is labeled with the cellular compartment in which it resides, and each substrate is a controlled-vocabulary term from the extensive set of chemical compounds in MetaCyc. The TIP program converts the free-text descriptions of transporter functions found in genome annotations (examples: “phosphate ABC transporter”and “sodium/proline symporter”) into computable transport reactions.
 
 Pathway prediction score cutoff
--------------------------------
+###############################
 
 The -p/pathway_score determines the cutoff for pathway prediction.
 
@@ -869,9 +869,13 @@ Bibliography
 ------------
 
 .. [Karp et al. 2019] Karp, P. D., Midford, P. E., Billington, R., Kothari, A., Krummenacker, M., Latendresse, M., Ong, W. K., Subhraveti, P., Caspi, R., Fulcher, C., Keseler, I. M., & Paley, S. M. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in bioinformatics, bbz104. Advance online publication (2019). https://doi.org/10.1093/bib/bbz104
+
 .. [Karp et al. 2018] Karp, P. D., Weaver, D. & Latendresse, M. How accurate is automated gap filling of metabolic models?. BMC Systems Biology 12(1), 73 (2018). https://doi.org/10.1186/s12918-018-0593-7
+
 .. [Karp et al. 2019 arXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools version 23.0: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv (2019). https://arxiv.org/abs/1510.03964
+
 .. [Karp et al. 2011] Karp, P. D., Latendresse, M., & Caspi, R. The pathway tools pathway prediction algorithm. Standards in genomic sciences 5(3), 424–429 (2011). https://doi.org/10.4056/sigs.1794338
+
 .. [Green & Karp 2004] Green, M.L., Karp, P.D. A Bayesian method for identifying missing enzymes in predicted metabolic pathway databases. BMC Bioinformatics 5, 76 (2004). https://doi.org/10.1186/1471-2105-5-76
 
 Citation
