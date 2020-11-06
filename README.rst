@@ -418,7 +418,7 @@ This option is more precisely described in [Green2004]_:
 Operon Predictor
 ++++++++++++++++
 
-The --op/patho_operon_predictor identifies operon [Karp2019 arXiv]_:
+The --op/patho_operon_predictor identifies operon [Karp2019arXiv]_:
 
     The Pathway Tools operon predictor identifies operon boundaries by examining pairs of adjacent genes A and B and using information such as intergenic distance, and whether it can identify a functional relationship between A and B, such as membership in the same pathway, membership in the same multimeric protein complex, or whether A is a transporter for a substrate within a metabolic pathway in which B is an enzyme.
 
