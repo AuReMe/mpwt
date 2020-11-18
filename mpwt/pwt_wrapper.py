@@ -32,7 +32,7 @@ def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_sta
     """
     if error_status:
         logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
-    species_name = species_input_folder_path.split('/')[-2]
+    species_name = os.path.basename(species_input_folder_path)
     if subprocess_returncode:
         logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
     if subprocess_stderr:
@@ -76,7 +76,7 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
         boolean: True if there is an error during Pathway Tools run
     """
     fatal_error_index = None
-    log_file_path = species_input_folder_path + '/' + log_filename
+    log_file_path = os.path.join(species_input_folder_path, log_filename)
     with open(log_file_path, 'r') as log_file:
         for index, line in enumerate(log_file):
             if line != '':
@@ -130,7 +130,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     patho_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
-    pwt_log = species_input_folder_path + 'pwt_terminal.log'
+    pwt_log = os.path.join(species_input_folder_path, 'pwt_terminal.log')
 
     try:
         # Launch Pathway Tools PathoLogic.
@@ -188,7 +188,7 @@ def run_pwt_dat(species_input_folder_path):
     Returns:
         boolean: True if there is an error during lisp script execution
     """
-    lisp_path = species_input_folder_path + 'dat_creation.lisp'
+    lisp_path = os.path.join(species_input_folder_path, 'dat_creation.lisp')
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
@@ -200,7 +200,7 @@ def run_pwt_dat(species_input_folder_path):
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
-    dat_log = species_input_folder_path + 'dat_creation.log'
+    dat_log = os.path.join(species_input_folder_path, 'dat_creation.log')
 
     try:
         # Launch Pathway Tools lisp command.
@@ -258,10 +258,10 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         output_folder (str): path to output folder
         size_reduction (bool): to compress or not the results
     """
-    output_species = output_folder + '/' + pgdb_folder_dbname +'/'
+    output_species = os.path.join(output_folder, pgdb_folder_dbname)
 
     if dat_extraction:
-        pgdb_tmp_folder_path = pgdb_folder_path + '/1.0/data'
+        pgdb_tmp_folder_path = os.path.join(*[pgdb_folder_path, '1.0', 'data'])
     else:
         pgdb_tmp_folder_path = pgdb_folder_path
 
@@ -270,21 +270,23 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
     if size_reduction:
         if dat_extraction:
             for pgdb_file in os.listdir(pgdb_tmp_folder_path):
-                pgdb_file_pathname = pgdb_tmp_folder_path + '/' + pgdb_file
+                pgdb_file_pathname = os.path.join(pgdb_tmp_folder_path, pgdb_file)
                 if '.dat' not in pgdb_file:
                     if os.path.isfile(pgdb_file):
                         os.remove(pgdb_file_pathname)
                     elif os.path.isdir(pgdb_file):
                         shutil.rmtree(pgdb_file_pathname)
-        shutil.make_archive(output_folder + '/' + pgdb_folder_dbname, 'zip', pgdb_tmp_folder_path)
+        zip_input_path = os.path.join(output_folder, pgdb_folder_dbname)
+        shutil.make_archive(zip_input_path, 'zip', pgdb_tmp_folder_path)
         shutil.rmtree(pgdb_folder_path)
 
     else:
         shutil.copytree(pgdb_tmp_folder_path, output_species)
         if dat_extraction:
             for pgdb_file in os.listdir(output_species):
+                pgdb_path = os.path.join(output_species, pgdb_file)
                 if '.dat' not in pgdb_file:
-                    if os.path.isfile(output_species+'/'+pgdb_file):
-                        os.remove(output_species+'/'+pgdb_file)
-                    elif os.path.isdir(output_species+'/'+pgdb_file):
-                        shutil.rmtree(output_species+'/'+pgdb_file)
+                    if os.path.isfile(pgdb_path):
+                        os.remove(pgdb_path)
+                    elif os.path.isdir(pgdb_path):
+                        shutil.rmtree(pgdb_path)

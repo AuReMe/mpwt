@@ -61,7 +61,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Check if Pathway Tools is in the path.
     # Find PGDB folder path.
     ptools_local_path = utils.find_ptools_path()
-    pgdbs_folder_path = ptools_local_path + '/pgdbs/user/'
+    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
 
     # Check if ptools-local is accessible.
     error = utils.check_ptools_local_pwt()
@@ -124,7 +124,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     # Create taxon file in the input folder.
     if taxon_file and input_folder and not patho_inference:
-        taxon_file_pathname = input_folder + '/taxon_id.tsv'
+        taxon_file_pathname = os.path.join(input_folder, 'taxon_id.tsv')
         if os.path.exists(taxon_file_pathname):
             sys.exit('taxon ID file (' + taxon_file_pathname + ') already exists.')
         else:
@@ -156,8 +156,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             multiprocess_run_pwt_dats = []
             multiprocess_run_move_pgdbs = []
             for run_patho_dat_id in run_patho_dat_ids:
-                input_folder_path = input_folder + '/' + run_patho_dat_id + '/'
-                species_pgdb_folder = pgdbs_folder_path + run_patho_dat_id.lower() + 'cyc/'
+                input_folder_path = os.path.join(input_folder, run_patho_dat_id)
+                species_pgdb_folder = os.path.join(pgdbs_folder_path, run_patho_dat_id.lower() + 'cyc')
                 input_run_move_pgdbs = [run_patho_dat_id, species_pgdb_folder]
                 input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
                 multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
@@ -205,7 +205,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         only_dat_creation = True
         # Create a temporary folder in ptools-local where list script will be stored.
-        tmp_folder = ptools_local_path + '/tmp/'
+        tmp_folder = os.path.join(ptools_local_path, 'tmp')
         if not os.path.exists(tmp_folder):
             os.mkdir(tmp_folder)
 
@@ -214,8 +214,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         multiprocess_run_pwt_dats = []
         multiprocess_run_move_pgdbs = []
         for dat_run_id in dat_run_ids:
-            input_folder_path = input_folder + '/' + dat_run_id + '/'
-            species_pgdb_folder = pgdbs_folder_path + dat_run_id.lower() + 'cyc/'
+            input_folder_path = os.path.join(input_folder, dat_run_id)
+            species_pgdb_folder = os.path.join(pgdbs_folder_path, dat_run_id.lower() + 'cyc')
             input_run_move_pgdbs = [dat_run_id, species_pgdb_folder]
             if only_dat_creation:
                 input_run_move_pgdbs = retrieve_complete_id(input_run_move_pgdbs)
@@ -241,9 +241,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             run_dat_ids = tmp_run_dat_ids
         if run_dat_ids:
             for run_dat_id in run_dat_ids:
-                create_dat_creation_script(run_dat_id, input_folder + "/" + run_dat_id + "/" + "dat_creation.lisp")
-                input_folder_path = input_folder + '/' + run_dat_id + '/'
-                species_pgdb_folder = pgdbs_folder_path + run_dat_id.lower() + 'cyc/'
+                dat_creation_path = os.path.join(*[input_folder, run_dat_id, 'dat_creation.lisp'])
+                create_dat_creation_script(run_dat_id, dat_creation_path)
+                input_folder_path = os.path.join(input_folder, run_dat_id)
+                species_pgdb_folder = os.path.join(pgdbs_folder_path, run_dat_id.lower() + 'cyc')
                 multiprocess_run_pwt_dats.append([input_folder_path])
                 input_run_move_pgdbs = [run_dat_id, species_pgdb_folder]
                 input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
@@ -280,7 +281,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
         ptools_local_path = utils.find_ptools_path()
-        shutil.rmtree(ptools_local_path + '/tmp')
+        ptools_local_tmp_path = os.path.join(ptools_local_path, 'tmp')
+        shutil.rmtree(ptools_local_tmp_path)
 
     logger.info('~~~~~~~~~~End of Pathway Tools~~~~~~~~~~')
 
@@ -310,7 +312,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             if not os.path.exists(patho_log):
                 logger.info('No log directory, it will be created.')
                 os.mkdir(patho_log)
-        patho_error_pathname = patho_log + '/log_error.txt'
+        patho_error_pathname = os.path.join(patho_log, 'log_error.txt')
         with open(patho_error_pathname, 'a') as input_file:
             input_file.write('\n\n---------Time---------\n')
             for index, step_time in enumerate(times):
