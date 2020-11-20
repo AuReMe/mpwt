@@ -46,7 +46,8 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
     if 'taxon_id.tsv' in input_names:
         taxon_ids = {}
         input_names.remove('taxon_id.tsv')
-        with open(input_folder + '/taxon_id.tsv', 'r') as taxon_file:
+        taxon_id_path = os.path.join(input_folder, 'taxon_id.tsv')
+        with open(taxon_id_path, 'r') as taxon_file:
             for row in csv.reader(taxon_file, delimiter='\t'):
                 taxon_ids[row[0]] = row[1]
     else:
@@ -56,31 +57,34 @@ def create_pathologic_file(input_folder, output_folder, number_cpu=None):
         os.makedirs(output_folder)
 
     # Initiate the output taxon_id.tsv file.
-    with open(output_folder + '/taxon_id.tsv', 'w', encoding='utf-8') as taxon_id_file:
+    output_taxon_id_path = os.path.join(output_folder, 'taxon_id.tsv')
+    with open(output_taxon_id_path, 'w', encoding='utf-8') as taxon_id_file:
         taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
         taxon_writer.writerow(['species', 'taxon_id'])
 
     # For each input, search for a GenBank, a GFF or PathoLogic files.
     for input_name in input_names:
-        input_path_gbk = input_folder + '/' + input_name + '/' + input_name + '.gbk'
-        input_path_gbff = input_folder + '/' + input_name + '/' + input_name + '.gbff'
-        input_path_gff = input_folder + '/' + input_name + '/' + input_name + '.gff'
+        input_path_gbk = os.path.join(*[input_folder, input_name, input_name + '.gbk'])
+        input_path_gbff = os.path.join(*[input_folder, input_name, input_name + '.gbff'])
+        input_path_gff = os.path.join(*[input_folder, input_name, input_name + '.gff'])
         if os.path.exists(input_path_gbk):
             input_path = input_path_gbk
         elif os.path.exists(input_path_gbff):
             input_path = input_path_gbff
         elif os.path.exists(input_path_gff):
             input_path = input_path_gff
-        elif any([species_file.endswith('.pf') for species_file in os.listdir(input_folder + '/' + input_name + '/')]):
-            input_path = input_folder + '/' + input_name + '/'
+        elif any([species_file.endswith('.pf') for species_file in os.listdir(os.path.join(input_folder, input_name))]):
+            input_path = os.path.join(input_folder, input_name)
         else:
-            sys.exit('No .gff/.gbk/.gbff/.pf file in ' + input_folder + '/' + input_name)
+            sys.exit('No .gff/.gbk/.gbff/.pf file in ' + os.path.join(input_folder, input_name))
 
-        output_path = output_folder + '/' + input_name
+        output_path = os.path.join(output_folder, input_name)
 
         if taxon_ids:
             if input_name in taxon_ids:
                 taxon_id = taxon_ids[input_name]
+            else:
+                taxon_id = None
         else:
             taxon_id = None
 
@@ -105,7 +109,7 @@ def write_taxon_id_file(input_name, taxon_id, output_folder):
         taxon_id (str): taxon_id linked to the species
         output_folder (str): path to output folder
     """
-    taxon_id_path = output_folder + '/taxon_id.tsv'
+    taxon_id_path = os.path.join(output_folder, 'taxon_id.tsv')
 
     with open(taxon_id_path, 'a') as taxon_id_file:
         taxon_writer = csv.writer(taxon_id_file, delimiter='\t')
@@ -146,8 +150,10 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
         for record in SeqIO.parse(input_path, 'genbank'):
             element_id = record.id
             records = [record]
-            SeqIO.write(records, output_path + '/' + element_id + '.fasta', 'fasta')
-            with open(output_path + '/' + element_id + '.pf', 'w', encoding='utf-8') as element_file:
+            output_fasta_path = os.path.join(output_path, element_id + '.fasta')
+            output_pf_path = os.path.join(output_path, element_id + '.pf')
+            SeqIO.write(records, output_fasta_path, 'fasta')
+            with open(output_pf_path, 'w', encoding='utf-8') as element_file:
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 element_file.write(';; ' + element_id + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
@@ -310,11 +316,12 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
 
         for record in SeqIO.parse(gff_fasta, 'fasta'):
             gff_fasta_extension = os.path.splitext(gff_fasta)[1]
-            output_fasta = output_path + '/' + record.id + gff_fasta_extension
+            output_fasta = os.path.join(output_path, record.id + gff_fasta_extension)
             SeqIO.write(record, output_fasta, 'fasta')
 
         for region in regions:
-            with open(output_path + '/' + region + '.pf', 'w', encoding='utf-8') as element_file:
+            region_pf_path = os.path.join(output_path, region + '.pf')
+            with open(region_pf_path, 'w', encoding='utf-8') as element_file:
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
                 element_file.write(';; ' + region + '\n')
                 element_file.write(';;;;;;;;;;;;;;;;;;;;;;;;;\n')
@@ -356,7 +363,7 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
         if not os.path.isdir(output_path):
             os.mkdir(output_path)
         for species_file in os.listdir(input_path):
-            species_file_path = input_path + '/' + species_file
+            species_file_path = os.path.join(input_path, species_file)
             if species_file.endswith('.pf'):
                 if os.path.exists(species_file_path.replace('.pf', '.fasta')):
                     fasta_file = species_file.replace('.pf', '.fasta')
@@ -366,7 +373,10 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
                 else:
                     logger.critical('Error: No fasta file (.fasta or .fsa) for PathoLogic file ' + species_file_path)
                     return None
-                shutil.copy2(species_file_path, output_path+'/'+species_file)
-                shutil.copy2(input_path+'/'+fasta_file, output_path+'/'+fasta_file)
+                output_species_path = os.path.join(output_path, species_file)
+                input_fasta_path = os.path.join(input_path, fasta_file)
+                output_fasta_path = os.path.join(output_path, fasta_file)
+                shutil.copy2(species_file_path, output_species_path)
+                shutil.copy2(input_fasta_path, output_fasta_path)
 
     return True

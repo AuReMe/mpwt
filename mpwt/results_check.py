@@ -29,8 +29,8 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
             logger.info('No log directory, it will be created.')
             os.mkdir(patho_log_folder)
 
-        patho_error_pathname = patho_log_folder + '/log_error.txt'
-        patho_resume_pathname = patho_log_folder + '/resume_inference.tsv'
+        patho_error_pathname = os.path.join(patho_log_folder, 'log_error.txt')
+        patho_resume_pathname = os.path.join(patho_log_folder, 'resume_inference.tsv')
 
         patho_error_file = open(patho_error_pathname, 'w', encoding='utf-8')
         patho_resume_file = open(patho_resume_pathname, 'w', encoding='utf-8')
@@ -42,8 +42,8 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
 
     for multiprocess_run_pwt in multiprocess_run_pwts:
         species_input_folder_path = multiprocess_run_pwt[0]
-        species = species_input_folder_path.split('/')[-2]
-        patho_log = species_input_folder_path + '/pathologic.log'
+        species = os.path.basename(species_input_folder_path)
+        patho_log = os.path.join(species_input_folder_path, 'pathologic.log')
 
         if patho_log_folder:
             patho_error_file.write('------------ Species: ')
@@ -150,7 +150,7 @@ def check_dat(run_dat_id, species_pgdb_folder):
     """
     pgdb_folder_dbname = run_dat_id.lower() + 'cyc'
 
-    dats_path = species_pgdb_folder +'/1.0/data/'
+    dats_path = os.path.join(*[species_pgdb_folder, '1.0', 'data'])
 
     dat_files = ["classes.dat", "compound-links.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "gene-links.dat", "genes.dat", "pathway-links.dat",
                 "pathways.dat", "promoters.dat", "protein-features.dat", "protein-links.dat", "proteins.dat", "protligandcplxes.dat", "pubs.dat",
@@ -158,7 +158,7 @@ def check_dat(run_dat_id, species_pgdb_folder):
 
     dat_checks = []
     for dat_file in dat_files:
-        dat_file_path = dats_path + '/' + dat_file
+        dat_file_path = os.path.join(dats_path, dat_file)
         if os.path.exists(dat_file_path):
             dat_checks.append(dat_file_path)
 

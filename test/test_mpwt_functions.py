@@ -7,14 +7,16 @@ Test mpwt functions which don't need a Pathway-Tools environment.
 """
 
 import mpwt
+import os
 
 
 def test_create_dats_and_lisp():
-    mpwt.pathologic_input.create_dats_and_lisp('test/fatty_acid_beta_oxydation_I/', False)
+    input_path = os.path.join(*['test', 'fatty_acid_beta_oxydation_I'])
+    mpwt.pathologic_input.create_dats_and_lisp(input_path, False)
 
-    genetic_pathname = 'test/fatty_acid_beta_oxydation_I/genetic-elements.dat'
-    organism_pathname = 'test/fatty_acid_beta_oxydation_I/organism-params.dat'
-    lisp_pathname = 'test/fatty_acid_beta_oxydation_I/dat_creation.lisp'
+    genetic_pathname = os.path.join(*['test', 'fatty_acid_beta_oxydation_I', 'genetic-elements.dat'])
+    organism_pathname = os.path.join(*['test', 'fatty_acid_beta_oxydation_I', 'organism-params.dat'])
+    lisp_pathname = os.path.join(*['test', 'fatty_acid_beta_oxydation_I' , 'dat_creation.lisp'])
 
     genetic_string_expected = 'NAME\t\nANNOT-FILE\tfatty_acid_beta_oxydation_I.gbk\n//\n'
     organism_string_expected = 'ID\tfatty_acid_beta_oxydation_I\nSTORAGE\tFILE\nNCBI-TAXON-ID\t511145\nNAME\tEscherichia coli str. K-12 substr. MG1655\n'

@@ -28,7 +28,7 @@ def find_ptools_path():
 
     pathway_tools_file = open(pathway_tools_path, 'r')
     ptools_local_str = [line for line in pathway_tools_file if 'PTOOLS_LOCAL_PATH' in line][0]
-    ptools_local_path = ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' ') + '/ptools-local'
+    ptools_local_path = os.path.join(ptools_local_str.split(';')[0].split('=')[1].replace('"', '').strip(' '), 'ptools-local')
     pathway_tools_file.close()
 
     return ptools_local_path
@@ -39,7 +39,9 @@ def check_ptools_local_pwt():
 
     error = None
 
-    if not os.path.exists(ptools_path + '/ptools-init.dat'):
+    ptools_init_path = os.path.join(ptools_path, 'ptools-init.dat')
+
+    if not os.path.exists(ptools_init_path):
         logger.critical('Missing ptools-init.dat file in ptools-local folder. Use "pathway-tools -config" to recreate it.')
         error = True
 
@@ -56,7 +58,7 @@ def list_pgdb():
         list: PGDB IDs inside ptools-local
     """
     ptools_local_path = find_ptools_path()
-    pgdb_folder = ptools_local_path + '/pgdbs/user/'
+    pgdb_folder = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
 
     return [species_pgdb for species_pgdb in os.listdir(pgdb_folder) if 'cyc' in species_pgdb]
 
@@ -69,7 +71,7 @@ def delete_pgdb(pgdb_name):
         pgdb_name (str): PGDB ID to delete
     """
     ptools_local_path = find_ptools_path()
-    pgdb_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/' + pgdb_name
+    pgdb_path = os.path.join(*[ptools_local_path.replace('\n', ''), 'pgdbs', 'user', pgdb_name])
     if os.path.isdir(pgdb_path):
         shutil.rmtree(pgdb_path)
         logger.info('{0} (at {1}) has been removed.'.format(pgdb_name, pgdb_path))
@@ -110,14 +112,14 @@ def cleaning(number_cpu=None, verbose=None):
         logger.setLevel(logging.DEBUG)
 
     ptools_local_path = find_ptools_path()
-    file_path = ptools_local_path.replace('\n', '') +'/pgdbs/user/'
+    file_path = os.path.join(*[ptools_local_path.replace('\n', ''), 'pgdbs', 'user'])
 
-    pgdb_metadata_path = file_path + 'PGDB-METADATA.ocelot'
+    pgdb_metadata_path = os.path.join(file_path, 'PGDB-METADATA.ocelot')
     if os.path.isfile(pgdb_metadata_path):
         os.remove(pgdb_metadata_path)
         logger.info('PGDB-METADATA.ocelot has been removed.')
 
-    pgdb_counter_path = file_path + 'PGDB-counter.dat'
+    pgdb_counter_path = os.path.join(file_path, 'PGDB-counter.dat')
     if os.path.isfile(pgdb_counter_path):
         os.remove(pgdb_counter_path)
         logger.info('PGDB-counter.dat has been removed.')
@@ -145,16 +147,16 @@ def cleaning_input(input_folder, verbose=None):
 
     run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
 
-    input_paths = [input_folder + "/" + run_id + "/" for run_id in run_ids]
+    input_paths = [os.path.join(input_folder, run_id) for run_id in run_ids]
 
     for input_path in input_paths:
         if os.path.isdir(input_path):
-            lisp_script = input_path + 'dat_creation.lisp'
-            patho_log = input_path + 'pathologic.log'
-            pwt_log = input_path + 'pwt_terminal.log'
-            dat_log = input_path + 'dat_creation.log'
-            genetic_dat = input_path + 'genetic-elements.dat'
-            organism_dat = input_path + 'organism-params.dat'
+            lisp_script = os.path.join(input_path, 'dat_creation.lisp')
+            patho_log = os.path.join(input_path, 'pathologic.log')
+            pwt_log = os.path.join(input_path, 'pwt_terminal.log')
+            dat_log = os.path.join(input_path, 'dat_creation.log')
+            genetic_dat = os.path.join(input_path, 'genetic-elements.dat')
+            organism_dat = os.path.join(input_path, 'organism-params.dat')
             if os.path.exists(lisp_script):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
@@ -167,7 +169,7 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
                 os.remove(organism_dat)
-            species = input_path.split('/')[-2]
+            species = os.path.basename(input_path)
             logger.info('Remove ' + species + ' temporary datas.')
 
 
@@ -178,7 +180,7 @@ def pubmed_citations(activate_citations):
     Args:
         activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
     """
-    ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
+    ptools_init_filepath = os.path.join(find_ptools_path(), 'ptools-init.dat')
     new_ptools_file = ""
 
     download_pubmed_entries_parameter = None
@@ -211,7 +213,7 @@ def modify_pathway_score(pathway_score):
     Args:
         pathway_score (float): score between 0 and 1 to accept or reject pathways
     """
-    ptools_init_filepath = find_ptools_path() + '/ptools-init.dat'
+    ptools_init_filepath = os.path.join(find_ptools_path() ,'ptools-init.dat')
     new_ptools_file = ""
 
     pathway_prediction_score_cutoff = None
