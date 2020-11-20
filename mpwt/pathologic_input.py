@@ -673,7 +673,8 @@ def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
         generator: generator with the PGDB IDs.
     """
     for species_pgdb in os.listdir(pgdbs_folder_path):
-        if os.path.isdir(pgdbs_folder_path + species_pgdb):
+        species_dir_path = os.path.join(pgdbs_folder_path, species_pgdb)
+        if os.path.isdir(species_dir_path):
             pgdb_id = species_pgdb[:-3]
             pgdb_pathname = os.path.join(tmp_folder, pgdb_id)
             tmp_pgdb_path = os.path.join(tmp_folder, pgdb_id)

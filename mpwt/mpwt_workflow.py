@@ -214,13 +214,13 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         multiprocess_run_pwt_dats = []
         multiprocess_run_move_pgdbs = []
         for dat_run_id in dat_run_ids:
-            input_folder_path = os.path.join(input_folder, dat_run_id)
+            input_tmp_folder_path = os.path.join(tmp_folder, dat_run_id)
             species_pgdb_folder = os.path.join(pgdbs_folder_path, dat_run_id.lower() + 'cyc')
             input_run_move_pgdbs = [dat_run_id, species_pgdb_folder]
             if only_dat_creation:
                 input_run_move_pgdbs = retrieve_complete_id(input_run_move_pgdbs)
             input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
-            multiprocess_run_pwt_dats.append([input_folder_path])
+            multiprocess_run_pwt_dats.append([input_tmp_folder_path])
             multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
     # Add species that have data in PGDB but are not present in output folder.
