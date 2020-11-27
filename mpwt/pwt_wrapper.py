@@ -245,7 +245,7 @@ def run_pwt_dat(species_input_folder_path):
     return error_status
 
 
-def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
@@ -259,6 +259,13 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         size_reduction (bool): to compress or not the results
     """
     output_species = os.path.join(output_folder, pgdb_folder_dbname)
+
+    if xml_extraction:
+        xml_file = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'metabolic-reactions.xml'])
+        shutil.copyfile(xml_file, output_species+'.xml')
+        if size_reduction:
+            shutil.rmtree(pgdb_folder_path)
+        return
 
     if dat_extraction:
         pgdb_tmp_folder_path = os.path.join(*[pgdb_folder_path, '1.0', 'data'])

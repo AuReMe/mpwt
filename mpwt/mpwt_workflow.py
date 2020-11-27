@@ -24,9 +24,10 @@ logger = logging.getLogger(__name__)
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
                      patho_transporter_inference=None, no_download_articles=None,
-                     dat_creation=None, dat_extraction=None, size_reduction=None,
-                     number_cpu=None, patho_log=None, ignore_error=None,
-                     pathway_score=None, taxon_file=None, verbose=None):
+                     dat_creation=None, dat_extraction=None, xml_extraction=None,
+                     size_reduction=None, number_cpu=None, patho_log=None,
+                     ignore_error=None, pathway_score=None, taxon_file=None,
+                     verbose=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -41,6 +42,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         dat_creation (bool): BioPAX/attributes-values files creation (True/False)
         dat_extraction (bool): move only BioPAX/attributes-values files to output folder (True/False)
+        xml_extraction (bool): move only metabolic-reactions.xml to output folder (True/False)
         size_reduction (bool): delete ptools-local data at the end (True/False)
         number_cpu (int): number of CPU used (default=1)
         patho_log (str): pathname to mpwt log folder
@@ -100,9 +102,17 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if pathway_score and not patho_inference:
         sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
 
-    #Check if no_download_articles is used with patho_inference.
+    #Check if no_download_articles is used with output_folder.
     if dat_extraction and not output_folder:
         sys.exit('To use --md/dat_extraction, you need to use the -o/output_folder argument.')
+
+    #Check if xml_extraction is used with output_folder.
+    if xml_extraction and not output_folder:
+        sys.exit('To use --mx/xml_extraction, you need to use the -o/output_folder argument.')
+
+    #Check if no_download_articles is used with patho_inference.
+    if dat_extraction and xml_extraction:
+        sys.exit('--mx/xml_extraction is incompatible with --md/dat_extraction.')
 
     # Use the number of cpu given by the user or 1 CPU.
     if number_cpu:
@@ -159,7 +169,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 input_folder_path = os.path.join(input_folder, run_patho_dat_id)
                 species_pgdb_folder = os.path.join(pgdbs_folder_path, run_patho_dat_id.lower() + 'cyc')
                 input_run_move_pgdbs = [run_patho_dat_id, species_pgdb_folder]
-                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction])
                 multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
                 multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference])
                 multiprocess_run_pwt_dats.append([input_folder_path])
@@ -219,7 +229,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             input_run_move_pgdbs = [dat_run_id, species_pgdb_folder]
             if only_dat_creation:
                 input_run_move_pgdbs = retrieve_complete_id(input_run_move_pgdbs)
-            input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+            input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction])
             multiprocess_run_pwt_dats.append([input_tmp_folder_path])
             multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
@@ -247,7 +257,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 species_pgdb_folder = os.path.join(pgdbs_folder_path, run_dat_id.lower() + 'cyc')
                 multiprocess_run_pwt_dats.append([input_folder_path])
                 input_run_move_pgdbs = [run_dat_id, species_pgdb_folder]
-                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction])
+                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction])
                 multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
     if not multiprocess_run_pwt_dats:

@@ -7,7 +7,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [--mx] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
     mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
     mpwt -o=DIR [--md] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -28,6 +28,7 @@ options:
     -p=FLOAT   Use with --patho. Modify PathoLogic pathway prediction score.
     --dat    Will create BioPAX/attribute-value dat files from PGDB.
     --md    Move only the dat files into the output folder.
+    --mx    Move only the metabolic-reactions.xml file into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local and compress results files to reduce results size (use it with -o).
@@ -78,6 +79,7 @@ def run_mpwt():
     no_download_articles = args['--nc']
     dat_creation = args['--dat']
     move_dat = args['--md']
+    move_xml = args['--mx']
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
@@ -140,6 +142,7 @@ def run_mpwt():
                     no_download_articles=no_download_articles,
                     dat_creation=dat_creation,
                     dat_extraction=move_dat,
+                    xml_extraction=move_xml,
                     size_reduction=size_reduction,
                     number_cpu=number_cpu,
                     patho_log=patho_log,
