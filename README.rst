@@ -309,11 +309,18 @@ Command Line and Python arguments
 
 By using the python multiprocessing library, mpwt launches parallel PathoLogic processes on physical cores. Regarding memory requirements, they depend on the genome but we advise to use at least 2 GB per core.
 
-mpwt can be used with the command line:
+mpwt can be used with the command lines:
 
 .. code:: sh
 
-    mpwt -f path/to/folder/input [-o path/to/folder/output] [--patho] [--hf] [--op] [--tp] [--nc] [-p FLOAT] [--dat] [--md] [--cpu INT] [-r] [--clean] [--log path/to/folder/log] [--ignore-error] [-v]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt --dat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt --clean [--cpu=INT] [-v]
+    mpwt --delete=STR [--cpu=INT]
+    mpwt --list
+    mpwt --version
+    mpwt topf -f=FOLDER -o=FOLDER [--cpu=INT] [--clean]
 
 Optional argument are identified by [].
 
@@ -335,6 +342,9 @@ mpwt can be used in a python script with an import:
 			  no_download_articles=optional_boolean,
 			  dat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
+			  xml_extraction=optional_boolean,
+			  owl_extraction=optional_boolean,
+			  col_extraction=optional_boolean,
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
@@ -364,7 +374,13 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --md           | dat_extraction(boolean)                        | Move only the dat files inside the output folder                        |
+|          --md           | dat_extraction(boolean)                        | Move the dat files into the output folder                               |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --mx           | xml_extraction(boolean)                        | Move the metabolic-reactions.xml file into the output folder            |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --mo           | owl_extraction(boolean)                        | Move owl files into the output folder                                   |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|          --mc           | col_extraction(boolean)                        | Move tabular files into the output folder                               |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --cpu          | number_cpu(int)                                | Number of cpu used for the multiprocessing                              |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -772,9 +788,7 @@ Output
 If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
-If you used the output argument, there is two potential outputs depending on the use of the option **--md/dat_extraction**:
-
-- without --md/dat_extraction, you will have a complete PGDB folder inside your results, for example:
+If you used the output argument, mpwt will move each of the PGDB folders to the output folder:
 
 .. code-block:: text
 
@@ -798,7 +812,9 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3
     ..
 
-- with --md/dat_extraction, you will only have the dat files, for example:
+If you want specific files, you can use the --m* options.
+
+- **--md/dat_extraction** will only move the attribute-values dat files:
 
 .. code-block:: text
 
@@ -828,7 +844,89 @@ If you used the output argument, there is two potential outputs depending on the
     ├── species_3
     ..
 
-- with the **-r /size_reduction** argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
+- **--mx/xml_extraction** will only move the metabolic-reactions.xml file of each PGDB and rename it:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1.xml
+    ├── species_2.xml
+    ├── species_3.xml
+    ..
+
+- **--mo/owl_extraction** will only move the biopax-level2.owl and the biopax-level3.owl files of each PGDB and rename them:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1-level2.owl
+    ├── species_1-level3.owl
+    ├── species_2-level2.owl
+    ├── species_2-level3.owl
+    ├── species_3-level2.owl
+    ├── species_3-level3.owl
+    ..
+
+- **--mc/col_extraction** will only move the tabular files of each PGDB:
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── enzymes.col
+    │   └── genes.col
+    │   └── pathways.col
+    │   └── protcplxs.col
+    │   └── transporters.col
+    ├── species_2
+    ..
+    ├── species_3
+    ..
+
+It is also possible to use a combination of these arguments:
+
+.. code:: sh
+
+    mpwt -f input_folder -f output_folder --patho --dat --md --mx --mo --mc
+
+.. code-block:: text
+
+    Folder_output
+    ├── species_1
+    │   └── biopax-level2.owl
+    │   └── biopax-level3.owl
+    │   └── classes.dat
+    │   └── compounds.dat
+    │   └── dnabindsites.dat
+    │   └── enzrxns.dat
+    │   └── enzymes.col
+    │   └── genes.col
+    │   └── genes.dat
+    │   └── metabolic-reactions.xml
+    │   └── pathways.col
+    │   └── pathways.dat
+    │   └── promoters.dat
+    │   └── protcplxs.col
+    │   └── protein-features.dat
+    │   └── proteins.dat
+    │   └── protligandcplxes.dat
+    │   └── pubs.dat
+    │   └── reactions.dat
+    │   └── regulation.dat
+    │   └── regulons.dat
+    │   └── rnas.dat
+    │   └── species.dat
+    │   └── terminators.dat
+    │   └── transporters.col
+    │   └── transunits.dat
+    │   └── ..
+    ├── species_2
+    ..
+    ├── species_3
+    ..
+
+
+By using the **-r /size_reduction** argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
 
 .. code-block:: text
 

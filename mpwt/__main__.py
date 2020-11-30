@@ -7,19 +7,19 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
-    mpwt --dat [-f=DIR] [-o=DIR] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
-    mpwt -o=DIR [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt --dat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
     mpwt --version
-    mpwt topf -f=DIR -o=DIR [--cpu=INT] [--clean]
+    mpwt topf -f=FOLDER -o=FOLDER [--cpu=INT] [--clean]
 
 options:
     -h --help     Show help.
-    -f=DIR     Working folder containing sub-folders with Genbank/GFF/PF files.
-    -o=DIR    Output folder path. Will create a output folder in this folder.
+    -f=FOLDER     Working folder containing sub-folders with Genbank/GFF/PF files.
+    -o=FOLDER    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
     --hf    Use with --patho. Run the Hole Filler using Blast.
     --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
