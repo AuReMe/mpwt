@@ -245,7 +245,7 @@ def run_pwt_dat(species_input_folder_path):
     return error_status
 
 
-def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
@@ -259,6 +259,7 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         size_reduction (bool): to compress or not the results
         xml_extraction (bool): to extract or not the metabolic-reactions.xml'
         owl_extraction (bool): to extract or not the owl files
+        col_extraction (bool): to extract or not the tabular files (.col files)
     """
     output_species = os.path.join(output_folder, pgdb_folder_dbname)
 
@@ -269,9 +270,14 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         keep_extensions.append('.xml')
     if owl_extraction:
         keep_extensions.append('.owl')
+    if col_extraction:
+        keep_extensions.append('.col')
 
     if xml_extraction and len(keep_extensions) == 1:
         xml_file = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'metabolic-reactions.xml'])
+        if not os.path.exists(xml_file):
+            logger.critical('Missing metabolic-reactions.xml for ' + pgdb_folder_dbname + '. To create it use mpwt --dat.')
+            return
         shutil.copyfile(xml_file, output_species+'.xml')
         if size_reduction:
             shutil.rmtree(pgdb_folder_path)
@@ -279,15 +285,24 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
 
     if owl_extraction and len(keep_extensions) == 1:
         owl_level_2 = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'biopax-level2.owl'])
+        if not os.path.exists(owl_level_2):
+            logger.critical('Missing biopax-level2.owl for ' + pgdb_folder_dbname + '. To create it use mpwt --dat.')
+            return
         owl_level_3 = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'biopax-level3.owl'])
+        if not os.path.exists(owl_level_3):
+            logger.critical('Missing biopax-level3.owl for ' + pgdb_folder_dbname + '. To create it use mpwt --dat.')
+            return
         shutil.copyfile(owl_level_2, output_species+'-level2.owl')
         shutil.copyfile(owl_level_3, output_species+'-level3.owl')
         if size_reduction:
             shutil.rmtree(pgdb_folder_path)
         return
 
-    if dat_extraction:
+    if len(keep_extensions) > 0:
         pgdb_tmp_folder_path = os.path.join(*[pgdb_folder_path, '1.0', 'data'])
+        if not os.path.exists(pgdb_tmp_folder_path):
+            logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
+            return
     else:
         pgdb_tmp_folder_path = pgdb_folder_path
 
