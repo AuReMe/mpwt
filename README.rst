@@ -788,7 +788,7 @@ Output
 If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
-If you used the output argument, mpwt will move each of the PGDB folders to the output folder:
+If you use the output argument, mpwt will copy each of the PGDB folders to the output folder:
 
 .. code-block:: text
 
@@ -812,9 +812,9 @@ If you used the output argument, mpwt will move each of the PGDB folders to the 
     ├── species_3
     ..
 
-If you want specific files, you can use the --m* options.
+If you want specific files, you can use the **--mX/XXX_extraction** options.
 
-- **--md/dat_extraction** will only move the attribute-values dat files:
+- **--md/dat_extraction** will only copy the attribute-values dat files:
 
 .. code-block:: text
 
@@ -844,7 +844,7 @@ If you want specific files, you can use the --m* options.
     ├── species_3
     ..
 
-- **--mx/xml_extraction** will only move the metabolic-reactions.xml file of each PGDB and rename it:
+- **--mx/xml_extraction** will only copy the metabolic-reactions.xml file of each PGDB and rename it:
 
 .. code-block:: text
 
@@ -854,7 +854,7 @@ If you want specific files, you can use the --m* options.
     ├── species_3.xml
     ..
 
-- **--mo/owl_extraction** will only move the biopax-level2.owl and the biopax-level3.owl files of each PGDB and rename them:
+- **--mo/owl_extraction** will only copy the biopax-level2.owl and the biopax-level3.owl files of each PGDB and rename them:
 
 .. code-block:: text
 
@@ -867,7 +867,7 @@ If you want specific files, you can use the --m* options.
     ├── species_3-level3.owl
     ..
 
-- **--mc/col_extraction** will only move the tabular files of each PGDB:
+- **--mc/col_extraction** will only copy the tabular files of each PGDB:
 
 .. code-block:: text
 

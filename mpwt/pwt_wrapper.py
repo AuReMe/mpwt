@@ -314,9 +314,9 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
                 pgdb_file_pathname = os.path.join(pgdb_tmp_folder_path, pgdb_file)
                 pgdb_file_extension = os.path.splitext(pgdb_file)[1]
                 if pgdb_file_extension not in keep_extensions:
-                    if os.path.isfile(pgdb_file):
+                    if os.path.isfile(pgdb_file_pathname):
                         os.remove(pgdb_file_pathname)
-                    elif os.path.isdir(pgdb_file):
+                    elif os.path.isdir(pgdb_file_pathname):
                         shutil.rmtree(pgdb_file_pathname)
         zip_input_path = os.path.join(output_folder, pgdb_folder_dbname)
         shutil.make_archive(zip_input_path, 'zip', pgdb_tmp_folder_path)
@@ -326,10 +326,10 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         shutil.copytree(pgdb_tmp_folder_path, output_species)
         if len(keep_extensions) > 0:
             for pgdb_file in os.listdir(output_species):
-                pgdb_path = os.path.join(output_species, pgdb_file)
+                pgdb_file_pathname = os.path.join(output_species, pgdb_file)
                 pgdb_file_extension = os.path.splitext(pgdb_file)[1]
                 if pgdb_file_extension not in keep_extensions:
-                    if os.path.isfile(pgdb_path):
-                        os.remove(pgdb_path)
-                    elif os.path.isdir(pgdb_path):
-                        shutil.rmtree(pgdb_path)
+                    if os.path.isfile(pgdb_file_pathname):
+                        os.remove(pgdb_file_pathname)
+                    elif os.path.isdir(pgdb_file_pathname):
+                        shutil.rmtree(pgdb_file_pathname)
