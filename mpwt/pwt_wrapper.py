@@ -245,7 +245,7 @@ def run_pwt_dat(species_input_folder_path):
     return error_status
 
 
-def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
@@ -257,12 +257,31 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
         dat_extraction (bool): to extract or not the attribute-values files (.dat files)
         output_folder (str): path to output folder
         size_reduction (bool): to compress or not the results
+        xml_extraction (bool): to extract or not the metabolic-reactions.xml'
+        owl_extraction (bool): to extract or not the owl files
     """
     output_species = os.path.join(output_folder, pgdb_folder_dbname)
 
+    keep_extensions = []
+    if dat_extraction:
+        keep_extensions.append('.dat')
     if xml_extraction:
+        keep_extensions.append('.xml')
+    if owl_extraction:
+        keep_extensions.append('.owl')
+
+    if xml_extraction and len(keep_extensions) == 1:
         xml_file = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'metabolic-reactions.xml'])
         shutil.copyfile(xml_file, output_species+'.xml')
+        if size_reduction:
+            shutil.rmtree(pgdb_folder_path)
+        return
+
+    if owl_extraction and len(keep_extensions) == 1:
+        owl_level_2 = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'biopax-level2.owl'])
+        owl_level_3 = os.path.join(*[pgdb_folder_path, '1.0', 'data', 'biopax-level3.owl'])
+        shutil.copyfile(owl_level_2, output_species+'-level2.owl')
+        shutil.copyfile(owl_level_3, output_species+'-level3.owl')
         if size_reduction:
             shutil.rmtree(pgdb_folder_path)
         return
@@ -275,10 +294,11 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
     # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
     # It will also delete the PGDB folder in ptools-local.
     if size_reduction:
-        if dat_extraction:
+        if len(keep_extensions) > 0:
             for pgdb_file in os.listdir(pgdb_tmp_folder_path):
                 pgdb_file_pathname = os.path.join(pgdb_tmp_folder_path, pgdb_file)
-                if '.dat' not in pgdb_file:
+                pgdb_file_extension = os.path.splitext(pgdb_file)[1]
+                if pgdb_file_extension not in keep_extensions:
                     if os.path.isfile(pgdb_file):
                         os.remove(pgdb_file_pathname)
                     elif os.path.isdir(pgdb_file):
@@ -289,10 +309,11 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
 
     else:
         shutil.copytree(pgdb_tmp_folder_path, output_species)
-        if dat_extraction:
+        if len(keep_extensions) > 0:
             for pgdb_file in os.listdir(output_species):
                 pgdb_path = os.path.join(output_species, pgdb_file)
-                if '.dat' not in pgdb_file:
+                pgdb_file_extension = os.path.splitext(pgdb_file)[1]
+                if pgdb_file_extension not in keep_extensions:
                     if os.path.isfile(pgdb_path):
                         os.remove(pgdb_path)
                     elif os.path.isdir(pgdb_path):
