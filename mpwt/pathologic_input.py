@@ -617,50 +617,6 @@ def pwt_input_files(run_folder, taxon_file):
     return error_found
 
 
-def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
-                      patho_hole_filler=None, patho_operon_predictor=None,
-                      dat_extraction=None, output_folder=None,
-                      size_reduction=None, only_dat_creation=None,
-                      taxon_file=None):
-    """
-    Create input list for all multiprocess function, containing one lsit for each input subfolder.
-    All arguments are also stored.
-
-    Args:
-        run_ids (list): input species IDs
-        input_folder (str): pathname to input folder
-        pgdbs_folder_path (str): pathname to species PGDB in ptools-local
-        patho_hole_filler (bool): PathoLogic Hole Filler argument
-        patho_operon_predictor (bool): PathoLogic Operon predictor argument
-        dat_extraction (bool): BioPAX/attribute-values file extraction argument
-        output_folder (str): pathname to output folder
-        size_reduction (bool): ptools-local PGDB deletion after processing argument
-        only_dat_creation (bool): only create BioPAX/attribute values argument
-    Returns:
-        dictionary: contain all these data for multiprocessing
-    """
-    multiprocess_inputs = []
-    for run_id in run_ids:
-        multiprocess_input = {}
-        input_folder_path = os.path.join(input_folder, run_id)
-        species_pgdb_folder = os.path.join(pgdbs_folder_path, run_id.lower() + 'cyc')
-        pgdb_id_folders = (run_id, species_pgdb_folder)
-        if only_dat_creation:
-            multiprocess_input['pgdb_folders'] = retrieve_complete_id(pgdb_id_folders)
-        else:
-            multiprocess_input['pgdb_folders'] = pgdb_id_folders
-        multiprocess_input['species_input_folder_path'] = input_folder_path
-        multiprocess_input['patho_hole_filler'] = patho_hole_filler
-        multiprocess_input['patho_operon_predictor'] = patho_operon_predictor
-        multiprocess_input['dat_extraction'] = dat_extraction
-        multiprocess_input['output_folder'] = output_folder
-        multiprocess_input['size_reduction'] = size_reduction
-        multiprocess_input['taxon_file'] = taxon_file
-        multiprocess_inputs.append(multiprocess_input)
-
-    return multiprocess_inputs
-
-
 def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
     """
     Create a lisp script file for each PGDB in the ptools-local folder.
@@ -685,21 +641,3 @@ def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
                 raise Exception('Error with the creation of the lisp script for {0}'.format(species_pgdb))
 
             yield pgdb_id
-
-
-def retrieve_complete_id(pgdb_id_folder):
-    """
-    Retrieve the ID of the PGDB from the genetic-elements.dat file.
-
-    Args:
-        pgdb_id_folder (list): second tuple argument is the pathname to the PGDB
-    Returns:
-        list: (new PGDB ID (according to input file), pathname to PGDB folder)
-    """
-    genetic_element_path = os.path.join(*[pgdb_id_folder[1], '1.0', 'input', 'genetic-elements.dat'])
-    with open(genetic_element_path) as organism_file:
-        for line in organism_file:
-            if 'ANNOT-FILE' in line and ';;' not in line:
-                pgdb_id_complete = line.split('\t')[1].replace('.gff','').replace('.gbk','').strip()
-
-    return [pgdb_id_complete, pgdb_id_folder[1]]

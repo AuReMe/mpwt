@@ -71,23 +71,22 @@ def test_multiprocess_pwt_call():
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     subprocess.call(['mpwt', '-f', 'test', '--patho'])
 
-    subprocess.call(['mpwt', '-f', 'test', '-o', 'test_output', '--dat', '--md', '--cpu', '3'])
+    subprocess.call(['mpwt', '-o', 'test_output', '--dat', '--md', '--mx', '--mc', '--mo', '--cpu', '3'])
 
     pgdbs = mpwt.list_pgdb()
     assert set(['fatty_acid_beta_oxydation_i_gffcyc', 'fatty_acid_beta_oxydation_i_pfcyc', 'fatty_acid_beta_oxydation_icyc']).issubset(set(pgdbs))
 
-    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_I_gff', 'pathways.dat'])
+    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_i_gff', 'pathways.dat'])
     expected_tca_reactions = reaction_extraction(pathway_fabo_pathname)
     assert set(fabo_reactions()).issubset(set(expected_tca_reactions))
 
-    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_I', 'pathways.dat'])
+    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_i', 'pathways.dat'])
     expected_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
     assert set(fabo_reactions()).issubset(set(expected_fabo_reactions))
 
-    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_I_pf', 'pathways.dat'])
+    pathway_fabo_pathname = os.path.join(*['test_output', 'fatty_acid_beta_oxydation_i_pf', 'pathways.dat'])
     expected_pf_fabo_reactions = reaction_extraction(pathway_fabo_pathname)
     assert set(fabo_reactions()).issubset(set(expected_pf_fabo_reactions))
 
     subprocess.call(['mpwt', '-f', 'test', '--clean'])
     shutil.rmtree('test_output')
-

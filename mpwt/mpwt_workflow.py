@@ -15,7 +15,7 @@ import time
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_dat, run_move_pgdb
 from mpwt.results_check import check_dat, check_pwt
-from mpwt.pathologic_input import check_input_and_existing_pgdb, create_mpwt_input, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id, retrieve_complete_id
+from mpwt.pathologic_input import check_input_and_existing_pgdb, pwt_input_files, create_only_dat_lisp, create_dat_creation_script, read_taxon_id
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
@@ -219,8 +219,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Create path for lisp if there is no folder given.
     # Create the input for the creation of BioPAX/attribute-values files.
     if (dat_creation and not input_folder) or (output_folder and not input_folder):
-        only_dat_creation = True
-        # Create a temporary folder in ptools-local where list script will be stored.
+        # Create a temporary folder in ptools-local where lisp script will be stored.
         tmp_folder = os.path.join(ptools_local_path, 'tmp')
         if not os.path.exists(tmp_folder):
             os.mkdir(tmp_folder)
@@ -233,8 +232,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             input_tmp_folder_path = os.path.join(tmp_folder, dat_run_id)
             species_pgdb_folder = os.path.join(pgdbs_folder_path, dat_run_id.lower() + 'cyc')
             input_run_move_pgdbs = [dat_run_id, species_pgdb_folder]
-            if only_dat_creation:
-                input_run_move_pgdbs = retrieve_complete_id(input_run_move_pgdbs)
+
             input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction])
             multiprocess_run_pwt_dats.append([input_tmp_folder_path])
             multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
