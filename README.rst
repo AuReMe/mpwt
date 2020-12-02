@@ -298,7 +298,7 @@ The species_name is extracted from the Genbank/GFF/PF files.
     ANNOT-FILE  gbk_pathname
     //
 
-    **dat_creation.lisp**
+    **flat_files_creation.lisp**
     (in-package :ecocyc)
     (select-organism :org-id 'myDBName)
     (let ((*progress-noter-enabled?* NIL))
@@ -313,8 +313,8 @@ mpwt can be used with the command lines:
 
 .. code:: sh
 
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
-    mpwt --dat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
@@ -340,7 +340,7 @@ mpwt can be used in a python script with an import:
 			  patho_operon_predictor=optional_boolean,
 			  patho_transporter_inference=patho_transporter_inference,
 			  no_download_articles=optional_boolean,
-			  dat_creation=optional_boolean,
+			  flat_creation=optional_boolean,
 			  dat_extraction=optional_boolean,
 			  xml_extraction=optional_boolean,
 			  owl_extraction=optional_boolean,
@@ -358,7 +358,7 @@ mpwt can be used in a python script with an import:
 +=========================+================================================+=========================================================================+
 |          -f             | input_folder(string: folder pathname)          | Input folder as described in Input data                                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -o             | output_folder(string: folder pathname)         | Output folder containing PGDB data or dat files (see --dat arguments)   |
+|          -o             | output_folder(string: folder pathname)         | Output folder containing PGDB data or flat files (see --flat arguments) |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --patho        | patho_inference(boolean)                       | Launch PathoLogic inference on input folder                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -372,7 +372,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score cutoff     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --dat          | dat_creation(boolean)                          | Create BioPAX/attribute-value dat files                                 |
+|          --flat         | flat_creation(boolean)                         | Create BioPAX/attribute-value flat files                                |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --md           | dat_extraction(boolean)                        | Move the dat files into the output folder                               |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -539,20 +539,20 @@ Create PGDBs of studied organisms inside ptools-local with pathway prediction sc
                             patho_inference=True,
                             pathway_score=1.0)
 
-Create PGDBs of studied organisms inside ptools-local and create dat files:
+Create PGDBs of studied organisms inside ptools-local and create flat files:
 
 ..
 
     .. code:: sh
 
-        mpwt -f path/to/folder/input --patho --dat
+        mpwt -f path/to/folder/input --patho --flat
 
     .. code:: python
 
         import mpwt
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             patho_inference=True,
-                            dat_creation=True)
+                            flat_creation=True)
 
 Create PGDBs of studied organisms inside ptools-local.
 Then move all the PGDB files to the output folder.
@@ -570,14 +570,14 @@ Then move all the PGDB files to the output folder.
                             output_folder='path/to/folder/output',
                             patho_inference=True)
 
-Create PGDBs of studied organisms inside ptools-local and create dat files.
+Create PGDBs of studied organisms inside ptools-local and create flat files.
 Then move the dat files to the output folder.
 
 ..
 
     .. code:: sh
 
-        mpwt -f path/to/folder/input --patho --dat -o path/to/folder/output --md
+        mpwt -f path/to/folder/input --patho --flat -o path/to/folder/output --md
 
 
     .. code:: python
@@ -586,24 +586,24 @@ Then move the dat files to the output folder.
         mpwt.multiprocess_pwt(input_folder='path/to/folder/input',
                             output_folder='path/to/folder/output',
                             patho_inference=True,
-                            dat_creation=True,
+                            flat_creation=True,
                             dat_extraction=True)
 
 
-Create dat files for the PGDB inside ptools-local.
+Create flat files for the PGDB inside ptools-local.
 And move them to the output folder.
 
 ..
 
     .. code:: sh
 
-        mpwt --dat -o path/to/folder/output --md
+        mpwt --flat -o path/to/folder/output --md
 
     .. code:: python
 
         import mpwt
         mpwt.multiprocess_pwt(output_folder='path/to/folder/output',
-                            dat_creation=True,
+                            flat_creation=True,
                             dat_extraction=True)
 
 Move PGDB from ptools-local to the output folder:
@@ -651,7 +651,7 @@ Useful functions
                 patho_operon_predictor=optional_boolean,
                 patho_transporter_inference=patho_transporter_inference,
                 no_download_articles=optional_boolean,
-                dat_creation=optional_boolean,
+                flat_creation=optional_boolean,
                 dat_extraction=optional_boolean,
                 size_reduction=optional_boolean,
                 number_cpu=int,
@@ -676,7 +676,7 @@ Useful functions
 
         mpwt --clean
 
-    If you use clean and the argument -f input_folder, it will delete input files ('dat_creation.lisp', 'dat_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
+    If you use clean and the argument -f input_folder, it will delete input files ('flat_files_creation.lisp', 'flat_files_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
 
     .. code:: sh
 
@@ -785,7 +785,7 @@ This option will ignore error and continue the mpwt workflow on the successful P
 Output
 ~~~~~~
 
-If you did not use the output argument, results (PGDB with/without BioPAX/dat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
+If you did not use the output argument, results (PGDB with/without BioPAX/flat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
 If you use the output argument, mpwt will copy each of the PGDB folders to the output folder:
@@ -797,7 +797,7 @@ If you use the output argument, mpwt will copy each of the PGDB folders to the o
     │   └── default-version
     │   └── 1.0
     │       └── data
-    │           └── contains BioPAX/dat files if you used the --dat/dat_creation option.
+    │           └── contains BioPAX/flat files if you used the --flat/flat_creation option.
     │       └── input
     │           └── species_1.gbk
     │           └── genetic-elements.dat
@@ -887,7 +887,7 @@ It is also possible to use a combination of these arguments:
 
 .. code:: sh
 
-    mpwt -f input_folder -o output_folder --patho --dat --md --mx --mo --mc
+    mpwt -f input_folder -o output_folder --patho --flat --md --mx --mo --mc
 
 .. code-block:: text
 

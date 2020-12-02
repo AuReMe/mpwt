@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Wrapping Pathway Tools for PathoLogic and attribute-values dat files creation.
+Wrapping Pathway Tools for PathoLogic and attribute-values flat files creation.
 Move results files to an output folder.
 """
 import chardet
@@ -47,11 +47,11 @@ def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_sta
 
     if '-load' in cmd:
         load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
-        dat_error_status = check_log(species_input_folder_path, 'dat_creation.log', error_status, load_errors)
+        flat_error_status = check_log(species_input_folder_path, 'flat_files_creation.log', error_status, load_errors)
     else:
-        dat_error_status = None
+        flat_error_status = None
 
-    error_status = any([error_status, patho_error_status, dat_error_status])
+    error_status = any([error_status, patho_error_status, flat_error_status])
 
     if error_status:
         logger.critical('=== Pathway Tools log ===')
@@ -96,7 +96,7 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
 
 def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference):
     """
-    Create PGDB using files created during 'create_dats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
+    Create PGDB using files created during 'create_flats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
     Otherwise send the output to the null device.
     Command used:
@@ -175,9 +175,9 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     return error_status
 
 
-def run_pwt_dat(species_input_folder_path):
+def run_pwt_flat(species_input_folder_path):
     """
-    Create dat file using a lisp script created during 'create_dats_and_lisp'.
+    Create flat files using a lisp script created during 'create_flats_and_lisp'.
     Kill the subprocess when the command reach the Navigator Window opening proposition.
     If this proposition is not closed, the script can't continue.
     Command used:
@@ -188,32 +188,32 @@ def run_pwt_dat(species_input_folder_path):
     Returns:
         boolean: True if there is an error during lisp script execution
     """
-    lisp_path = os.path.join(species_input_folder_path, 'dat_creation.lisp')
+    lisp_path = os.path.join(species_input_folder_path, 'flat_files_creation.lisp')
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
-    cmd_dat = ['pathway-tools', *cmd_options, '-load', lisp_path]
+    cmd_flat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
-    logger.info(' '.join(cmd_dat))
+    logger.info(' '.join(cmd_flat))
 
     error_status = None
-    dat_creation_ends = ['Opening Navigator window.']
+    flat_creation_ends = ['Opening Navigator window.']
     load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
-    dat_log = os.path.join(species_input_folder_path, 'dat_creation.log')
+    flat_log = os.path.join(species_input_folder_path, 'flat_files_creation.log')
 
     try:
         # Launch Pathway Tools lisp command.
         # Use start_new_session to group process ID to kill this process and its childs (with os.killpg).
-        load_subprocess = subprocess.Popen(cmd_dat, stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
-        with open(dat_log, 'w', encoding='utf-8') as  dat_file_writer:
+        load_subprocess = subprocess.Popen(cmd_flat, stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
+        with open(flat_log, 'w', encoding='utf-8') as flat_file_writer:
             for load_line in iter(load_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(load_line)['encoding']
                 load_line = load_line.decode(encoding, errors='replace')
-                dat_file_writer.write(load_line)
+                flat_file_writer.write(load_line)
 
                 # Lisp commnd has finished, kill Pathway Toosl trying to open navigator.
-                if any(dat_end in load_line for dat_end in dat_creation_ends):
+                if any(flat_end in load_line for flat_end in flat_creation_ends):
                     load_subprocess.stdout.close()
                     load_subprocess.kill()
                     os.killpg(os.getpgid(load_subprocess.pid), signal.SIGKILL)
@@ -231,14 +231,14 @@ def run_pwt_dat(species_input_folder_path):
                 load_subprocess.poll()
                 return_code = load_subprocess.returncode
                 if return_code:
-                    raise subprocess.CalledProcessError(return_code, cmd_dat)
+                    raise subprocess.CalledProcessError(return_code, cmd_flat)
 
         # Check for error.
-        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_dat, error_status)
+        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_flat, error_status)
 
     except subprocess.CalledProcessError as subprocess_error:
         # Check error with subprocess (when process is killed).
-        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_dat, error_status, subprocess_error.returncode, load_subprocess.stderr)
+        error_status = pwt_check_error(species_input_folder_path, load_lines, cmd_flat, error_status, subprocess_error.returncode, load_subprocess.stderr)
 
     load_subprocess.stdout.close()
 

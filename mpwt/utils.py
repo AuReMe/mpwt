@@ -131,7 +131,7 @@ def cleaning(number_cpu=None, verbose=None):
 
 def cleaning_input(input_folder, verbose=None):
     """
-    Remove dat_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
+    Remove flat_files_creation.lisp, pathologic.log, genetic-elements.dat and organism-params.dat in a genbank folder.
 
     Args:
         input_folder (str): pathname to input folder
@@ -151,10 +151,10 @@ def cleaning_input(input_folder, verbose=None):
 
     for input_path in input_paths:
         if os.path.isdir(input_path):
-            lisp_script = os.path.join(input_path, 'dat_creation.lisp')
+            lisp_script = os.path.join(input_path, 'flat_files_creation.lisp')
             patho_log = os.path.join(input_path, 'pathologic.log')
             pwt_log = os.path.join(input_path, 'pwt_terminal.log')
-            dat_log = os.path.join(input_path, 'dat_creation.log')
+            flat_log = os.path.join(input_path, 'flat_files_creation.log')
             genetic_dat = os.path.join(input_path, 'genetic-elements.dat')
             organism_dat = os.path.join(input_path, 'organism-params.dat')
             if os.path.exists(lisp_script):
@@ -163,8 +163,8 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(patho_log)
             if os.path.exists(pwt_log):
                 os.remove(pwt_log)
-            if os.path.exists(dat_log):
-                os.remove(dat_log)
+            if os.path.exists(flat_log):
+                os.remove(flat_log)
             if os.path.exists(genetic_dat):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
