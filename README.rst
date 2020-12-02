@@ -12,7 +12,7 @@ mpwt: Multiprocessing Pathway Tools
 
 mpwt is a python package for running Pathway Tools [Karp2019]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
 
-There is no guarantee that this script will work, it is a Work In Progress in early state.
+The last version of Pathway Tools supported by mpwt is shown in the badge named "Pathway Tools".
 
 mpwt: Pipeline summary
 ======================
@@ -31,10 +31,10 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-mpwt needs at least **Python3.6**.
+mpwt needs at least **Python 3.6**.
 mpwt requires three python depedencies (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
-You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__. The last version supported by mpwt is shown in the badge Pathway Tools.
+You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 
 Pathway Tools needs **Blast**, so it must be install on your system. Depending on your system, Pathway Tools needs a file named **.ncbirc** to locate Blast, for more informations look at `this page <http://bioinformatics.ai.sri.com/ptools/installation-guide/released/blast.html>`__.
 
@@ -887,7 +887,7 @@ It is also possible to use a combination of these arguments:
 
 .. code:: sh
 
-    mpwt -f input_folder -f output_folder --patho --dat --md --mx --mo --mc
+    mpwt -f input_folder -o output_folder --patho --dat --md --mx --mo --mc
 
 .. code-block:: text
 
