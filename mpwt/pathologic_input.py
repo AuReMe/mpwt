@@ -4,7 +4,7 @@ Check input folders and input files.
 Create PathoLogic input files:
 -organism-params.dat
 -genetic-elements.dats
--dat_creation.lisp
+-flat_files_creation.lisp
 """
 
 import csv

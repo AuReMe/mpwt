@@ -768,7 +768,7 @@ If you encounter errors (and it is highly possible) there is informations that c
 
 For error during PathoLogic inference, you can use the log arguments.
 The log contains the summary of the build and the error for each species.
-There is also a pathologic.log (created by Pathway Tools), a pwt_terminal.log (log of the terminal during PathoLogic process) and a dat_creation.log (log of the terminal during attributes-values files creation) in each sub-folders.
+There is also a pathologic.log (created by Pathway Tools), a pwt_terminal.log (log of the terminal during PathoLogic process) and a flat_files_creation.log (log of the terminal during attributes-values files creation) in each sub-folders.
 
 If the build passed you have also the possibility to see the result of the inference with the file resume_inference.tsv.
 For each species, it contains the number of genes/proteins/reactions/pathways/compounds in the metabolic network.
