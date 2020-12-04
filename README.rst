@@ -844,7 +844,7 @@ If you want specific files, you can use the **--mX/XXX_extraction** options.
     ├── species_3
     ..
 
-- **--mx/xml_extraction** will only copy the metabolic-reactions.xml file of each PGDB and rename it:
+- **--mx/xml_extraction** will only copy the metabolic-reactions.xml file of each PGDB (created by MetaFlux) and rename it:
 
 .. code-block:: text
 
