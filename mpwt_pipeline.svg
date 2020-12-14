@@ -390,7 +390,8 @@
            height="74.751289"
            x="-12.121831"
            y="39.636158" /></flowRegion><flowPara
-         id="flowPara4541">PathoLogic, GenbBank, GFF</flowPara></flowRoot>    <text
+         id="flowPara4541">PathoLogic, GenbBank, GFF</flowPara></flowRoot>
+    <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="28.788073"
@@ -483,18 +484,18 @@
            x="85.724205">attribute-values flat files creation</tspan></tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="269.7999"
        y="201.98994"
        id="text1141"><tspan
          x="269.7999"
          y="201.98994"
          id="tspan1139"
-         style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.26458332"><tspan
+         style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.264583"><tspan
            x="269.7999"
            y="201.98994"
-           style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
-           id="tspan1137">--dat</tspan></tspan></text>
+           style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+           id="tspan1137">--flat</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
@@ -510,26 +511,26 @@
            id="tspan1281"
            style="stroke-width:0.26458332">output folder</tspan></tspan></text>
     <rect
-       style="fill:#241f1c;fill-opacity:0;stroke:#000000;stroke-width:1.3240217;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#241f1c;fill-opacity:0;stroke:#000000;stroke-width:1.32402;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect21-8-0-1"
-       width="228.52412"
-       height="69.721649"
+       width="227.26556"
+       height="102.9367"
        x="437.93289"
        y="-136.99863" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="467.11868"
        y="-80.348541"
        id="text1279"><tspan
          x="467.11868"
          y="-80.348541"
          id="tspan1277"
-         style="stroke-width:0.26458332"><tspan
+         style="stroke-width:0.264583"><tspan
            x="467.11868"
            y="-80.348541"
            id="tspan1275"
-           style="stroke-width:0.26458332">attribute-values flat files only</tspan></tspan></text>
+           style="stroke-width:0.264583">attribute-values flat files</tspan></tspan></text>
     <rect
        style="fill:#241f1c;fill-opacity:0;stroke:#000000;stroke-width:1.41239357;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect21-8-9"
@@ -800,7 +801,8 @@
            height="47.594765"
            width="91.136284"
            id="rect1267" /></flowRegion><flowPara
-         id="flowPara1269" /></flowRoot>    <text
+         id="flowPara1269" /></flowRoot>
+    <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333397px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="614.69763"
@@ -913,8 +915,8 @@
        d="m 181.08322,54.37184 -0.33151,40.21241"
        id="path1849-8-8-2" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:3.00011039;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Arrow2Send-8-1)"
-       d="m 382.95751,188.14454 175.68816,0.91946 1.56852,-250.449348"
+       style="fill:none;stroke:#000000;stroke-width:3.00011;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Arrow2Send-8-1)"
+       d="m 382.95751,188.14454 175.68816,0.91946 1.56852,-213.818212"
        id="path1849-8-8-9" />
     <text
        xml:space="preserve"
@@ -936,6 +938,70 @@
          id="rect21-8-9-32"
          style="fill:#241f1c;fill-opacity:0;stroke:#003100;stroke-width:1.41239357;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="466.87836"
+       y="-68.737228"
+       id="text1279-7"><tspan
+         x="466.87836"
+         y="-68.737228"
+         id="tspan1277-0"
+         style="stroke-width:0.264583">metabolic-reactions.xml<tspan
+   x="466.87836"
+   y="-68.737228"
+   id="tspan1275-9"
+   style="stroke-width:0.264583" /></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="629.53802"
+       y="-69.0952"
+       id="text1141-4-7"><tspan
+         x="629.53802"
+         y="-69.0952"
+         id="tspan1139-6-9"
+         style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.264583">--mx</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="495.24017"
+       y="-57.299225"
+       id="text1279-7-3"><tspan
+         x="495.24017"
+         y="-57.299225"
+         id="tspan1277-0-7"
+         style="stroke-width:0.264583">biopax owl files</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="629.91394"
+       y="-57.95261"
+       id="text1141-4-7-9"><tspan
+         x="629.91394"
+         y="-57.95261"
+         id="tspan1139-6-9-2"
+         style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.264583">--mo</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="503.35449"
+       y="-46.200123"
+       id="text1279-7-3-3"><tspan
+         x="503.35449"
+         y="-46.200123"
+         id="tspan1277-0-7-6"
+         style="stroke-width:0.264583">tabular files</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="630.03375"
+       y="-47.695232"
+       id="text1141-4-7-9-3"><tspan
+         x="630.03375"
+         y="-47.695232"
+         id="tspan1139-6-9-2-6"
+         style="fill:#339b00;fill-opacity:1;stroke:none;stroke-width:0.264583">--mc</tspan></text>
   </g>
   <path
      id="path5037"

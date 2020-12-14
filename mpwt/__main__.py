@@ -3,38 +3,41 @@
 
 """
 Description:
-From Genbank/GFF/PF files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate dat files.
+From Genbank/GFF/PF files this script will create Pathway Tools input data, then run Pathway Tools's PathoLogic on them. It can also generate flat files.
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=DIR [-o=DIR] [--patho] [--hf] [--op] [--tp] [--nc] [--dat] [--md] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
-    mpwt --dat [-f=DIR] [-o=DIR] [--md] [--cpu=INT] [-v]
-    mpwt -o=DIR [--md] [--cpu=INT] [-v]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
+    mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
     mpwt --delete=STR [--cpu=INT]
     mpwt --list
     mpwt --version
-    mpwt topf -f=DIR -o=DIR [--cpu=INT] [--clean]
+    mpwt topf -f=FOLDER -o=FOLDER [--cpu=INT] [--clean]
 
 options:
     -h --help     Show help.
-    -f=DIR     Working folder containing sub-folders with Genbank/GFF/PF files.
-    -o=DIR    Output folder path. Will create a output folder in this folder.
+    -f=FOLDER     Working folder containing sub-folders with Genbank/GFF/PF files.
+    -o=FOLDER    Output folder path. Will create a output folder in this folder.
     --patho    Will run an inference of Pathologic on the input files.
     --hf    Use with --patho. Run the Hole Filler using Blast.
     --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
     --tp    Use with --patho. Run the Transport Inference Parser of Pathway-Tools.
     --nc    Use with --patho. Turn off loading of Pubmed entries.
     -p=FLOAT   Use with --patho. Modify PathoLogic pathway prediction score.
-    --dat    Will create BioPAX/attribute-value dat files from PGDB.
-    --md    Move only the dat files into the output folder.
+    --flat    Will create BioPAX/attribute-value flat files from PGDB.
+    --md    Move the dat files into the output folder.
+    --mx    Move the metabolic-reactions.xml file into the output folder.
+    --mo    Move owl files into the output folder.
+    --mc    Move tabular files into the output folder.
     --clean    Clean ptools-local folder, before any other operations.
     --delete=STR    Give a PGDB name and it will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).
     -r    Will delete files in ptools-local and compress results files to reduce results size (use it with -o).
     --cpu=INT     Number of cpu to use for the multiprocessing (default=1). [default: 1]
     --log=FOLDER     Create PathoLogic log files inside the given folder (use it with --patho).
     --list     List all PGDBs inside the ptools-local folder.
-    --ignore-error     Ignore errors (PathoLogic and dat creation) and continue for successful builds.
+    --ignore-error     Ignore errors (PathoLogic and flat-files creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
     -v     Verbose.
     --version     Version
@@ -76,8 +79,11 @@ def run_mpwt():
     patho_operon_predictor = args['--op']
     patho_transporter_inference = args['--tp']
     no_download_articles = args['--nc']
-    dat_creation = args['--dat']
+    flat_creation = args['--flat']
     move_dat = args['--md']
+    move_xml = args['--mx']
+    move_owl = args['--mo']
+    move_col = args['--mc']
     size_reduction = args['-r']
     number_cpu = args['--cpu']
     patho_log = args['--log']
@@ -123,7 +129,7 @@ def run_mpwt():
             utils.remove_pgdbs(input_pgdb_to_deletes, number_cpu)
         else:
             utils.cleaning(number_cpu, verbose)
-        if not patho_inference and not dat_creation and not move_dat and not output_folder:
+        if not patho_inference and not flat_creation and not move_dat and not output_folder:
             sys.exit()
 
     if topf:
@@ -138,8 +144,11 @@ def run_mpwt():
                     patho_operon_predictor=patho_operon_predictor,
                     patho_transporter_inference=patho_transporter_inference,
                     no_download_articles=no_download_articles,
-                    dat_creation=dat_creation,
+                    flat_creation=flat_creation,
                     dat_extraction=move_dat,
+                    xml_extraction=move_xml,
+                    owl_extraction=move_owl,
+                    col_extraction=move_col,
                     size_reduction=size_reduction,
                     number_cpu=number_cpu,
                     patho_log=patho_log,

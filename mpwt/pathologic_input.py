@@ -4,7 +4,7 @@ Check input folders and input files.
 Create PathoLogic input files:
 -organism-params.dat
 -genetic-elements.dats
--dat_creation.lisp
+-flat_files_creation.lisp
 """
 
 import csv
@@ -39,7 +39,7 @@ def compare_input_ids_to_ptools_ids(compare_ids, ptools_run_ids, set_operation):
         compare_ids_ptools = set(lower_case_compare_ids) - set(ptools_run_ids)
 
     # Intersection to obtain all IDs which are already in PGDB folder.
-    # Which need only to create BioPAX/dat files and move them in output folder.
+    # Which need only to create BioPAX/flat files and move them in output folder.
     elif set_operation == 'intersection':
         compare_ids_ptools = set(ptools_run_ids).intersection(set(lower_case_compare_ids))
 
@@ -57,8 +57,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
         output_folder (str): pathname to the output folder
         number_cpu_to_use (int): number of CPU to use for multiprocessing
     Returns:
-        list: input IDs for PathoLogic and BioPAX/dat creation
-        list: input IDs for BioPAX/dat creation
+        list: input IDs for PathoLogic and BioPAX/flat files creation
+        list: input IDs for BioPAX/flat files creation
     """
     # Check if there are files/folders inside the input folder.
     # And remove hidden folder/file (beginning with '.').
@@ -164,18 +164,18 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
 
         already_present_pgdbs = list(set(already_present_pgdbs) - set(unfinished_builds))
 
-        run_patho_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
-        run_dat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
+        run_patho_flat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'difference')
+        run_flat_ids = compare_input_ids_to_ptools_ids(new_run_ids, already_present_pgdbs, 'intersection')
 
-        for run_dat_id in run_dat_ids:
-            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launched on this species.".format(run_dat_id))
-        return run_patho_dat_ids, run_dat_ids
+        for run_flat_id in run_flat_ids:
+            logger.info("! PGDB {0} already in ptools-local, no PathoLogic inference will be launched on this species.".format(run_flat_id))
+        return run_patho_flat_ids, run_flat_ids
 
     return new_run_ids, None
 
 
-def create_dat_creation_script(pgdb_id, lisp_pathname):
-    """ Create a lisp script allowing dat extraction.
+def create_flat_creation_script(pgdb_id, lisp_pathname):
+    """ Create a lisp script allowing flat files creation.
 
     Args:
         pgdb_id (str): ID of a PGDB
@@ -323,10 +323,10 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
     return False, taxon_id, taxon_datas
 
 
-def create_dats_and_lisp(run_folder, taxon_file):
+def create_flats_and_lisp(run_folder, taxon_file):
     """
     Read Genbank/GFF/PF files and create Pathway Tools needed file.
-    Create also a lisp file to create dat files from Pathway tools results.
+    Create also a lisp file to create flat files from Pathway tools results.
     The name of the PGDB created by Pathway Tools will be the name of the species with '_' instead of space.
 
     Create organism-params.dat:
@@ -340,7 +340,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
     ANNOT-FILE  gbk_name
     //
 
-    Create dat_creation.lisp:
+    Create flat_files_creation.lisp:
     (in-package :ecocyc)
     (select-organism :org-id 'pgdb_id)
     (create-flat-files-for-current-kb)
@@ -362,7 +362,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
 
     organism_dat = os.path.join(run_folder, 'organism-params.dat')
     genetic_dat = os.path.join(run_folder, 'genetic-elements.dat')
-    lisp_pathname = os.path.join(run_folder, 'dat_creation.lisp')
+    lisp_pathname = os.path.join(run_folder, 'flat_files_creation.lisp')
 
     fasta_extensions = ['.fasta', '.fsa']
 
@@ -527,7 +527,7 @@ def create_dats_and_lisp(run_folder, taxon_file):
                                 genetic_writer.writerow(['CODON-TABLE', codon_table])
                         genetic_writer.writerow(['//'])
     # Create the lisp script.
-    check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
+    check_lisp_file = create_flat_creation_script(pgdb_id, lisp_pathname)
 
     return all([os.path.isfile(organism_dat), os.path.isfile(genetic_dat), check_lisp_file])
 
@@ -591,7 +591,7 @@ def pwt_input_files(run_folder, taxon_file):
         run_folder (str): path to the input folder
         taxon_file (str): path to the taxon_id.tsv file
     """
-    required_files = set(['organism-params.dat', 'genetic-elements.dat', 'dat_creation.lisp'])
+    required_files = set(['organism-params.dat', 'genetic-elements.dat', 'flat_files_creation.lisp'])
     files_in = set(next(os.walk(run_folder))[2])
 
     species_folder = os.path.basename(run_folder)
@@ -606,7 +606,7 @@ def pwt_input_files(run_folder, taxon_file):
         missing_string = 'no missing files'
     else:
         missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(species_folder)
-        check_datas_lisp = create_dats_and_lisp(run_folder, taxon_file)
+        check_datas_lisp = create_flats_and_lisp(run_folder, taxon_file)
         if check_datas_lisp is None:
             logger.critical('Error with the creation of input files of {0}.'.format(run_folder))
             error_found = True
@@ -617,51 +617,7 @@ def pwt_input_files(run_folder, taxon_file):
     return error_found
 
 
-def create_mpwt_input(run_ids, input_folder, pgdbs_folder_path,
-                      patho_hole_filler=None, patho_operon_predictor=None,
-                      dat_extraction=None, output_folder=None,
-                      size_reduction=None, only_dat_creation=None,
-                      taxon_file=None):
-    """
-    Create input list for all multiprocess function, containing one lsit for each input subfolder.
-    All arguments are also stored.
-
-    Args:
-        run_ids (list): input species IDs
-        input_folder (str): pathname to input folder
-        pgdbs_folder_path (str): pathname to species PGDB in ptools-local
-        patho_hole_filler (bool): PathoLogic Hole Filler argument
-        patho_operon_predictor (bool): PathoLogic Operon predictor argument
-        dat_extraction (bool): BioPAX/attribute-values file extraction argument
-        output_folder (str): pathname to output folder
-        size_reduction (bool): ptools-local PGDB deletion after processing argument
-        only_dat_creation (bool): only create BioPAX/attribute values argument
-    Returns:
-        dictionary: contain all these data for multiprocessing
-    """
-    multiprocess_inputs = []
-    for run_id in run_ids:
-        multiprocess_input = {}
-        input_folder_path = os.path.join(input_folder, run_id)
-        species_pgdb_folder = os.path.join(pgdbs_folder_path, run_id.lower() + 'cyc')
-        pgdb_id_folders = (run_id, species_pgdb_folder)
-        if only_dat_creation:
-            multiprocess_input['pgdb_folders'] = retrieve_complete_id(pgdb_id_folders)
-        else:
-            multiprocess_input['pgdb_folders'] = pgdb_id_folders
-        multiprocess_input['species_input_folder_path'] = input_folder_path
-        multiprocess_input['patho_hole_filler'] = patho_hole_filler
-        multiprocess_input['patho_operon_predictor'] = patho_operon_predictor
-        multiprocess_input['dat_extraction'] = dat_extraction
-        multiprocess_input['output_folder'] = output_folder
-        multiprocess_input['size_reduction'] = size_reduction
-        multiprocess_input['taxon_file'] = taxon_file
-        multiprocess_inputs.append(multiprocess_input)
-
-    return multiprocess_inputs
-
-
-def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
+def create_only_flat_lisp(pgdbs_folder_path, tmp_folder):
     """
     Create a lisp script file for each PGDB in the ptools-local folder.
     Return a generator with the PGDB IDs.
@@ -679,27 +635,9 @@ def create_only_dat_lisp(pgdbs_folder_path, tmp_folder):
             pgdb_pathname = os.path.join(tmp_folder, pgdb_id)
             tmp_pgdb_path = os.path.join(tmp_folder, pgdb_id)
             os.mkdir(tmp_pgdb_path)
-            lisp_pathname = os.path.join(pgdb_pathname, 'dat_creation.lisp')
-            check_lisp_file = create_dat_creation_script(pgdb_id, lisp_pathname)
+            lisp_pathname = os.path.join(pgdb_pathname, 'flat_files_creation.lisp')
+            check_lisp_file = create_flat_creation_script(pgdb_id, lisp_pathname)
             if not check_lisp_file:
                 raise Exception('Error with the creation of the lisp script for {0}'.format(species_pgdb))
 
             yield pgdb_id
-
-
-def retrieve_complete_id(pgdb_id_folder):
-    """
-    Retrieve the ID of the PGDB from the genetic-elements.dat file.
-
-    Args:
-        pgdb_id_folder (list): second tuple argument is the pathname to the PGDB
-    Returns:
-        list: (new PGDB ID (according to input file), pathname to PGDB folder)
-    """
-    genetic_element_path = os.path.join(*[pgdb_id_folder[1], '1.0', 'input', 'genetic-elements.dat'])
-    with open(genetic_element_path) as organism_file:
-        for line in organism_file:
-            if 'ANNOT-FILE' in line and ';;' not in line:
-                pgdb_id_complete = line.split('\t')[1].replace('.gff','').replace('.gbk','').strip()
-
-    return [pgdb_id_complete, pgdb_id_folder[1]]
