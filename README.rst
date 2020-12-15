@@ -10,7 +10,7 @@
 mpwt: Multiprocessing Pathway Tools
 ===================================
 
-mpwt is a python package for running Pathway Tools [Karp2019]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
+mpwt is a python package for running Pathway Tools [PathwayToolsarXiv]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
 
 The last version of Pathway Tools supported by mpwt is shown in the badge named "Pathway Tools".
 
@@ -676,7 +676,7 @@ Useful functions
 
         mpwt --clean
 
-    If you use clean and the argument -f input_folder, it will delete input files ('flat_files_creation.lisp', 'flat_files_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
+    If you use ``--clean`` with the argument ``-f input_folder``, it will delete input files ('flat_files_creation.lisp', 'flat_files_creation.log', 'pathologic.log', 'pwt_terminal.log', 'genetic-elements.dat' and 'organism-params.dat') and the PGDB corresponding to the input folder.
 
     .. code:: sh
 
@@ -779,7 +779,7 @@ Also, if there is an error in pathologic.log, it will be shown after **=== Error
 
 There is a `Pathway Tools forum <https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
 
-You can also ignore PathoLogic errors by using the argument --ignore-error/ignore_error.
+You can also ignore PathoLogic errors by using the argument ``--ignore-error/ignore_error``.
 This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
 
 Output
@@ -814,9 +814,9 @@ If you use the output argument, mpwt will copy each of the PGDB folders to the o
     ├── species_3
     ..
 
-If you want specific files, you can use the **--mX/XXX_extraction** options.
+If you want specific files, you can use the ``--mX/XXX_extraction`` options.
 
-- **--md/dat_extraction** will only copy the attribute-values dat files:
+- ``--md/dat_extraction`` will only copy the attribute-values dat files:
 
 .. code-block:: text
 
@@ -846,7 +846,7 @@ If you want specific files, you can use the **--mX/XXX_extraction** options.
     ├── species_3
     ..
 
-- **--mx/xml_extraction** will only copy the metabolic-reactions.xml file of each PGDB (created by MetaFlux) and rename it:
+- ``--mx/xml_extraction`` will only copy the metabolic-reactions.xml file of each PGDB (created by MetaFlux) and rename it:
 
 .. code-block:: text
 
@@ -856,7 +856,7 @@ If you want specific files, you can use the **--mX/XXX_extraction** options.
     ├── species_3.xml
     ..
 
-- **--mo/owl_extraction** will only copy the biopax-level2.owl and the biopax-level3.owl files of each PGDB and rename them:
+- ``--mo/owl_extraction`` will only copy the biopax-level2.owl and the biopax-level3.owl files of each PGDB and rename them:
 
 .. code-block:: text
 
@@ -869,7 +869,7 @@ If you want specific files, you can use the **--mX/XXX_extraction** options.
     ├── species_3-level3.owl
     ..
 
-- **--mc/col_extraction** will only copy the tabular files of each PGDB:
+- ``--mc/col_extraction`` will only copy the tabular files of each PGDB:
 
 .. code-block:: text
 
@@ -928,7 +928,7 @@ It is also possible to use a combination of these arguments:
     ..
 
 
-By using the **-r /size_reduction** argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
+By using the ``-r /size_reduction`` argument, you will have compressed zip files (and PGDBs inside ptools-local will be deleted):
 
 .. code-block:: text
 
@@ -967,10 +967,9 @@ Bibliography
 
 .. [Karp2018] Karp, P. D., Weaver, D. & Latendresse, M. How accurate is automated gap filling of metabolic models?. BMC Systems Biology 12(1), 73 (2018). https://doi.org/10.1186/s12918-018-0593-7
 
-.. [Karp2019arXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools version 23.0: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv (2019). https://arxiv.org/abs/1510.03964
+.. [Karp2019arXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools version 23.0: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv (2019). https://arxiv.org/abs/1510.03964v3
 
-.. [Karp2019] Karp, P. D., Midford, P. E., Billington, R., Kothari, A., Krummenacker, M., Latendresse, M., Ong, W. K., Subhraveti, P., Caspi, R., Fulcher, C., Keseler, I. M., & Paley, S. M. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in bioinformatics, bbz104. Advance online publication (2019). https://doi.org/10.1093/bib/bbz104
-
+.. [PathwayToolsarXiv] Karp, P. D., Paley, S. M., Midford, P. E., Krummenacker, M., Billington, R., Kothari, A., Ong, W. K., Subhraveti, P., Keseler, I. M. & Caspi R. Pathway Tools: Integrated Software for Pathway/Genome Informatics and Systems Biology. arXiv. https://arxiv.org/abs/1510.03964
 
 Citation
 --------
