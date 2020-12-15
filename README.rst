@@ -788,6 +788,8 @@ Output
 If you did not use the output argument, results (PGDB with/without BioPAX/flat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
 Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
 
+The different file formats created are described on `Pathway Tools data-file format site <https://bioinformatics.ai.sri.com/ptools/flatfile-format.html>`__.
+
 If you use the output argument, mpwt will copy each of the PGDB folders to the output folder:
 
 .. code-block:: text
