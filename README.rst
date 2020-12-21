@@ -10,7 +10,7 @@
 mpwt: Multiprocessing Pathway Tools
 ===================================
 
-mpwt is a python package for running Pathway Tools [PathwayToolsarXiv]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism. This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
+mpwt is a python package for running Pathway Tools [PathwayToolsarXiv]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism (PathoLogic and Pathway Tools pathway prediction are described in this `blog entry <http://pathwaytools.blogspot.com/2020/10/how-does-metabolic-pathway-prediction.html>`__). This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
 
 The last version of Pathway Tools supported by mpwt is shown in the badge named "Pathway Tools".
 
