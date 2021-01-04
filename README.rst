@@ -1,7 +1,7 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
 	:target: https://pypi.python.org/pypi/mpwt
 
-.. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
+.. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
 	:target: https://doi.org/10.7554/eLife.61968
 
 .. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
@@ -974,7 +974,7 @@ Bibliography
 Citation
 --------
 
-Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020;9:e61968 [https://doi.org/10.7554/eLife.61968](https://doi.org/10.7554/eLife.61968).
+Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020;9:e61968 `https://doi.org/10.7554/eLife.61968 <https://doi.org/10.7554/eLife.61968>`__.
 
 Acknowledgements
 ----------------
