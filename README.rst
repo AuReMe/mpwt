@@ -2,7 +2,7 @@
 	:target: https://pypi.python.org/pypi/mpwt
 
 .. image:: https://img.shields.io/badge/doi-10.1101/803056-blueviolet.svg
-	:target: https://www.biorxiv.org/content/10.1101/803056v1
+	:target: https://doi.org/10.7554/eLife.61968
 
 .. image:: https://img.shields.io/badge/Pathway%20Tools-24.0-brightgreen
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
@@ -974,7 +974,7 @@ Bibliography
 Citation
 --------
 
-Arnaud Belcour, Clémence Frioux, Meziane Aite, Anthony Bretaudeau, Anne Siegel (2019) Metage2Metabo: metabolic complementarity applied to genomes of large-scale microbiotas for the identification of keystone species. bioRxiv 803056; doi: `https://doi.org/10.1101/803056 <https://doi.org/10.1101/803056>`__.
+Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020;9:e61968 [https://doi.org/10.7554/eLife.61968](https://doi.org/10.7554/eLife.61968).
 
 Acknowledgements
 ----------------
