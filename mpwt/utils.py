@@ -49,6 +49,13 @@ def find_ptools_path():
 
 
 def check_ptools_local_pwt():
+    """
+    Check if ptools-init.dat exists in ptools-local folder.
+
+    Args:
+    Returns:
+        bool: True if ptools-init.dat is missing
+    """
     ptools_path = find_ptools_path()
 
     error = None

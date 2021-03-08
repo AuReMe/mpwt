@@ -218,7 +218,11 @@ def create_flat_creation_script(pgdb_id, lisp_pathname):
 
 
 def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
-    """ Extract taxon ID from taxon_id.tsv file.
+    """ Extract taxon ID and other informations from taxon_id.tsv file.
+    Other informatiosn are:
+        - circular (cirularity of genome)
+        - element_type (chromosome, plasmid, contig, mitochondria or chloroplast)
+        - codon_table
 
     Args:
         run_folder (str): ID of a species of the input folder
@@ -361,6 +365,7 @@ def create_flats_and_lisp(run_folder, taxon_file):
 
     Args:
         run_folder (str): ID of a species of the input folder
+        taxon_file (bool): Boolean indicating if a taxon_file must be used
     Returns:
         list: boolean list, True if all files have been created
    """
@@ -547,6 +552,14 @@ def create_flats_and_lisp(run_folder, taxon_file):
 
 
 def read_taxon_id(run_folder):
+    """
+    Search for Taxon ID in genbank or GFF files.
+    For GenBank file searc for ''taxon:' key in 'db_xref' qualifier.
+    For GFF file search for 'taxon' in dbxref feature.
+
+    Args:
+        run_folder (str): path to the input folder
+    """
     taxon_ids = {}
 
     for input_folder in os.listdir(run_folder):
