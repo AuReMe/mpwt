@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss - Pleiade
+# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@ Check input folders and input files.
 
 Create PathoLogic input files:
 -organism-params.dat
--genetic-elements.dats
+-genetic-elements.dat
 -flat_files_creation.lisp
 """
 
