@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss - Pleiade
+# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -74,10 +74,19 @@ logger = logging.getLogger(__name__)
 logging.getLogger("mpwt").setLevel(logging.CRITICAL)
 
 VERSION = pkg_resources.get_distribution("mpwt").version
-LICENSE = """Copyright (C) AuReMe
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-Mpwt is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
+LICENSE = """Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss\n
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.\n
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.\n
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>\n
 """
 
 def run_mpwt():

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss - Pleiade
+# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@ Check input folders and input files.
 
 Create PathoLogic input files:
 -organism-params.dat
--genetic-elements.dats
+-genetic-elements.dat
 -flat_files_creation.lisp
 """
 
@@ -218,7 +218,11 @@ def create_flat_creation_script(pgdb_id, lisp_pathname):
 
 
 def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
-    """ Extract taxon ID from taxon_id.tsv file.
+    """ Extract taxon ID and other informations from taxon_id.tsv file.
+    Other informatiosn are:
+        - circular (cirularity of genome)
+        - element_type (chromosome, plasmid, contig, mitochondria or chloroplast)
+        - codon_table
 
     Args:
         run_folder (str): ID of a species of the input folder
@@ -361,6 +365,7 @@ def create_flats_and_lisp(run_folder, taxon_file):
 
     Args:
         run_folder (str): ID of a species of the input folder
+        taxon_file (bool): Boolean indicating if a taxon_file must be used
     Returns:
         list: boolean list, True if all files have been created
    """
@@ -547,6 +552,14 @@ def create_flats_and_lisp(run_folder, taxon_file):
 
 
 def read_taxon_id(run_folder):
+    """
+    Search for Taxon ID in genbank or GFF files.
+    For GenBank file searc for ''taxon:' key in 'db_xref' qualifier.
+    For GFF file search for 'taxon' in dbxref feature.
+
+    Args:
+        run_folder (str): path to the input folder
+    """
     taxon_ids = {}
 
     for input_folder in os.listdir(run_folder):

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss - Pleiade
+# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -14,9 +14,11 @@
 
 """
 Workflow of mpwt:
-    -create input files (pathologic_input)
-    -launch Pathway Tools in multiprocess (pwt_wrapper)
-    -check the results (results_check)
+    - create PathoLogic input files: organisms.dat and genetic-elements.dat (pathologic_input)
+    - mutliprocessing of PathoLogic (run_pwt)
+    - create flat files (run_pwt_flat)
+    - check the results (results_check)
+    - move the results to output folder (run_move_pgdb)
 """
 
 import csv
