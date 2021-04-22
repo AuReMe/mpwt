@@ -17,22 +17,15 @@
 
 import os
 
-from distutils.util import convert_path
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(setup_directory, 'README.rst'), encoding='utf-8') as readme_file:
     long_description = readme_file.read()
 
-init_data = {}
-init_pathname = convert_path('mpwt/__init__.py')
-with open(init_pathname) as init_file:
-    exec(init_file.read(), init_data)
-
 setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
-      version=init_data['__version__'],
       url='https://github.com/AuReMe/mpwt',
       author='Arnaud Belcour',
       python_requires='>=3.6',
