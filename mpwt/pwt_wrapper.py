@@ -88,7 +88,11 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
     """
     fatal_error_index = None
     log_file_path = os.path.join(species_input_folder_path, log_filename)
-    with open(log_file_path, 'r') as log_file:
+    if log_filename == 'flat_files_creation.log':
+        encoding = 'utf-8'
+    else:
+        encoding = 'ascii'
+    with open(log_file_path, 'r', encoding=encoding) as log_file:
         for index, line in enumerate(log_file):
             if line != '':
                 if not line.startswith(';;;'):
@@ -147,7 +151,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         # Launch Pathway Tools PathoLogic.
         # Use start_new_session to group process ID to kill this process and its childs (with os.killpg).
         patho_subprocess = subprocess.Popen(cmd_pwt, stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
-        with open(pwt_log, 'w', encoding='utf-8') as  pwt_writer:
+        with open(pwt_log, 'w', encoding='utf-8') as pwt_writer:
             for patho_line in iter(patho_subprocess.stdout.readline, b''):
                 encoding = chardet.detect(patho_line)['encoding']
                 patho_line = patho_line.decode(encoding, errors='replace')
