@@ -4,7 +4,7 @@
 .. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
 	:target: https://doi.org/10.7554/eLife.61968
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-24.5-brightgreen
+.. image:: https://img.shields.io/badge/Pathway%20Tools-25.0-brightgreen
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
