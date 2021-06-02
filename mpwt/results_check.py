@@ -89,6 +89,8 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
                             if patho_log_folder:
                                 patho_error_file.write(line)
 
+                    # Search for Build done line and its following line which look like (for Pathway Tools 25.0):
+                    # PGDB contains XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds
                     if 'Build done.' in line or 'PGDB build done.' in line:
                         pgdb_build_done = True
                         if patho_log_folder:
@@ -102,8 +104,14 @@ def check_pwt(multiprocess_run_pwts, patho_log_folder):
                                 warning_line = 'Number of warning: ' + str(warning_count) + '. More information in ' + patho_log + '.\n'
                                 patho_error_file.write(warning_line)
                             gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
-                            protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
-                            pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
+                            # proteins is listed in pathologic.log for Pathway Tools inferior to 25.0
+                            # Since the 25.0 polypeptides replace proteins
+                            if 'proteins' in resume_inference_line:
+                                protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
+                                pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
+                            elif 'polypeptides' in resume_inference_line:
+                                protein_number = int(resume_inference_line.split('genes, ')[1].split(' polypeptides')[0])
+                                pathway_number = int(resume_inference_line.split('polypeptides, ')[1].split(' base pathways')[0])
                             reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
                             compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
 
