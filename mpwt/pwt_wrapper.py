@@ -260,7 +260,7 @@ def run_pwt_flat(species_input_folder_path):
     return error_status
 
 
-def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
@@ -269,8 +269,8 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
     Args:
         pgdb_folder_dbname (str): species ID
         pgdb_folder_path (str): path to species PGDB folder
-        dat_extraction (bool): to extract or not the attribute-values files (.dat files)
         output_folder (str): path to output folder
+        dat_extraction (bool): to extract or not the attribute-values files (.dat files)
         size_reduction (bool): to compress or not the results
         xml_extraction (bool): to extract or not the metabolic-reactions.xml'
         owl_extraction (bool): to extract or not the owl files
@@ -315,11 +315,12 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
 
     if len(keep_extensions) > 0:
         pgdb_tmp_folder_path = os.path.join(*[pgdb_folder_path, '1.0', 'data'])
-        if not os.path.exists(pgdb_tmp_folder_path):
-            logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
-            return
     else:
         pgdb_tmp_folder_path = pgdb_folder_path
+
+    if not os.path.exists(pgdb_tmp_folder_path):
+        logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
+        return False
 
     # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
     # It will also delete the PGDB folder in ptools-local.
@@ -348,3 +349,5 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
                         os.remove(pgdb_file_pathname)
                     elif os.path.isdir(pgdb_file_pathname):
                         shutil.rmtree(pgdb_file_pathname)
+
+    return True

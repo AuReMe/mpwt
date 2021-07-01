@@ -66,7 +66,7 @@ import sys
 import pkg_resources
 
 from mpwt import utils, to_pathologic
-from mpwt.mpwt_workflow import multiprocess_pwt
+from mpwt.mpwt_workflow import multiprocess_pwt, independent_mpwt
 from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
@@ -160,7 +160,7 @@ def run_mpwt():
             to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
         sys.exit()
 
-    multiprocess_pwt(input_folder=input_folder,
+    independent_mpwt(input_folder=input_folder,
                     output_folder=output_folder,
                     patho_inference=patho_inference,
                     patho_hole_filler=patho_hole_filler,

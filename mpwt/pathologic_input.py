@@ -128,6 +128,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
 
     # Take run_ids and remove folder with error (with the intersection with check_species_folders) and if there is already present output.
     clean_run_ids = set(run_ids).intersection(set(check_species_folders))
+
     if output_folder:
         if os.path.exists(output_folder):
             if os.path.isdir(output_folder):

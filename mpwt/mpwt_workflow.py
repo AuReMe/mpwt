@@ -191,7 +191,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 input_folder_path = os.path.join(input_folder, run_patho_flat_id)
                 species_pgdb_folder = os.path.join(pgdbs_folder_path, run_patho_flat_id.lower() + 'cyc')
                 input_run_move_pgdbs = [run_patho_flat_id, species_pgdb_folder]
-                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction])
+                input_run_move_pgdbs.extend([output_folder, dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction])
                 multiprocess_pwt_input_files.append([input_folder_path, taxon_file])
                 multiprocess_run_pwts.append([input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference])
                 multiprocess_run_pwt_flats.append([input_folder_path])
@@ -249,7 +249,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             species_pgdb_folder = os.path.join(pgdbs_folder_path, flat_run_id.lower() + 'cyc')
             input_run_move_pgdbs = [flat_run_id, species_pgdb_folder]
 
-            input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction])
+            input_run_move_pgdbs.extend([output_folder, dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction])
             multiprocess_run_pwt_flats.append([input_tmp_folder_path])
             multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
@@ -277,7 +277,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                 species_pgdb_folder = os.path.join(pgdbs_folder_path, run_flat_id.lower() + 'cyc')
                 multiprocess_run_pwt_flats.append([input_folder_path])
                 input_run_move_pgdbs = [run_flat_id, species_pgdb_folder]
-                input_run_move_pgdbs.extend([dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction])
+                input_run_move_pgdbs.extend([output_folder, dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction])
                 multiprocess_run_move_pgdbs.append(input_run_move_pgdbs)
 
     if not multiprocess_run_pwt_flats:
@@ -354,6 +354,154 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                     input_file.write('Step {0} takes: {1:.2f}s.\n'.format(steps[index] , step_duration))
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+
+
+def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
+                     patho_hole_filler=None, patho_operon_predictor=None,
+                     patho_transporter_inference=None, no_download_articles=None,
+                     flat_creation=None, dat_extraction=None, xml_extraction=None,
+                     owl_extraction=None, col_extraction=None, size_reduction=None,
+                     number_cpu=None, patho_log=None, ignore_error=None,
+                     pathway_score=None, taxon_file=None, verbose=None):
+    """
+    Function managing the workflow for independent run of mpwt.
+    Each process of Pathway Tools on an organism are run separatly so if one failed the othe that passed wil go to an end.
+
+    Args:
+        input_folder (str): pathname to input folder
+        output_folder (str): pathname to output folder
+        patho_inference (bool): PathoLogic inference (True/False)
+        patho_hole_filler (bool): PathoLogic hole filler (True/False)
+        patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
+        patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
+        no_download_articles (bool): turning off loading of PubMed citations (True/False)
+        flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
+        dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
+        xml_extraction (bool): move metabolic-reactions.xml to output folder (True/False)
+        owl_extraction (bool): move owl files to output folder (True/False)
+        col_extraction (bool): move tabular files to output folder (True/False)
+        size_reduction (bool): delete ptools-local data at the end (True/False)
+        number_cpu (int): number of CPU used (default=1)
+        patho_log (str): pathname to mpwt log folder
+        ignore_error (bool): Ignore error during PathoLogic inference (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        taxon_file (str): pathname to the mpwt taxon ID file
+        verbose (bool): verbose argument
+    """
+    logger.info('---------- Launching mpwt ----------')
+    ptools_local_path = utils.find_ptools_path()
+    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
+
+    start_time = time.time()
+    # Use the number of cpu given by the user or 1 CPU.
+    if number_cpu:
+        try:
+            number_cpu_to_use = int(number_cpu)
+        except ValueError:
+            raise ValueError('The number of CPU must be an integer.')
+    else:
+        number_cpu_to_use = 1
+    mpwt_pool = Pool(processes=number_cpu_to_use)
+
+    if output_folder:
+        if not os.path.exists(output_folder):
+            logger.info('No output directory, it will be created.')
+            os.mkdir(output_folder)
+
+    if input_folder:
+        run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
+
+        run_patho_flat_ids, run_flat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
+
+    # Create path for lisp if there is no folder given.
+    # Create the input for the creation of BioPAX/attribute-values files.
+    if (flat_creation and not input_folder) or (output_folder and not input_folder):
+        # Create a temporary folder in ptools-local where lisp script will be stored.
+        tmp_folder = os.path.join(ptools_local_path, 'tmp')
+        if not os.path.exists(tmp_folder):
+            os.mkdir(tmp_folder)
+
+        # Create a lisp script file for each PGDB in the ptools-local folder.
+        run_ids = list(create_only_flat_lisp(pgdbs_folder_path, tmp_folder))
+        if flat_creation:
+            run_flat_ids = list(run_ids)
+        else:
+            run_flat_ids = None
+        run_patho_flat_ids = None
+
+    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference]
+    move_options = [dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction]
+
+    # Create data for multiprocessing.
+    # For each organism, find if a PathoLogic inference must be run, if a flat creation msut be performed and if the output files must be moved.
+    multiprocess_run_mpwts = []
+    run_input_files_creation = False
+    run_patho_inference = False
+    run_flat_creation = False
+    run_output_folder = False
+
+    for run_id in run_ids:
+        if run_patho_flat_ids and run_id in run_patho_flat_ids:
+            run_input_files_creation = True
+            if patho_inference:
+                run_patho_inference = True
+            if flat_creation:
+                run_flat_creation = True
+            if output_folder:
+                run_output_folder = True
+        if run_flat_ids and run_id in run_flat_ids:
+            if flat_creation:
+                run_flat_creation = True
+            if output_folder:
+                run_output_folder = True
+        if not input_folder:
+            if flat_creation:
+                if not os.path.exists(os.path.join(output_folder, run_id)):
+                    input_folder = os.path.join(ptools_local_path, 'tmp')
+                    run_output_folder = True
+                else:
+                    run_flat_creation = False
+                    run_output_folder = False
+
+        multiprocess_run_mpwt = [run_id, input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
+                                run_flat_creation, move_options, taxon_file]
+
+        multiprocess_run_mpwts.append(multiprocess_run_mpwt)
+
+    mpwt_pool.starmap(run_mpwt, multiprocess_run_mpwts)
+
+    if (flat_creation and not input_folder) or (output_folder and not input_folder):
+        ptools_local_tmp_path = os.path.join(ptools_local_path, 'tmp')
+        shutil.rmtree(ptools_local_tmp_path)
+
+    close_mpwt(mpwt_pool, no_download_articles, pathway_score)
+    end_time = time.time()
+
+    logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+
+
+def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None, run_output_folder=None, output_folder=None,
+                    run_patho_inference=None,
+                    pathologic_options=None,
+                    run_flat_creation=None, move_options=None,
+                    taxon_file=None):
+    ptools_local_path = utils.find_ptools_path()
+    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
+    species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
+
+    if input_folder:
+        run_folder_path = os.path.join(input_folder, run_folder)
+
+    if run_input_files_creation:
+        pwt_input_files(run_folder_path, taxon_file)
+
+    if run_patho_inference:
+        patho__error_status = run_pwt(run_folder_path, *pathologic_options)
+    if run_flat_creation:
+        flat_error_status = run_pwt_flat(run_folder_path)
+        check_dat(run_folder_path, species_pgdb_folder)
+    if run_output_folder:
+        move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score):
