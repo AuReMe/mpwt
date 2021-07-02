@@ -662,7 +662,8 @@ def create_only_flat_lisp(pgdbs_folder_path, tmp_folder):
             pgdb_id = species_pgdb[:-3]
             pgdb_pathname = os.path.join(tmp_folder, pgdb_id)
             tmp_pgdb_path = os.path.join(tmp_folder, pgdb_id)
-            os.mkdir(tmp_pgdb_path)
+            if not os.path.exists(tmp_pgdb_path):
+                os.mkdir(tmp_pgdb_path)
             lisp_pathname = os.path.join(pgdb_pathname, 'flat_files_creation.lisp')
             check_lisp_file = create_flat_creation_script(pgdb_id, lisp_pathname)
             if not check_lisp_file:

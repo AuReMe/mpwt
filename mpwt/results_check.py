@@ -170,8 +170,6 @@ def check_dat(run_dat_id, species_pgdb_folder):
         run_dat_id (str): species ID
         species_pgdb_folder (str): path to species PGDB folder
     """
-    pgdb_folder_dbname = run_dat_id.lower() + 'cyc'
-
     dats_path = os.path.join(*[species_pgdb_folder, '1.0', 'data'])
 
     dat_files = ["classes.dat", "compound-links.dat", "compounds.dat", "dnabindsites.dat", "enzrxns.dat", "gene-links.dat", "genes.dat", "pathway-links.dat",
@@ -186,5 +184,5 @@ def check_dat(run_dat_id, species_pgdb_folder):
 
     expected_dat_number = str(len(dat_files))
     found_dat_number = str(len(dat_checks))
-    logger.info('{0}: {1} out of {2} dat files created.'.format(pgdb_folder_dbname, found_dat_number, expected_dat_number))
+    logger.info('{0}: {1} out of {2} dat files created.'.format(run_dat_id, found_dat_number, expected_dat_number))
 

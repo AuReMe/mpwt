@@ -138,7 +138,8 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     if patho_transporter_inference:
         cmd_pwt.append('-tip')
 
-    logger.info(' '.join(cmd_pwt))
+    species_name = os.path.basename(species_input_folder_path)
+    logger.info('|PathoLogic|{}| '.format(species_name) + ' '.join(cmd_pwt))
 
     error_status = None
     errors = ['Restart actions (select using :continue):']
@@ -207,7 +208,8 @@ def run_pwt_flat(species_input_folder_path):
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_flat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
-    logger.info(' '.join(cmd_flat))
+    species_name = os.path.basename(species_input_folder_path)
+    logger.info('|Flat files creation|{}| '.format(species_name) + ' '.join(cmd_flat))
 
     error_status = None
     flat_creation_ends = ['Opening Navigator window.']
@@ -276,6 +278,8 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
         owl_extraction (bool): to extract or not the owl files
         col_extraction (bool): to extract or not the tabular files (.col files)
     """
+    logger.info('|Moving output files|{}| '.format(pgdb_folder_dbname))
+
     output_species = os.path.join(output_folder, pgdb_folder_dbname)
 
     keep_extensions = []
