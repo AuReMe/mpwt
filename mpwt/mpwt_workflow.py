@@ -43,7 +43,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                      flat_creation=None, dat_extraction=None, xml_extraction=None,
                      owl_extraction=None, col_extraction=None, size_reduction=None,
                      number_cpu=None, patho_log=None, ignore_error=None,
-                     pathway_score=None, taxon_file=None, verbose=None):
+                     pathway_score=None, taxon_file=None, verbose=None, independent=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -68,20 +68,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         pathway_score (float): score between 0 and 1 to accept or reject pathway
         taxon_file (str): pathname to the mpwt taxon ID file
         verbose (bool): verbose argument
+        independent (bool): independent run of mpwt to avoid stop mpwt when encountering errors.
     """
     if verbose:
         logger.setLevel(logging.DEBUG)
-
-    start_time = time.time()
-    times = []
-    steps = []
-    times.append(start_time)
-    steps.append('start')
-
-    # Check if Pathway Tools is in the path.
-    # Find PGDB folder path.
-    ptools_local_path = utils.find_ptools_path()
-    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
 
     # Check if ptools-local is accessible.
     error = utils.check_ptools_local_pwt()
@@ -116,11 +106,21 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if patho_transporter_inference and not patho_inference:
         sys.exit('To use --tp/patho_transporter_inference, you need to use the --patho/patho_inference argument.')
 
-    #Check if no_download_articles is used with patho_inference.
+    #Check if pathway_score is used with patho_inference.
     if pathway_score and not patho_inference:
         sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
 
-    #Check if no_download_articles is used with output_folder.
+    # Check if pathway_score is a float between 0 and 1.
+    if pathway_score:
+        try:
+            float(pathway_score)
+        except ValueError:
+            sys.exit("{0} is not a float. Pathway score prediction must be a flaot between 0.0 and 1.0.".format(pathway_score))
+
+        if pathway_score < 0.0 or pathway_score > 1.0:
+            sys.exit("{0} is not a float between 0.0 and 1.0.".format(pathway_score))
+
+    #Check if dat_extraction is used with output_folder.
     if dat_extraction and not output_folder:
         sys.exit('To use --md/dat_extraction, you need to use the -o/output_folder argument.')
 
@@ -144,6 +144,44 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             raise ValueError('The number of CPU must be an integer.')
     else:
         number_cpu_to_use = 1
+
+    if independent:
+        independent_mpwt(input_folder, output_folder, patho_inference,
+                            patho_hole_filler, patho_operon_predictor,
+                            patho_transporter_inference, no_download_articles,
+                            flat_creation, dat_extraction, xml_extraction,
+                            owl_extraction, col_extraction, size_reduction,
+                            number_cpu_to_use, patho_log, ignore_error,
+                            pathway_score, taxon_file, verbose)
+    else:
+        dependent_mpwt(input_folder, output_folder, patho_inference,
+                            patho_hole_filler, patho_operon_predictor,
+                            patho_transporter_inference, no_download_articles,
+                            flat_creation, dat_extraction, xml_extraction,
+                            owl_extraction, col_extraction, size_reduction,
+                            number_cpu_to_use, patho_log, ignore_error,
+                            pathway_score, taxon_file, verbose)
+
+
+
+def dependent_mpwt(input_folder, output_folder=None, patho_inference=None,
+                     patho_hole_filler=None, patho_operon_predictor=None,
+                     patho_transporter_inference=None, no_download_articles=None,
+                     flat_creation=None, dat_extraction=None, xml_extraction=None,
+                     owl_extraction=None, col_extraction=None, size_reduction=None,
+                     number_cpu_to_use=None, patho_log=None, ignore_error=None,
+                     pathway_score=None, taxon_file=None, verbose=None):
+    start_time = time.time()
+    times = []
+    steps = []
+    times.append(start_time)
+    steps.append('start')
+
+    # Check if Pathway Tools is in the path.
+    # Find PGDB folder path.
+    ptools_local_path = utils.find_ptools_path()
+    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
+
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
     if input_folder:
@@ -356,12 +394,50 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
 
 
+def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None, run_output_folder=None, output_folder=None,
+                    run_patho_inference=None,
+                    pathologic_options=None,
+                    run_flat_creation=None, move_options=None,
+                    taxon_file=None):
+    ptools_local_path = utils.find_ptools_path()
+    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
+    species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
+
+    patho_error_status = False
+    flat_error_status = False
+    move_error_status = False
+
+    if input_folder:
+        run_folder_path = os.path.join(input_folder, run_folder)
+
+    if run_input_files_creation:
+        pwt_input_files(run_folder_path, taxon_file)
+
+    if run_patho_inference:
+        patho_error_status = run_pwt(run_folder_path, *pathologic_options)
+        if patho_error_status:
+            return run_folder, patho_error_status, flat_error_status, move_error_status
+
+    if run_flat_creation:
+        flat_error_status = run_pwt_flat(run_folder_path)
+        check_dat(run_folder_path, species_pgdb_folder)
+        if flat_error_status:
+            return run_folder, patho_error_status, flat_error_status, move_error_status
+
+    if run_output_folder:
+        move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
+        if move_error_status:
+            return run_folder, patho_error_status, flat_error_status, move_error_status
+
+    return run_folder, patho_error_status, flat_error_status, move_error_status
+
+
 def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
                      patho_transporter_inference=None, no_download_articles=None,
                      flat_creation=None, dat_extraction=None, xml_extraction=None,
                      owl_extraction=None, col_extraction=None, size_reduction=None,
-                     number_cpu=None, patho_log=None, ignore_error=None,
+                     number_cpu_to_use=None, patho_log=None, ignore_error=None,
                      pathway_score=None, taxon_file=None, verbose=None):
     """
     Function managing the workflow for independent run of mpwt.
@@ -393,14 +469,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
 
     start_time = time.time()
-    # Use the number of cpu given by the user or 1 CPU.
-    if number_cpu:
-        try:
-            number_cpu_to_use = int(number_cpu)
-        except ValueError:
-            raise ValueError('The number of CPU must be an integer.')
-    else:
-        number_cpu_to_use = 1
+
     mpwt_pool = Pool(processes=number_cpu_to_use)
 
     if output_folder:
@@ -500,43 +569,6 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
 
-
-def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None, run_output_folder=None, output_folder=None,
-                    run_patho_inference=None,
-                    pathologic_options=None,
-                    run_flat_creation=None, move_options=None,
-                    taxon_file=None):
-    ptools_local_path = utils.find_ptools_path()
-    pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
-    species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
-
-    patho_error_status = False
-    flat_error_status = False
-    move_error_status = False
-
-    if input_folder:
-        run_folder_path = os.path.join(input_folder, run_folder)
-
-    if run_input_files_creation:
-        pwt_input_files(run_folder_path, taxon_file)
-
-    if run_patho_inference:
-        patho_error_status = run_pwt(run_folder_path, *pathologic_options)
-        if patho_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
-
-    if run_flat_creation:
-        flat_error_status = run_pwt_flat(run_folder_path)
-        check_dat(run_folder_path, species_pgdb_folder)
-        if flat_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
-
-    if run_output_folder:
-        move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
-        if move_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
-
-    return run_folder, patho_error_status, flat_error_status, move_error_status
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score):

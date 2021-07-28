@@ -59,7 +59,7 @@ options:
 
 """
 
-import docopt
+import argparse
 import logging
 import os
 import sys
@@ -71,9 +71,9 @@ from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
-logging.getLogger("mpwt").setLevel(logging.CRITICAL)
+logging.getLogger('mpwt').setLevel(logging.CRITICAL)
 
-VERSION = pkg_resources.get_distribution("mpwt").version
+VERSION = pkg_resources.get_distribution('mpwt').version
 LICENSE = """Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss\n
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -93,39 +93,235 @@ def run_mpwt():
     """
     Function used with a mpwt call in the terminal.
     """
-    args = docopt.docopt(__doc__)
+    parser = argparse.ArgumentParser(
+        'mpwt',
+        description='For specific help on each subcommand use: mpwt --help',
+    )
 
-    input_folder = args['-f']
-    output_folder = args['-o']
-    patho_inference = args['--patho']
-    patho_hole_filler = args['--hf']
-    patho_operon_predictor = args['--op']
-    patho_transporter_inference = args['--tp']
-    no_download_articles = args['--nc']
-    flat_creation = args['--flat']
-    move_dat = args['--md']
-    move_xml = args['--mx']
-    move_owl = args['--mo']
-    move_col = args['--mc']
-    size_reduction = args['-r']
-    number_cpu = args['--cpu']
-    patho_log = args['--log']
-    clean_arg = args['--clean']
-    pgdb_to_deletes = args['--delete']
-    pgdb_list = args['--list']
-    ignore_error = args['--ignore-error']
-    taxon_file = args['--taxon-file']
-    pathway_score = args['-p']
-    verbose = args['-v']
-    topf = args['topf']
-    version = args['--version']
+    parser.add_argument(
+        '-f',
+        dest='input',
+        required=False,
+        help='Working folder containing sub-folders with Genbank/GFF/PF files.',
+        metavar='INPUT_DIR')
+
+    parser.add_argument(
+        '-o',
+        dest='output',
+        required=False,
+        help='Output folder path. Will create a output folder in this folder.',
+        metavar='OUPUT_DIR')
+
+    parser.add_argument(
+        '--patho',
+        dest='patho',
+        help='Will run an inference of Pathologic on the input files.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+
+    parser.add_argument(
+        '--hf',
+        dest='hf',
+        help='Use with --patho. Run the Hole Filler using Blast.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--op',
+        dest='op',
+        help='Use with --patho. Run the Operon predictor of Pathway-Tools.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--tp',
+        dest='tp',
+        help='Use with --patho. Run the Transport Inference Parser of Pathway-Tools.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--nc',
+        dest='nc',
+        help='Use with --patho. Turn off loading of Pubmed entries.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '-p',
+        dest='p',
+        help='Use with --patho. Modify PathoLogic pathway prediction score. Must be a float between 0 and 1.',
+        required=False,
+    )
+
+    parser.add_argument(
+        '--flat',
+        dest='flat',
+        help='Will create BioPAX/attribute-value flat files from PGDB.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+
+    parser.add_argument(
+        '--md',
+        dest='md',
+        help='Move the dat files into the output folder.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--mx',
+        dest='mx',
+        help='Move the metabolic-reactions.xml file into the output folder.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--mo',
+        dest='mo',
+        help='Move owl files into the output folder.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--mc',
+        dest='mc',
+        help='Move tabular files into the output folder.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+
+    parser.add_argument(
+        '--clean',
+        dest='clean',
+        help='Clean ptools-local folder, before any other operations.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--delete',
+        dest='delete',
+        help="Give a PGDB name and mpwt will delete it (if multiple separe them with a ',', example: ecolicyc,athalianacyc).",
+        required=False,
+    )
+    parser.add_argument(
+        '-r',
+        dest='r',
+        help="Will delete files in ptools-local and compress results files to reduce results size (use it with -o).",
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--log',
+        dest='log',
+        help="Create PathoLogic log files inside the given folder (use it with --patho).",
+        required=False,
+    )
+    parser.add_argument(
+        '--list',
+        dest='list',
+        help="List all PGDBs inside the ptools-local folder.",
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--ignore-error',
+        dest='ignore_error',
+        help="Ignore errors (PathoLogic and flat-files creation) and continue for successful builds.",
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--taxon-file',
+        dest='taxon_file',
+        help="For the use of the taxon_id.tsv file to find the taxon ID.",
+        required=False,
+    )
+    parser.add_argument(
+        '-v',
+        dest='verbose',
+        help="Verbose.",
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        'topf',
+        help="Will convert Genbank and/or GFF files into PathoLogic Format file.",
+        nargs='?',
+    )
+
+    parser.add_argument(
+        '--version',
+        dest='version',
+        action='version',
+        default=False,
+        version='%(prog)s ' + VERSION + '\n' + LICENSE)
+
+    parser.add_argument(
+        '--cpu',
+        help='Number of cpu to use for the multiprocessing (default=1). [default: 1]',
+        required=False,
+        type=int,
+        default=1)
+    parser.add_argument(
+        '--independent',
+        dest='independent',
+        help="Independent run of PathoLogic to pass through errors.",
+        required=False,
+        action='store_true',
+        default=False,
+    )
+
+    args = parser.parse_args()
+
+    input_folder = args.input
+    output_folder = args.output
+    patho_inference = args.patho
+    patho_hole_filler = args.hf
+    patho_operon_predictor = args.op
+    patho_transporter_inference = args.tp
+    no_download_articles = args.nc
+    flat_creation = args.flat
+    move_dat = args.md
+    move_xml = args.mx
+    move_owl = args.mo
+    move_col = args.mc
+    size_reduction = args.r
+    number_cpu = args.cpu
+    patho_log = args.log
+    clean_arg = args.clean
+    pgdb_to_deletes = args.delete
+    pgdb_list = args.list
+    ignore_error = args.ignore_error
+    taxon_file = args.taxon_file
+    pathway_score = args.p
+    verbose = args.verbose
+    topf = args.topf
+    version = args.version
+    independent = args.independent
 
     if version:
-        print("Mpwt v" + VERSION  + "\n" + LICENSE)
+        print('Mpwt v' + VERSION  + '\n' + LICENSE)
         sys.exit()
 
     if verbose:
-        logging.getLogger("mpwt").setLevel(logging.DEBUG)
+        logging.getLogger('mpwt').setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
     if pgdb_list:
@@ -140,7 +336,7 @@ def run_mpwt():
     # Use a set to remove redudant PGDB.
     if pgdb_to_deletes:
         utils.remove_pgdbs(list(set(pgdb_to_deletes.split(','))), number_cpu)
-        return
+        sys.exit()
 
     if clean_arg:
         if verbose:
@@ -160,7 +356,7 @@ def run_mpwt():
             to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
         sys.exit()
 
-    independent_mpwt(input_folder=input_folder,
+    multiprocess_pwt(input_folder=input_folder,
                     output_folder=output_folder,
                     patho_inference=patho_inference,
                     patho_hole_filler=patho_hole_filler,
@@ -178,8 +374,9 @@ def run_mpwt():
                     ignore_error=ignore_error,
                     pathway_score=pathway_score,
                     taxon_file=taxon_file,
-                    verbose=verbose)
+                    verbose=verbose,
+                    independent=independent)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_mpwt()
