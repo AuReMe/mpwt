@@ -324,7 +324,7 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
 
     if not os.path.exists(pgdb_tmp_folder_path):
         logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
-        return False
+        return True
 
     # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
     # It will also delete the PGDB folder in ptools-local.
@@ -354,4 +354,4 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
                     elif os.path.isdir(pgdb_file_pathname):
                         shutil.rmtree(pgdb_file_pathname)
 
-    return True
+    return False

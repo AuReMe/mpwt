@@ -66,7 +66,7 @@ import sys
 import pkg_resources
 
 from mpwt import utils, to_pathologic
-from mpwt.mpwt_workflow import multiprocess_pwt, independent_mpwt
+from mpwt.mpwt_workflow import multiprocess_pwt
 from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
@@ -287,6 +287,12 @@ def run_mpwt():
         action='store_true',
         default=False,
     )
+    parser.add_argument(
+        '--permission',
+        dest='permission',
+        help="Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).",
+        required=False,
+    )
 
     args = parser.parse_args()
 
@@ -315,6 +321,7 @@ def run_mpwt():
     topf = args.topf
     version = args.version
     independent = args.independent
+    permission = args.permission
 
     if version:
         print('Mpwt v' + VERSION  + '\n' + LICENSE)
@@ -351,10 +358,14 @@ def run_mpwt():
         if not patho_inference and not flat_creation and not move_dat and not output_folder:
             sys.exit()
 
-    if topf:
+    if topf == 'topf':
         if input_folder and output_folder:
             to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
-        sys.exit()
+            sys.exit()
+        else:
+            sys.exit('topf argument needs input_folder (-f) and output_folder options (-o).')
+    else:
+        sys.exit(f'Wrong positional argument passed: {topf}, only "topf" is expected as a postional argument.')
 
     multiprocess_pwt(input_folder=input_folder,
                     output_folder=output_folder,
@@ -375,7 +386,8 @@ def run_mpwt():
                     pathway_score=pathway_score,
                     taxon_file=taxon_file,
                     verbose=verbose,
-                    independent=independent)
+                    independent=independent,
+                    permission=permission)
 
 
 if __name__ == '__main__':
