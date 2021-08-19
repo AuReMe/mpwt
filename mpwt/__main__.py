@@ -358,14 +358,15 @@ def run_mpwt():
         if not patho_inference and not flat_creation and not move_dat and not output_folder:
             sys.exit()
 
-    if topf == 'topf':
-        if input_folder and output_folder:
-            to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
-            sys.exit()
+    if topf is not None:
+        if topf == 'topf':
+            if input_folder and output_folder:
+                to_pathologic.create_pathologic_file(input_folder, output_folder, number_cpu)
+                sys.exit()
+            else:
+                sys.exit('topf argument needs input_folder (-f) and output_folder options (-o).')
         else:
-            sys.exit('topf argument needs input_folder (-f) and output_folder options (-o).')
-    else:
-        sys.exit(f'Wrong positional argument passed: {topf}, only "topf" is expected as a postional argument.')
+            sys.exit(f'Wrong positional argument passed: {topf}, only "topf" is expected as a postional argument.')
 
     multiprocess_pwt(input_folder=input_folder,
                     output_folder=output_folder,
