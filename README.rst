@@ -84,7 +84,7 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
     │   └── scaffold_2.fsa
-    taxon_id.tsv
+    ├── taxon_id.tsv
     ..
 
 Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff.
@@ -178,7 +178,7 @@ PathoLogic Format
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
     │   └── scaffold_2.fsa
-    taxon_id.tsv
+    ├── taxon_id.tsv
     ..
 
 PF file example:
