@@ -475,8 +475,7 @@ def create_flats_and_lisp(run_folder, taxon_file):
                     if os.path.exists(fasta_path):
                         pf_fasta = fasta_species_name
                 if not pf_fasta:
-                    logger.critical('No fasta file (.fasta or .fsa) with the Pathologic file of {0}'.format(pgdb_id))
-                    return None
+                    logger.critical('No fasta file (.fasta or .fsa) with the Pathologic file of {0}, this could lead to warnings in Pathway Tools.'.format(pgdb_id))
 
         taxon_error, taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
 
