@@ -372,7 +372,7 @@ def classic_mpwt(input_folder, output_folder=None, patho_inference=None,
         move_time = time.time()
         times.append(move_time)
         steps.append('Moving results files')
-        logger.info('----------End of moving fimes: {0:.2f}s----------'.format(times[-1] - times[-2]))
+        logger.info('----------End of moving files: {0:.2f}s----------'.format(times[-1] - times[-2]))
 
 
     close_mpwt(mpwt_pool, no_download_articles, pathway_score)
