@@ -22,7 +22,6 @@ import os
 import shutil
 import signal
 import subprocess
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -213,7 +212,7 @@ def run_pwt_flat(species_input_folder_path):
 
     error_status = None
     flat_creation_ends = ['Opening Navigator window.']
-    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
+    load_errors = ['fatal error']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
