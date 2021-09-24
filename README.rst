@@ -974,7 +974,17 @@ Bibliography
 Citation
 --------
 
-Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020;9:e61968 `https://doi.org/10.7554/eLife.61968 <https://doi.org/10.7554/eLife.61968>`__.
+Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020, 9, e61968 `https://doi.org/10.7554/eLife.61968 <https://doi.org/10.7554/eLife.61968>`__.
+
+Also when using ``mpwt``, please cite the following articles:
+
+- ``Pathway Tools`` for the reconstruction of draft metabolic networks (the article can be not up-to-date, look at the `Publications <https://biocyc.org/publications.shtml>`__ on the BioCyc site):
+
+Karp P D, Midford P E, Billington R, Kothari A, Krummenacker M, Latendresse M, Ong W K, Subhraveti P, Caspi R, Fulcher C, Keseler I M, Paley SM. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in Bioinformatics 2021, 22, 109–126 `https://doi.org/10.1093/bib/bbz104 <https://doi.org/10.1093/bib/bbz104>`__.
+
+- ``Biopython`` for GenBank parsing:
+
+Cock, P.J.A., Antao, T., Chang, J.T., Chapman, B.A., Cox, C.J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., de Hoon, M.J.L. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009, 25, 1422–1423 `https://doi.org/10.1093/bioinformatics/btp163 <https://doi.org/10.1093/bioinformatics/btp163>`__.
 
 Acknowledgements
 ----------------
