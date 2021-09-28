@@ -27,7 +27,8 @@ setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
       url='https://github.com/AuReMe/mpwt',
-      author='Arnaud Belcour',
+      author='AuReMe',
+      license='GPLv3',
       python_requires='>=3.6',
       classifiers=[
         # How mature is this project? Common values are

@@ -21,7 +21,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file] [--independent]
     mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -53,6 +53,8 @@ options:
     --list     List all PGDBs inside the ptools-local folder.
     --ignore-error     Ignore errors (PathoLogic and flat-files creation) and continue for successful builds.
     --taxon-file     For the use of the taxon_id.tsv file to find the taxon ID.
+    --independent     Independent run of mpwt to pass through errors.
+    --permission     Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
     -v     Verbose.
     --version     Version
     topf     Will convert Genbank and/or GFF files into PathoLogic Format file.
@@ -282,7 +284,7 @@ def run_mpwt():
     parser.add_argument(
         '--independent',
         dest='independent',
-        help="Independent run of PathoLogic to pass through errors.",
+        help="Independent run of mpwt to pass through errors.",
         required=False,
         action='store_true',
         default=False,

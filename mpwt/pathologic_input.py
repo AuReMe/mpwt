@@ -75,7 +75,7 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
         list: input IDs for BioPAX/flat files creation
     """
     # Check if there are files/folders inside the input folder.
-    # And remove hidden folder/file (beginning with '.').
+    # And do not use hidden folder/file (beginning with '.').
     species_folders = [species_folder for species_folder in os.listdir(input_folder) if not species_folder.startswith('.')]
     if len(species_folders) == 0:
         logger.critical("No folder containing genbank/gff file. In {0} you must have sub-folders containing Genbank/GFF file.".format(input_folder))

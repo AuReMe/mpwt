@@ -170,6 +170,24 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                             pathway_score, taxon_file, permission)
 
 
+def close_mpwt(mpwt_pool, no_download_articles, pathway_score):
+    """End multiprocessing Pool and restore ptools-init.dat
+
+    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
+    no_download_articles (bool): turning off loading of PubMed citations (True/False)
+    pathway_score (float): score between 0 and 1 to accept or reject pathway
+    """
+    mpwt_pool.close()
+    mpwt_pool.join()
+
+    # Turn on loading of pubmed entries.
+    if no_download_articles:
+        utils.pubmed_citations(activate_citations=True)
+
+    # Remodify the pathway score to its original value.
+    if pathway_score:
+        utils.modify_pathway_score(0.35)
+
 
 def classic_mpwt(input_folder, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
@@ -178,6 +196,31 @@ def classic_mpwt(input_folder, output_folder=None, patho_inference=None,
                      owl_extraction=None, col_extraction=None, size_reduction=None,
                      number_cpu_to_use=None, patho_log=None, ignore_error=None,
                      pathway_score=None, taxon_file=None, permission=None):
+    """
+    Run mpwt in a "dependent" way (the classic run of mpwt).
+    This means that all the PathoLogic must succeed to move to the flat files creation steps and then to moving the output files.
+
+    Args:
+        input_folder (str): pathname to input folder
+        output_folder (str): pathname to output folder
+        patho_inference (bool): PathoLogic inference (True/False)
+        patho_hole_filler (bool): PathoLogic hole filler (True/False)
+        patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
+        patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
+        no_download_articles (bool): turning off loading of PubMed citations (True/False)
+        flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
+        dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
+        xml_extraction (bool): move metabolic-reactions.xml to output folder (True/False)
+        owl_extraction (bool): move owl files to output folder (True/False)
+        col_extraction (bool): move tabular files to output folder (True/False)
+        size_reduction (bool): delete ptools-local data at the end (True/False)
+        number_cpu (int): number of CPU used (default=1)
+        patho_log (str): pathname to mpwt log folder
+        ignore_error (bool): Ignore error during PathoLogic inference (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        taxon_file (str): pathname to the mpwt taxon ID file
+        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+    """
     start_time = time.time()
     times = []
     steps = []
@@ -400,23 +443,49 @@ def classic_mpwt(input_folder, output_folder=None, patho_inference=None,
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
 
+
 def give_permission(folder, permission):
+    """ Give permission to group or all for folder.
+
+    Args:
+        folder (str): pathname to the input folder
+        permission (str): level of permission (either group or all)
+    """
     if permission == 'group':
-        for dirpath, dirnames, filenames in os.walk(folder):
+        for dirpath, _dirnames, filenames in os.walk(folder):
             os.chmod(dirpath, stat.S_IRGRP | ~stat.S_IWGRP | ~stat.S_IXGRP)
             for filename in filenames:
                 os.chmod(os.path.join(dirpath, filename), ~stat.S_IRGRP | ~stat.S_IWGRP | ~stat.S_IXGRP)
-    if permission == 'all':
-        for dirpath, dirnames, filenames in os.walk(folder):
+    elif permission == 'all':
+        for dirpath, _dirnames, filenames in os.walk(folder):
             os.chmod(dirpath, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
             for filename in filenames:
                 os.chmod(os.path.join(dirpath, filename), stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    else:
+        logger.critical(f'Invalid permission "{permission}", permission must be "group" or "all"')
 
 
-def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None, run_output_folder=None, output_folder=None,
-                    run_patho_inference=None, pathologic_options=None,
-                    run_flat_creation=None, move_options=None,
-                    taxon_file=None, permission=None):
+def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
+                run_output_folder=None, output_folder=None,
+                run_patho_inference=None, pathologic_options=None,
+                run_flat_creation=None, move_options=None,
+                taxon_file=None, permission=None):
+    """ Single run of mpwt on one folder.
+    Used in multiprocessing in independent_mpwt.
+
+    Args:
+        run_folder (str): name of the folder containg input files
+        input_folder (str): pathname to input folder
+        run_input_files_creation (bool): if True runs creation of PathoLogic input files
+        run_output_folder (bool): if True moves the output file to the ouput folder
+        output_folder (str): pathname to output folder
+        run_patho_inference (bool): if True PathoLogic is run on the input folder
+        pathologic_options (list): list of bool for: patho_hole_filler, patho_operon_predictor, patho_transporter_inference
+        run_flat_creation (bool): if True flat files will be created
+        move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
+        taxon_file (str): pathname to the mpwt taxon ID file
+        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+    """
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
     species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
@@ -465,7 +534,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      pathway_score=None, taxon_file=None, permission=None):
     """
     Function managing the workflow for independent run of mpwt.
-    Each process of Pathway Tools on an organism are run separatly so if one failed the othe that passed wil go to an end.
+    Each process of Pathway Tools on an organism are run separatly so if one failed the other that passed will succeed.
 
     Args:
         input_folder (str): pathname to input folder
@@ -593,22 +662,3 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
 
     logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
 
-
-
-def close_mpwt(mpwt_pool, no_download_articles, pathway_score):
-    """End multiprocessing Pool and restore ptools-init.dat
-
-    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
-    no_download_articles (bool): turning off loading of PubMed citations (True/False)
-    pathway_score (float): score between 0 and 1 to accept or reject pathway
-    """
-    mpwt_pool.close()
-    mpwt_pool.join()
-
-    # Turn on loading of pubmed entries.
-    if no_download_articles:
-        utils.pubmed_citations(activate_citations=True)
-
-    # Remodify the pathway score to its original value.
-    if pathway_score:
-        utils.modify_pathway_score(0.35)
