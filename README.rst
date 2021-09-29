@@ -351,6 +351,8 @@ mpwt can be used in a python script with an import:
 			  ignore_error=optional_boolean,
 			  pathway_score=pathway_score,
 			  taxon_file=optional_boolean,
+			  independent=optional_boolean,
+			  permission=optional_boolean,
 			  verbose=optional_boolean)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -396,6 +398,10 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |     --taxon-file        | taxon_file(boolean)                            | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|     --independent       | independent(boolean)                           | Independent run of mpwt to pass through errors                          |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
+|     --permission        | permission(boolean)                            | Choose permission access to PGDB in ptools-local and output files       |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 
@@ -413,6 +419,15 @@ There is also another argument:
 This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
 
 It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
+
+Independent
++++++++++++
+
+Since the version 0.7.0 of mpwt, it is possible to use the option ``independent`` to launch each process of Pathway Tools independently.
+Compared to the clasic run, mpwt will not wait for all PathoLogic to finish each run will be process independently.
+So if a PathoLogic process failed it will not stop the other processes.
+
+.. image:: mpwt_runs.svg
 
 PathoLogic Hole Filler
 ++++++++++++++++++++++
