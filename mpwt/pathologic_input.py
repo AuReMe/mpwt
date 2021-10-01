@@ -630,16 +630,16 @@ def pwt_input_files(run_folder, taxon_file):
     error_found = False
     missing_string = ''
     if required_files.issubset(files_in):
-        missing_string = 'no missing files'
+        missing_string = 'No missing files'
     else:
-        missing_string = 'missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(species_folder)
+        missing_string = 'Missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(species_folder)
         check_datas_lisp = create_flats_and_lisp(run_folder, taxon_file)
         if check_datas_lisp is None:
             logger.critical('Error with the creation of input files of {0}.'.format(run_folder))
             error_found = True
             return error_found
 
-    logger.info('Checking inputs for {0}: {1}.'.format(species_folder, missing_string))
+    logger.info('|Input Check|{0}| {1}'.format(species_folder, missing_string))
 
     return error_found
 

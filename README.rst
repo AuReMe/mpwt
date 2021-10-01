@@ -313,7 +313,7 @@ mpwt can be used with the command lines:
 
 .. code:: sh
 
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file]
     mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -348,7 +348,6 @@ mpwt can be used in a python script with an import:
 			  size_reduction=optional_boolean,
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
-			  ignore_error=optional_boolean,
 			  pathway_score=pathway_score,
 			  taxon_file=optional_boolean,
 			  independent=optional_boolean,
@@ -393,8 +392,6 @@ mpwt can be used in a python script with an import:
 |          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | Delete a specific PGDB                                                  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --ignore-error      | ignore_error(boolean)                          | Ignore errors and continue the workflow for successful build            |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |     --taxon-file        | taxon_file(boolean)                            | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -671,7 +668,6 @@ Useful functions
                 size_reduction=optional_boolean,
                 number_cpu=int,
                 patho_log=optional_folder_pathname,
-                ignore_error=optional_boolean,
                 pathway_score=pathway_score,
                 taxon_file=optional_boolean,
                 verbose=optional_boolean)
@@ -793,9 +789,6 @@ It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
 
 There is a `Pathway Tools forum <https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
-
-You can also ignore PathoLogic errors by using the argument ``--ignore-error/ignore_error``.
-This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
 
 Output
 ~~~~~~

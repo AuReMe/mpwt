@@ -227,12 +227,34 @@ def pubmed_citations(activate_citations):
         ptools_init_file.write(new_ptools_file)
 
 
-def modify_pathway_score(pathway_score):
+def extract_pathway_score():
+    """
+    Get the Pathway-Prediction-Score-Cutoff of ptools-init.dat
+
+    Returns:
+        pathway_score (float): score between 0 and 1 to accept or reject pathways
+    """
+    ptools_init_filepath = os.path.join(find_ptools_path() ,'ptools-init.dat')
+
+    pathway_prediction_score_cutoff = None
+    with open(ptools_init_filepath, 'r') as ptools_init_file:
+        for line in ptools_init_file.read().split('\n'):
+            if 'Pathway-Prediction-Score-Cutoff' in line:
+                pathway_prediction_score_cutoff = line.split(' ')[1]
+
+    if not pathway_prediction_score_cutoff:
+        sys.exit('There is no Pathway-Prediction-Score-Cutoff parameter in ' + ptools_init_filepath +'.')
+
+    return pathway_prediction_score_cutoff
+
+
+def modify_pathway_score(pathway_score, comment_line=None):
     """
     Modify the Pathway-Prediction-Score-Cutoff of ptools-init.dat
 
     Args:
         pathway_score (float): score between 0 and 1 to accept or reject pathways
+        comment_line (bool): boolean if True comment Pathway-Prediction-Score-Cutoff line
     """
     ptools_init_filepath = os.path.join(find_ptools_path() ,'ptools-init.dat')
     new_ptools_file = ""
@@ -245,7 +267,7 @@ def modify_pathway_score(pathway_score):
                 if '#' in line:
                     line = line.replace('#', '')
                 if pathway_score:
-                    if pathway_score == 0.35:
+                    if comment_line:
                         line = '###' + line.split(' ')[0] + ' ' + str(pathway_score)
                     else:
                         line = line.split(' ')[0] + ' ' + str(pathway_score)
