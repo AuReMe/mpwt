@@ -87,7 +87,7 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     ├── taxon_id.tsv
     ..
 
-Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff.
+Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff (the name must not be only uppercase other wise this can cause issue with Pathway Tools).
 
 For PF files, there is one file for each scaffold/contig and one corresponding fasta file.
 
