@@ -648,6 +648,23 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         input_folders = [os.path.join(multiprocess_run_mpwt[1], multiprocess_run_mpwt[0]) for multiprocess_run_mpwt in multiprocess_run_mpwts]
         check_mpwt_pathologic_runs(input_folders, patho_log)
 
+    logger.info('-------------- Checking mpwt runs --------------')
+    nb_failed_runs = len([result for result in results if any(result[1:])])
+    nb_total_runs = len(results)
+    if nb_failed_runs > 0:
+        if nb_failed_runs == 1:
+            failed_str = '{0} failed run'.format(nb_failed_runs)
+        else:
+            failed_str = '{0} failed runs'.format(nb_failed_runs)
+        if nb_total_runs == 1:
+            total_str = '{0} run'.format(nb_total_runs)
+        else:
+            total_str = '{0} runs'.format(nb_total_runs)
+
+        logger.info('/!\\ {0} on a total of {1}.'.format(failed_str, total_str))
+    else:
+        logger.info('All runs are successful.')
+
     for result in results:
         run_id = result[0]
         if any(result[1:]):
@@ -671,5 +688,5 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
 
     end_time = time.time()
 
-    logger.info('----------mpwt has finished in {0:.2f}s! Thank you for using it.'.format(end_time - start_time))
+    logger.info('-------------- mpwt has finished in {0:.2f}s! Thank you for using it. --------------'.format(end_time - start_time))
 

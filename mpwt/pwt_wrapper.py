@@ -141,7 +141,8 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     logger.info('|PathoLogic|{}| '.format(species_name) + ' '.join(cmd_pwt))
 
     error_status = None
-    errors = ['Restart actions (select using :continue):']
+    # Errors are either a fatal error or opening the lisp listener.
+    errors = ['fatal error', '[Current process: Initial Lisp Listener]']
     patho_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
@@ -212,7 +213,8 @@ def run_pwt_flat(species_input_folder_path):
 
     error_status = None
     flat_creation_ends = ['Opening Navigator window.']
-    load_errors = ['fatal error']
+    # Errors are either a fatal error or opening the lisp listener.
+    load_errors = ['fatal error', '[Current process: Initial Lisp Listener]']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
