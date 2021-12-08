@@ -96,6 +96,7 @@ def run_mpwt():
     parser = argparse.ArgumentParser(
         'mpwt',
         description='For specific help on each subcommand use: mpwt --help',
+        allow_abbrev=False,
     )
 
     parser.add_argument(
@@ -304,6 +305,11 @@ def run_mpwt():
     topf = args.topf
     version = args.version
     permission = args.permission
+
+    # If no argument print the help.
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
 
     if version:
         print('Mpwt v' + VERSION  + '\n' + LICENSE)
