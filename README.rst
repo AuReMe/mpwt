@@ -40,13 +40,14 @@ Pathway Tools needs **Blast**, so it must be install on your system. Depending o
 
 /!\\ For all OS, Pathway-Tools must be in ``$PATH``.
 
-On Linux and MacOS: ``export PATH=$PATH:your/install/directory/pathway-tools``.
+On Linux and MacOS: ``export PATH=$PATH:/your/install/directory/pathway-tools``.
 
-Consider adding Pathway Tools in ``$PATH`` permanently by running:
+Consider adding Pathway Tools in ``$PATH`` permanently by using the following command and then sourcing bashrc:
 
 .. code:: sh
 
-	echo 'export PATH="$PATH:your/install/directory/pathway-tools:"' >> ~/.bashrc
+    echo 'export PATH="$PATH:/your/install/directory/pathway-tools:"' >> ~/.bashrc
+    source ~/.bashrc
 
 If your OS doesn't support Pathway Tools, you can use a docker container. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
@@ -349,7 +350,7 @@ mpwt can be used in a python script with an import:
 			  number_cpu=int,
 			  patho_log=optional_folder_pathname,
 			  pathway_score=pathway_score,
-			  taxon_file=optional_boolean,
+			  taxon_file=optional_str,
 			  permission=optional_boolean,
 			  verbose=optional_boolean)
 
@@ -392,7 +393,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --taxon-file        | taxon_file(boolean)                            | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
+|     --taxon-file        | taxon_file(string: file pathanme)              | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |     --permission        | permission(boolean)                            | Choose permission access to PGDB in ptools-local and output files       |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -657,7 +658,7 @@ Useful functions
                 number_cpu=int,
                 patho_log=optional_folder_pathname,
                 pathway_score=pathway_score,
-                taxon_file=optional_boolean,
+                taxon_file=optional_str,
                 verbose=optional_boolean)
 
 - Delete all the previous PGDB and the metadata files
