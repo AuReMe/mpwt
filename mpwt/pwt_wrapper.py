@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -230,7 +230,7 @@ def run_pwt_flat(species_input_folder_path):
                 load_line = load_line.decode(encoding, errors='replace')
                 flat_file_writer.write(load_line)
 
-                # Lisp commnd has finished, kill Pathway Toosl trying to open navigator.
+                # Lisp command has finished, kill Pathway Toosl trying to open navigator.
                 if any(flat_end in load_line for flat_end in flat_creation_ends):
                     load_subprocess.stdout.close()
                     load_subprocess.kill()
