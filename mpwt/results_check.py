@@ -21,7 +21,7 @@ Check results from Pathway Tools command:
 import csv
 import os
 import logging
-import sys
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +90,8 @@ def extract_pathologic(patho_log):
 
             # Search for Build done line and its following line which look like (for Pathway Tools 25.0):
             # PGDB contains XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds
+            # In Pathway Tools 25.5 it looks like this:
+            # PGDB contains XXXX classes and XXXX instances: XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds, XXXX publications
             if 'Build done.' in line or 'PGDB build done.' in line:
                 log_str += line
                 if non_fatal_error_count > 0:
@@ -100,17 +102,24 @@ def extract_pathologic(patho_log):
                 resume_inference_line = next(input_file)
                 log_str += resume_inference_line
                 pgdb_build_done = True
-                gene_number = int(resume_inference_line.split('PGDB contains ')[1].split(' genes')[0])
+                # Search the PGDB stat line and use regex to extract informations.
+                # # This is done by searching for association like (digit word) like(XXXX genes).
+                pgdb_stats = {}
+                pgdb_line_re = r'(?P<stat_nb>[\d]+)\ (?P<variable_name>[\w]+(\ pathways)?)'
+                # Create a dictionary containing the stat  as: {'genes': XXXX, 'reactions': XXXX, ...}
+                for match_found in re.finditer(pgdb_line_re, resume_inference_line):
+                    pgdb_stats[match_found.group('variable_name')] = int(match_found.group('stat_nb'))
+
+                gene_number = int(pgdb_stats['genes'])
                 # proteins is listed in pathologic.log for Pathway Tools inferior to 25.0
                 # Since the 25.0 polypeptides replace proteins
-                if 'proteins' in resume_inference_line:
-                    protein_number = int(resume_inference_line.split('genes, ')[1].split(' proteins')[0])
-                    pathway_number = int(resume_inference_line.split('proteins, ')[1].split(' base pathways')[0])
-                elif 'polypeptides' in resume_inference_line:
-                    protein_number = int(resume_inference_line.split('genes, ')[1].split(' polypeptides')[0])
-                    pathway_number = int(resume_inference_line.split('polypeptides, ')[1].split(' base pathways')[0])
-                reaction_number = int(resume_inference_line.split('base pathways, ')[1].split(' reactions')[0])
-                compound_number = int(resume_inference_line.split('reactions, ')[1].split(' compounds')[0])
+                if 'proteins' in pgdb_stats:
+                    protein_number = int(pgdb_stats['proteins'])
+                elif 'polypeptides' in pgdb_stats:
+                    protein_number = int(pgdb_stats['polypeptides'])
+                pathway_number = int(pgdb_stats['base pathways'])
+                reaction_number = int(pgdb_stats['reactions'])
+                compound_number = int(pgdb_stats['compounds'])
 
             if 'Done' in line:
                 passed_inferences = True
