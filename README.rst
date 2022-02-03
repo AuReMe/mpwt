@@ -1,10 +1,10 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
-	:target: https://pypi.python.org/pypi/mpwt
+    :target: https://pypi.python.org/pypi/mpwt
 
 .. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
-	:target: https://doi.org/10.7554/eLife.61968
+    :target: https://doi.org/10.7554/eLife.61968
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-25.0-brightgreen
+.. image:: https://img.shields.io/badge/Pathway%20Tools-25.5-brightgreen
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
@@ -19,7 +19,7 @@ mpwt: Pipeline summary
 
 The following picture shows the main argument of mpwt:
 
-.. image:: mpwt_pipeline.svg
+.. image:: mpwt_runs.svg
 
 .. contents:: Table of contents
    :backlinks: top
@@ -32,7 +32,7 @@ Requirements
 ~~~~~~~~~~~~
 
 mpwt needs at least **Python 3.6**.
-mpwt requires three python depedencies (`biopython <https://github.com/biopython/biopython>`__, `docopt <https://github.com/docopt/docopt>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
+mpwt requires three python depedencies (`biopython <https://github.com/biopython/biopython>`__ , `chardet <https://github.com/chardet/chardet>`__ and `gffutils <https://github.com/daler/gffutils>`__) and **Pathway Tools**. For the multiprocessing, mpwt uses the `multiprocessing library of Python 3 <https://docs.python.org/3/library/multiprocessing.html>`__.
 
 You must have an environment where Pathway Tools is installed. Pathway Tools can be obtained `here <http://bioinformatics.ai.sri.com/ptools/>`__.
 
@@ -40,13 +40,14 @@ Pathway Tools needs **Blast**, so it must be install on your system. Depending o
 
 /!\\ For all OS, Pathway-Tools must be in ``$PATH``.
 
-On Linux and MacOS: ``export PATH=$PATH:your/install/directory/pathway-tools``.
+On Linux and MacOS: ``export PATH=$PATH:/your/install/directory/pathway-tools``.
 
-Consider adding Pathway Tools in ``$PATH`` permanently by running:
+Consider adding Pathway Tools in ``$PATH`` permanently by using the following command and then sourcing bashrc:
 
 .. code:: sh
 
-	echo 'export PATH="$PATH:your/install/directory/pathway-tools:"' >> ~/.bashrc
+    echo 'export PATH="$PATH:/your/install/directory/pathway-tools:"' >> ~/.bashrc
+    source ~/.bashrc
 
 If your OS doesn't support Pathway Tools, you can use a docker container. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
@@ -59,7 +60,7 @@ Using pip
 
 .. code:: sh
 
-	pip install mpwt
+    pip install mpwt
 
 Use
 ---
@@ -84,10 +85,10 @@ The script takes a folder containing sub-folders as input. Each sub-folder conta
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
     │   └── scaffold_2.fsa
-    taxon_id.tsv
+    ├── taxon_id.tsv
     ..
 
-Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff.
+Input files must have the same name as the folder in which they are located and also finished with a .gbk/.gbff or a .gff (the name must not be only uppercase otherwise this can cause issue with Pathway Tools such as this one: ``Error: Cannot use the organism identifier ORGID as a genetic element ID.``).
 
 For PF files, there is one file for each scaffold/contig and one corresponding fasta file.
 
@@ -178,7 +179,7 @@ PathoLogic Format
     │   └── scaffold_1.fasta
     │   └── scaffold_2.pf
     │   └── scaffold_2.fsa
-    taxon_id.tsv
+    ├── taxon_id.tsv
     ..
 
 PF file example:
@@ -202,7 +203,7 @@ PF file example:
 
 Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf>`__ for more informations.
 
-You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension) for each pathologic containing one scaffold/contig.
+You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension) for each pathologic containing one scaffold/contig. This is optionnal since mpwt 0.7.0.
 
 .. code-block:: text
 
@@ -313,7 +314,7 @@ mpwt can be used with the command lines:
 
 .. code:: sh
 
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--ignore-error] [--taxon-file]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file]
     mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -334,24 +335,24 @@ mpwt can be used in a python script with an import:
     folder_output = "path/to/folder/output"
 
     mpwt.multiprocess_pwt(input_folder=folder_input,
-			  output_folder=folder_output,
-			  patho_inference=optional_boolean,
-			  patho_hole_filler=optional_boolean,
-			  patho_operon_predictor=optional_boolean,
-			  patho_transporter_inference=patho_transporter_inference,
-			  no_download_articles=optional_boolean,
-			  flat_creation=optional_boolean,
-			  dat_extraction=optional_boolean,
-			  xml_extraction=optional_boolean,
-			  owl_extraction=optional_boolean,
-			  col_extraction=optional_boolean,
-			  size_reduction=optional_boolean,
-			  number_cpu=int,
-			  patho_log=optional_folder_pathname,
-			  ignore_error=optional_boolean,
-			  pathway_score=pathway_score,
-			  taxon_file=optional_boolean,
-			  verbose=optional_boolean)
+              output_folder=folder_output,
+              patho_inference=optional_boolean,
+              patho_hole_filler=optional_boolean,
+              patho_operon_predictor=optional_boolean,
+              patho_transporter_inference=patho_transporter_inference,
+              no_download_articles=optional_boolean,
+              flat_creation=optional_boolean,
+              dat_extraction=optional_boolean,
+              xml_extraction=optional_boolean,
+              owl_extraction=optional_boolean,
+              col_extraction=optional_boolean,
+              size_reduction=optional_boolean,
+              number_cpu=int,
+              patho_log=optional_folder_pathname,
+              pathway_score=pathway_score,
+              taxon_file=optional_str,
+              verbose=optional_boolean,
+              permission=optional_str)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                             |
@@ -392,9 +393,9 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --ignore-error      | ignore_error(boolean)                          | Ignore errors and continue the workflow for successful build            |
+|     --taxon-file        | taxon_file(string: file pathanme)              | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --taxon-file        | taxon_file(boolean)                            | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
+|     --permission        | permission(string: 'all', 'group')             | Choose permission access to PGDB in ptools-local and output files       |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -412,7 +413,8 @@ There is also another argument:
 
 This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
 
-It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
+It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress as at this moment the PathoLogic files created do not produce the same PGDB as the corresponding GenBank/GFF files.
+Especially some genes are missing in th PGDB.
 
 PathoLogic Hole Filler
 ++++++++++++++++++++++
@@ -653,13 +655,16 @@ Useful functions
                 no_download_articles=optional_boolean,
                 flat_creation=optional_boolean,
                 dat_extraction=optional_boolean,
+                xml_extraction=optional_boolean,
+                owl_extraction=optional_boolean,
+                col_extraction=optional_boolean,
                 size_reduction=optional_boolean,
                 number_cpu=int,
                 patho_log=optional_folder_pathname,
-                ignore_error=optional_boolean,
                 pathway_score=pathway_score,
-                taxon_file=optional_boolean,
-                verbose=optional_boolean)
+                taxon_file=optional_str,
+                verbose=optional_boolean,
+                permission=optional_str)
 
 - Delete all the previous PGDB and the metadata files
 
@@ -778,9 +783,6 @@ It will show the terminal in which Pathway Tools has crashed.
 Also, if there is an error in pathologic.log, it will be shown after **=== Error in Pathologic.log ===**.
 
 There is a `Pathway Tools forum <https://ask.pathwaytools.com/questions/>`__ where you can find informations on Pathway Tools errors.
-
-You can also ignore PathoLogic errors by using the argument ``--ignore-error/ignore_error``.
-This option will ignore error and continue the mpwt workflow on the successful PathoLogic build.
 
 Output
 ~~~~~~
@@ -974,7 +976,25 @@ Bibliography
 Citation
 --------
 
-Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020;9:e61968 `https://doi.org/10.7554/eLife.61968 <https://doi.org/10.7554/eLife.61968>`__.
+Belcour* A, Frioux* C, Aite M, Bretaudeau A, Hildebrand F, Siegel A. Metage2Metabo, microbiota-scale metabolic complementarity for the identification of key species. eLife 2020, 9, e61968 `https://doi.org/10.7554/eLife.61968 <https://doi.org/10.7554/eLife.61968>`__.
+
+``mpwt`` depends on the following tools:
+
+- ``Pathway Tools`` for the reconstruction of draft metabolic networks (the article can be not up-to-date, look at the `Publications <https://biocyc.org/publications.shtml>`__ on the BioCyc site):
+
+Karp P D, Midford P E, Billington R, Kothari A, Krummenacker M, Latendresse M, Ong W K, Subhraveti P, Caspi R, Fulcher C, Keseler I M, Paley SM. Pathway Tools version 23.0 update: software for pathway/genome informatics and systems biology. Briefings in Bioinformatics 2021, 22, 109–126 `https://doi.org/10.1093/bib/bbz104 <https://doi.org/10.1093/bib/bbz104>`__.
+
+- ``Biopython`` for GenBank parsing:
+
+Cock, P.J.A., Antao, T., Chang, J.T., Chapman, B.A., Cox, C.J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., de Hoon, M.J.L. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009, 25, 1422–1423 `https://doi.org/10.1093/bioinformatics/btp163 <https://doi.org/10.1093/bioinformatics/btp163>`__.
+
+- ``gffutils`` for GFF parsing:
+
+GitHub repository: `https://github.com/daler/gffutils <https://github.com/daler/gffutils>`__
+
+- ``chardet`` for character encoding detection:
+
+GitHub repository: `https://github.com/chardet/chardet <https://github.com/chardet/chardet>`__
 
 Acknowledgements
 ----------------

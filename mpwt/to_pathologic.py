@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -343,7 +343,7 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
                     if feature.featuretype == 'gene':
                         if feature.chrom == region:
                             if len(feature.id) > 40:
-                                logger.critical('Critical warning: gene ID ' + gene_id + ' of ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
+                                logger.critical('Critical warning: gene ID ' + feature.id + ' of ' + input_path + 'is too long (more than 40 characters), this will cause errors in Pathway Tools.')
                             element_file.write('ID\t' + feature.id + '\n')
                             element_file.write('NAME\t' + feature.id + '\n')
                             element_file.write('STARTBASE\t' + str(feature.start) + '\n')
@@ -356,8 +356,13 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
                                     for ec in child.attributes['ec_number']:
                                         element_file.write('EC\t' + ec + '\n')
                                 if 'db_xref' in child.attributes:
-                                    if ':' in db_xref:
-                                        element_file.write('DBLINK\t' + db_xref + '\n')
+                                    for dbxref in child.attributes['db_xref']:
+                                        if ':' in dbxref:
+                                            element_file.write('DBLINK\t' + dbxref + '\n')
+                                if 'Dbxref' in child.attributes:
+                                    for dbxref in child.attributes['Dbxref']:
+                                        if ':' in dbxref:
+                                            element_file.write('DBLINK\t' + dbxref + '\n')
                                 if child.featuretype == 'CDS':
                                     element_file.write('PRODUCT-TYPE\tP' + '\n')
                                     element_file.write('PRODUCT-ID\tprot ' + feature.id + '\n')

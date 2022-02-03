@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -22,7 +22,6 @@ import os
 import shutil
 import signal
 import subprocess
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +137,12 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     if patho_transporter_inference:
         cmd_pwt.append('-tip')
 
-    logger.info(' '.join(cmd_pwt))
+    species_name = os.path.basename(species_input_folder_path)
+    logger.info('|PathoLogic|{}| '.format(species_name) + ' '.join(cmd_pwt))
 
     error_status = None
-    errors = ['Restart actions (select using :continue):']
+    # Errors are either a fatal error or opening the lisp listener.
+    errors = ['fatal error', '[Current process: Initial Lisp Listener]']
     patho_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
@@ -207,11 +208,13 @@ def run_pwt_flat(species_input_folder_path):
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
     cmd_flat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
-    logger.info(' '.join(cmd_flat))
+    species_name = os.path.basename(species_input_folder_path)
+    logger.info('|Flat files creation|{}| '.format(species_name) + ' '.join(cmd_flat))
 
     error_status = None
     flat_creation_ends = ['Opening Navigator window.']
-    load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
+    # Errors are either a fatal error or opening the lisp listener.
+    load_errors = ['fatal error', '[Current process: Initial Lisp Listener]']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
@@ -227,7 +230,7 @@ def run_pwt_flat(species_input_folder_path):
                 load_line = load_line.decode(encoding, errors='replace')
                 flat_file_writer.write(load_line)
 
-                # Lisp commnd has finished, kill Pathway Toosl trying to open navigator.
+                # Lisp command has finished, kill Pathway Toosl trying to open navigator.
                 if any(flat_end in load_line for flat_end in flat_creation_ends):
                     load_subprocess.stdout.close()
                     load_subprocess.kill()
@@ -260,7 +263,7 @@ def run_pwt_flat(species_input_folder_path):
     return error_status
 
 
-def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_folder, size_reduction, xml_extraction, owl_extraction, col_extraction):
+def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction):
     """
     Move the result files inside the shared folder containing the input data.
     pgdb_folder_dbname: ID of the species.
@@ -269,13 +272,15 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
     Args:
         pgdb_folder_dbname (str): species ID
         pgdb_folder_path (str): path to species PGDB folder
-        dat_extraction (bool): to extract or not the attribute-values files (.dat files)
         output_folder (str): path to output folder
+        dat_extraction (bool): to extract or not the attribute-values files (.dat files)
         size_reduction (bool): to compress or not the results
         xml_extraction (bool): to extract or not the metabolic-reactions.xml'
         owl_extraction (bool): to extract or not the owl files
         col_extraction (bool): to extract or not the tabular files (.col files)
     """
+    logger.info('|Moving output files|{}| '.format(pgdb_folder_dbname))
+
     output_species = os.path.join(output_folder, pgdb_folder_dbname)
 
     keep_extensions = []
@@ -315,11 +320,12 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
 
     if len(keep_extensions) > 0:
         pgdb_tmp_folder_path = os.path.join(*[pgdb_folder_path, '1.0', 'data'])
-        if not os.path.exists(pgdb_tmp_folder_path):
-            logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
-            return
     else:
         pgdb_tmp_folder_path = pgdb_folder_path
+
+    if not os.path.exists(pgdb_tmp_folder_path):
+        logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
+        return True
 
     # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
     # It will also delete the PGDB folder in ptools-local.
@@ -348,3 +354,5 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, dat_extraction, output_f
                         os.remove(pgdb_file_pathname)
                     elif os.path.isdir(pgdb_file_pathname):
                         shutil.rmtree(pgdb_file_pathname)
+
+    return False

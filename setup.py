@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2018-2021 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -27,7 +27,8 @@ setup(name='mpwt',
       description='Multiprocessing for Pathway Tools',
       long_description=long_description,
       url='https://github.com/AuReMe/mpwt',
-      author='Arnaud Belcour',
+      author='AuReMe',
+      license='GPLv3',
       python_requires='>=3.6',
       classifiers=[
         # How mature is this project? Common values are
@@ -47,7 +48,6 @@ setup(name='mpwt',
       install_requires=[
             'biopython>=1.70',
             'chardet>=3.0.4',
-            'docopt>=0.6.2',
             'gffutils>=0.9',
       ],
       entry_points={
