@@ -1,10 +1,10 @@
 .. image:: https://img.shields.io/pypi/v/mpwt.svg
-	:target: https://pypi.python.org/pypi/mpwt
+    :target: https://pypi.python.org/pypi/mpwt
 
 .. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
-	:target: https://doi.org/10.7554/eLife.61968
+    :target: https://doi.org/10.7554/eLife.61968
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-25.0-brightgreen
+.. image:: https://img.shields.io/badge/Pathway%20Tools-25.5-brightgreen
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
@@ -60,7 +60,7 @@ Using pip
 
 .. code:: sh
 
-	pip install mpwt
+    pip install mpwt
 
 Use
 ---
@@ -203,7 +203,7 @@ PF file example:
 
 Look at the `Pathologic format <http://bioinformatics.ai.sri.com/ptools/tpal.pf>`__ for more informations.
 
-You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension) for each pathologic containing one scaffold/contig.
+You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension) for each pathologic containing one scaffold/contig. This is optionnal since mpwt 0.7.0.
 
 .. code-block:: text
 
@@ -335,24 +335,24 @@ mpwt can be used in a python script with an import:
     folder_output = "path/to/folder/output"
 
     mpwt.multiprocess_pwt(input_folder=folder_input,
-			  output_folder=folder_output,
-			  patho_inference=optional_boolean,
-			  patho_hole_filler=optional_boolean,
-			  patho_operon_predictor=optional_boolean,
-			  patho_transporter_inference=patho_transporter_inference,
-			  no_download_articles=optional_boolean,
-			  flat_creation=optional_boolean,
-			  dat_extraction=optional_boolean,
-			  xml_extraction=optional_boolean,
-			  owl_extraction=optional_boolean,
-			  col_extraction=optional_boolean,
-			  size_reduction=optional_boolean,
-			  number_cpu=int,
-			  patho_log=optional_folder_pathname,
-			  pathway_score=pathway_score,
-			  taxon_file=optional_str,
-			  permission=optional_boolean,
-			  verbose=optional_boolean)
+              output_folder=folder_output,
+              patho_inference=optional_boolean,
+              patho_hole_filler=optional_boolean,
+              patho_operon_predictor=optional_boolean,
+              patho_transporter_inference=patho_transporter_inference,
+              no_download_articles=optional_boolean,
+              flat_creation=optional_boolean,
+              dat_extraction=optional_boolean,
+              xml_extraction=optional_boolean,
+              owl_extraction=optional_boolean,
+              col_extraction=optional_boolean,
+              size_reduction=optional_boolean,
+              number_cpu=int,
+              patho_log=optional_folder_pathname,
+              pathway_score=pathway_score,
+              taxon_file=optional_str,
+              verbose=optional_boolean,
+              permission=optional_str)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                             |
@@ -395,7 +395,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |     --taxon-file        | taxon_file(string: file pathanme)              | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --permission        | permission(boolean)                            | Choose permission access to PGDB in ptools-local and output files       |
+|     --permission        | permission(string: 'all', 'group')             | Choose permission access to PGDB in ptools-local and output files       |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
@@ -413,7 +413,8 @@ There is also another argument:
 
 This argument reads the input data inside the input folder. Then it converts Genbank and GFF files into PathoLogic Format files. And if there is already PathoLogic files it copies them.
 
-It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress.
+It can be used to avoid issues with parsing Genbank and GFF files. But it is an early Work in Progress as at this moment the PathoLogic files created do not produce the same PGDB as the corresponding GenBank/GFF files.
+Especially some genes are missing in th PGDB.
 
 PathoLogic Hole Filler
 ++++++++++++++++++++++
@@ -654,12 +655,16 @@ Useful functions
                 no_download_articles=optional_boolean,
                 flat_creation=optional_boolean,
                 dat_extraction=optional_boolean,
+                xml_extraction=optional_boolean,
+                owl_extraction=optional_boolean,
+                col_extraction=optional_boolean,
                 size_reduction=optional_boolean,
                 number_cpu=int,
                 patho_log=optional_folder_pathname,
                 pathway_score=pathway_score,
                 taxon_file=optional_str,
-                verbose=optional_boolean)
+                verbose=optional_boolean,
+                permission=optional_str)
 
 - Delete all the previous PGDB and the metadata files
 

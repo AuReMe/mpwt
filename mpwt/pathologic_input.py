@@ -24,7 +24,6 @@ Create PathoLogic input files:
 import csv
 import logging
 import os
-import sys
 
 from Bio import SeqIO
 from gffutils.iterators import DataIterator
