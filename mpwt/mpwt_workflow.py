@@ -21,7 +21,6 @@ Workflow of mpwt:
     - move the results to output folder (run_move_pgdb)
 """
 
-import csv
 import logging
 import os
 import shutil

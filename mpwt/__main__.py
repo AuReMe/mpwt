@@ -67,7 +67,6 @@ import pkg_resources
 
 from mpwt import utils, to_pathologic
 from mpwt.mpwt_workflow import multiprocess_pwt
-from multiprocessing import Pool
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
