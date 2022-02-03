@@ -1,5 +1,38 @@
 # Changelog
 
+# mpwt 0.7.0 (2022-02-03)
+
+This version should be compatible with Pathway Tools 25.5.
+
+The behaviour of mpwt has been changed in this version. Before 0.7.0 mpwt will wait for all the PathoLogic processes to end before going to the next step. But if there was an error with one process, it will stop and no outputs were created even for successful processes.
+Now, mpwt run the processes independently. This means that for example if you have 3 organisms (Org_A, Org_B and Org_C). If the process for Org_A fails but the processes for Org_B and Org_C succeed, then you will have an output folder containing results for Org_B and Org_C (whereas in older version no results were created).
+
+## Add:
+
+- mpwt can take as input PathoLogic files without fasta. It will output a warning message but it should be usable. This should make mpwt compatible with PathoLogic files created by EsMeCaTa.
+- new option --permission/permission to choose the permission level for PGDB in ptools-local or output folder (useful when working with a container in a cluster).
+- changelog file.
+- citation in readme.
+
+## Fix:
+
+- issue with missing tmp path in run_move_pgdb.
+- issue with topf (especially when using a GFF file some fields like dbxref were not correctly used).
+- issue that prevents mpwt from killing Pathway Tools process that enters the Lisp Listener.
+- issue with pathway prediction score not being correctly return to its previous value.
+- String not Boolean and path incorrect in Readme (issue #70).
+- Issue with Pathway Tools 25.5 when checking log (issue #71). The way of parsing the 'PGDB contains' line has been modified to be more robust. The parsing with str.split() has been replaced with a parsing with regex.
+- numerous typos.
+
+## Modify:
+
+- refactor mpwt code to run each process independently from the other  (issue #68). Creation of the functions run_mpwt (to launch a complete run of mpwt on one organism) and independent_mpwt (to launch multiple run_mpwt on each inputs).
+- refactor log creation. Instead of a function taking as input a list of dictionary (check_pwt) use 2 functions (check_mpwt_pathologic_runs and extract_pathologic). The first one takes as input a list of the paths to the input folder containing pathologic.log file and an output folder. Then it uses the second function (extract_pathologic) for each pathologic file to extraction the informations.
+- replace docopt with argparse.
+- update readme.
+- year in license code.
+- update mpwt workflow svg according to the changes in mpwt code. Put a white background (useful when using a GitHub dark theme).
+
 # mpwt 0.6.3 (2021-04-02)
 
 This version should be compatible with Pathway Tools 25.0.
