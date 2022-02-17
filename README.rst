@@ -222,17 +222,20 @@ If you don't have taxon ID in your Genbank or GFF file, you can add one in this 
 
 You can also add more informations for the genetic elements like **circularity of genome** (Y or N), **type of genetic element** (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG) or **codon table** (see the corresponding code below).
 
+You can also specify reference PGDB. This can be useful if you have PGDB with manual curation, especially with reactions or pathways not present in MetaCyc.
+These reactions or pathways will be added into MetaCyc before reaction and pathways prediction (if the reactions or pathways are supported by evidence other than computational ones).
+
 Example:
 
-+------------+------------+------------+------------+------------+-------------------+
-|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file|
-+============+============+============+============+============+===================+
-|species_1   |10          |    Y       | :CHRSM     |1           |                   |
-+------------+------------+------------+------------+------------+-------------------+
-|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |
-+------------+------------+------------+------------+------------+-------------------+
-|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |
-+------------+------------+------------+------------+------------+-------------------+
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file| reference_pgdb |
++============+============+============+============+============+===================+================+
+|species_1   |10          |    Y       | :CHRSM     |1           |                   |    pgdb_id     |
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |                |
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |                |
++------------+------------+------------+------------+------------+-------------------+----------------+
 
 As you can see for **PF file** (species_4) you can use the column **corresponding_file** to add information for each PF files.
 
