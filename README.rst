@@ -210,7 +210,14 @@ You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
+You also need to add the taxon ID in the **taxon_id.tsv** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
+
+taxon_id.tsv file
++++++++++++++++++
+
+This tabulated file is required when using PathoLogic Format as input. But it can also bee used to give more informations to Pathway Tools.
+
+A simple file looks like this:
 
 +------------+------------+
 |species     |taxon_id    |
