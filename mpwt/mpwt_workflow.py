@@ -218,6 +218,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
     species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
 
+    input_error_status = False
     patho_error_status = False
     flat_error_status = False
     move_error_status = False
@@ -226,18 +227,20 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_folder_path = os.path.join(input_folder, run_folder)
 
     if run_input_files_creation:
-        pwt_input_files(run_folder_path, taxon_file)
+        input_error_status = pwt_input_files(run_folder_path, taxon_file)
+        if input_error_status:
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_patho_inference:
         patho_error_status = run_pwt(run_folder_path, *pathologic_options)
         if patho_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_flat_creation:
         flat_error_status = run_pwt_flat(run_folder_path)
         check_dat(run_folder_path, species_pgdb_folder)
         if flat_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission:
         give_permission(permission, species_pgdb_folder)
@@ -245,12 +248,12 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     if run_output_folder:
         move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
         if move_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission and output_folder:
         give_permission(permission, output_folder)
 
-    return run_folder, patho_error_status, flat_error_status, move_error_status
+    return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
 
 def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
