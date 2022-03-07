@@ -156,9 +156,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
     """End multiprocessing Pool and restore ptools-init.dat
 
-    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
-    no_download_articles (bool): turning off loading of PubMed citations (True/False)
-    pathway_score (float): score between 0 and 1 to accept or reject pathway
+    Args:
+        mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
+        no_download_articles (bool): turning off loading of PubMed citations (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        old_pathway_score (float): original value of pathway score
     """
     mpwt_pool.close()
     mpwt_pool.join()
@@ -212,7 +214,13 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_flat_creation (bool): if True flat files will be created
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
-        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user)
+    Returns:
+        run_folder (str): name of the folder containing input files
+        input_error_status (bool): if True an error occurs during pathologic input files creation
+        patho_error_status (bool): if True an error occurs during PathoLogic run
+        flat_error_status (bool): if True an error occurs during flat fiels creation
+        move_error_status (bool): if True an error occurs when moving output files
     """
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
