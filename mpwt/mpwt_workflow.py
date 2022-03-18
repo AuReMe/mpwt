@@ -336,12 +336,12 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     # Create the input for the creation of BioPAX/attribute-values files.
     if (flat_creation and not input_folder) or (output_folder and not input_folder):
         # Create a temporary folder in ptools-local where lisp script will be stored.
-        tmp_folder = os.path.join(ptools_local_path, 'tmp')
-        if not os.path.exists(tmp_folder):
-            os.mkdir(tmp_folder)
+        tmp_folder_path = os.path.join(ptools_local_path, 'tmp')
+        if not os.path.exists(tmp_folder_path):
+            os.mkdir(tmp_folder_path)
 
         # Create a lisp script file for each PGDB in the ptools-local folder.
-        run_ids = list(create_only_flat_lisp(pgdbs_folder_path, tmp_folder))
+        run_ids = list(create_only_flat_lisp(pgdbs_folder_path, tmp_folder_path))
         if flat_creation:
             run_flat_ids = list(run_ids)
         else:
@@ -363,6 +363,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     for run_id in run_ids:
         if input_folder:
             run_input_files_creation = True
+            run_input_folder = input_folder
         # For species without PGDB in ptools-local, launch input files creations, PathoLogic reconstruction, flat files creation and moving output files (according to user input)
         if run_patho_flat_ids and run_id in run_patho_flat_ids:
             if patho_inference:
@@ -371,7 +372,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                 run_flat_creation = True
             if output_folder:
                 run_output_folder = True
-        # For speccies with PGDB in ptools-local, launch only flat files creation and moving output files (according to user input)
+        # For species with PGDB in ptools-local, launch only flat files creation and moving output files (according to user input)
         if run_flat_ids and run_id in run_flat_ids:
             if flat_creation:
                 run_flat_creation = True
@@ -384,14 +385,14 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             # If flat_creation, flat files of these PGDBs will be created and moved to the output folder.
             if flat_creation:
                 run_flat_creation = True
-                input_folder = os.path.join(ptools_local_path, 'tmp')
+                run_input_folder = os.path.join(ptools_local_path, 'tmp')
             if output_folder:
                 if not os.path.exists(os.path.join(output_folder, run_id)):
                     run_output_folder = True
                 else:
                     logger.info('{0} contains already {1}, output files will not be moved'.format(output_folder, run_id))
 
-        multiprocess_run_mpwt = [run_id, input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
+        multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
                                 run_flat_creation, move_options, taxon_file, permission]
 
         multiprocess_run_mpwts.append(multiprocess_run_mpwt)
