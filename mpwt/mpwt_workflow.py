@@ -361,9 +361,10 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     tmp_folder = False
 
     for run_id in run_ids:
+        if input_folder:
+            run_input_files_creation = True
         # For species without PGDB in ptools-local, launch input files creations, PathoLogic reconstruction, flat files creation and moving output files (according to user input)
         if run_patho_flat_ids and run_id in run_patho_flat_ids:
-            run_input_files_creation = True
             if patho_inference:
                 run_patho_inference = True
             if flat_creation:
