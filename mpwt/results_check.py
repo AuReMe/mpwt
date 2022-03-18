@@ -153,17 +153,30 @@ def check_mpwt_pathologic_runs(species_input_folder_paths, patho_log_folder):
 
     failed_inferences = []
     passed_inferences = []
+    no_pathologic_files = []
     for species_input_folder_path in species_input_folder_paths:
         patho_log = os.path.join(species_input_folder_path, 'pathologic.log')
-        species_pathologic_informations = extract_pathologic(patho_log)
+        if os.path.exists(patho_log):
+            species_pathologic_informations = extract_pathologic(patho_log)
 
-        mpwt_pathologic_informations.append(species_pathologic_informations)
-        if species_pathologic_informations[3] is not None:
-            failed_inferences.append(species_pathologic_informations[0])
-        elif species_pathologic_informations[4] is not None:
-            passed_inferences.append(species_pathologic_informations[0])
-        elif species_pathologic_informations[3] is None and species_pathologic_informations[4] is not None:
-            failed_inferences.append(species_pathologic_informations[0])
+            mpwt_pathologic_informations.append(species_pathologic_informations)
+            if species_pathologic_informations[3] is not None:
+                failed_inferences.append(species_pathologic_informations[0])
+            elif species_pathologic_informations[4] is not None:
+                passed_inferences.append(species_pathologic_informations[0])
+            elif species_pathologic_informations[3] is None and species_pathologic_informations[4] is not None:
+                failed_inferences.append(species_pathologic_informations[0])
+        else:
+            logger.info('|Output Check|WARNING: No pathologic.log file for {0}, could not write log.'.format(species_input_folder_path))
+            base_name = os.path.basename(species_input_folder_path)
+            no_pathologic_files.append(base_name)
+            log_str = ''
+            log_str += '------------ Species: '
+            log_str += base_name + '\n'
+            log_str += 'No pathologic.log\n'
+            log_str += '------------\n\n'
+            mpwt_pathologic_informations.append([base_name, *['']*10, log_str, [['No pathologic.log', '', '', '', '']]])
+
 
     number_passed_inference = len(passed_inferences)
     number_failed_inference = len(failed_inferences)

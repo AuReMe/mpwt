@@ -330,6 +330,10 @@ def extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file):
                     if codon_table is not None:
                         taxon_datas['codon_table'] = codon_table
 
+                if 'reference_pgdb' in data:
+                    if data['reference_pgdb'] != '':
+                        taxon_datas['reference_pgdbs'] = data['reference_pgdb'].split(',')
+
     if pgdb_id not in known_species and taxon_id == '':
         logger.critical('Missing pgdb ID for {0} in {1}.'.format(pgdb_id, taxon_id_path))
         return True, None, None
@@ -489,6 +493,9 @@ def create_flats_and_lisp(run_folder, taxon_file):
         organism_writer.writerow(['STORAGE', "FILE"])
         organism_writer.writerow(['NCBI-TAXON-ID', taxon_id])
         organism_writer.writerow(['NAME', species_name])
+        if 'reference_pgdbs' in taxon_datas:
+            for reference_pgdb in taxon_datas['reference_pgdbs']:
+                organism_writer.writerow(['REF-ORGID', reference_pgdb])
 
     # Create the genetic-elements dat file.
     with open(genetic_dat, 'w', encoding='utf-8') as genetic_file:
@@ -634,7 +641,7 @@ def pwt_input_files(run_folder, taxon_file):
         missing_string = 'Missing {0}'.format('; '.join(required_files.difference(files_in))) + '. Inputs file created for {0}'.format(species_folder)
         check_datas_lisp = create_flats_and_lisp(run_folder, taxon_file)
         if check_datas_lisp is None:
-            logger.critical('Error with the creation of input files of {0}.'.format(run_folder))
+            logger.critical('|Input Check|{0}| Error with the creation of input files of {1}.'.format(species_folder, run_folder))
             error_found = True
             return error_found
 

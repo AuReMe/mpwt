@@ -1,5 +1,21 @@
 # Changelog
 
+# mpwt 0.7.1 (2022-03-18)
+
+## Add:
+
+- support for specifying reference PGDB (with taxon_id file) to be used in PathoLogic.
+- warning message when there is a missing pathologic.log file during log file creation (before mpwt crahses with a python error associated with `species_pathologic_informations`).
+
+## Fix:
+
+- an issue where mpwt does not stop if there is an error in pwt_input_files.
+- input files not created if mpwt uses PGDB from ptools-local.
+
+## Modify:
+
+- update readme.
+
 # mpwt 0.7.0 (2022-02-03)
 
 This version should be compatible with Pathway Tools 25.5.

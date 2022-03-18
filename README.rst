@@ -210,7 +210,14 @@ You have to provide one nucleotide sequence (either '.fasta' or '.fsa' extension
     >scaffold_1
     ATGATGCTGATACTGACTTAGCAT
 
-Also to add the taxon ID we need the **taxon_id.tsv** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
+You also need to add the taxon ID in the **taxon_id.tsv** (a tsv file with two values: the name of the folder containing the PF files and the taxon ID corresponding).
+
+taxon_id.tsv file
++++++++++++++++++
+
+This tabulated file is required when using PathoLogic Format as input. But it can also bee used to give more informations to Pathway Tools.
+
+A simple file looks like this:
 
 +------------+------------+
 |species     |taxon_id    |
@@ -222,17 +229,20 @@ If you don't have taxon ID in your Genbank or GFF file, you can add one in this 
 
 You can also add more informations for the genetic elements like **circularity of genome** (Y or N), **type of genetic element** (:CHRSM, :PLASMID, :MT (mitochondrial chromosome), :PT (chloroplast chromosome), or :CONTIG) or **codon table** (see the corresponding code below).
 
+You can also specify reference PGDB. This can be useful if you have PGDB with manual curation, especially with reactions or pathways not present in MetaCyc.
+These reactions or pathways will be added into MetaCyc before reaction and pathways prediction (if the reactions or pathways are supported by evidence other than computational ones).
+
 Example:
 
-+------------+------------+------------+------------+------------+-------------------+
-|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file|
-+============+============+============+============+============+===================+
-|species_1   |10          |    Y       | :CHRSM     |1           |                   |
-+------------+------------+------------+------------+------------+-------------------+
-|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |
-+------------+------------+------------+------------+------------+-------------------+
-|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |
-+------------+------------+------------+------------+------------+-------------------+
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species     |taxon_id    |  circular  |element_type| codon_table| corresponding_file| reference_pgdb |
++============+============+============+============+============+===================+================+
+|species_1   |10          |    Y       | :CHRSM     |1           |                   |    pgdb_id     |
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species_4   |4           |    N       | :CHRSM     |1           |  scaffold_1       |                |
++------------+------------+------------+------------+------------+-------------------+----------------+
+|species_4   |4           |    N       | :MT        |1           |  scaffold_2       |                |
++------------+------------+------------+------------+------------+-------------------+----------------+
 
 As you can see for **PF file** (species_4) you can use the column **corresponding_file** to add information for each PF files.
 
@@ -788,7 +798,7 @@ Output
 ~~~~~~
 
 If you did not use the output argument, results (PGDB with/without BioPAX/flat files) will be inside your ptools-local folder ready to be used with Pathway Tools.
-Have in mind that mpwt does not create the cellular overview and does not used the hole-filler. So if you want these results you should run them after.
+Have in mind that mpwt does not create the cellular overview. So if you want these results you should run them after.
 
 The different file formats created are described on `Pathway Tools data-file format site <https://bioinformatics.ai.sri.com/ptools/flatfile-format.html>`__.
 

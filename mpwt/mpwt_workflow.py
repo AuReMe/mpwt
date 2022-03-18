@@ -156,9 +156,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
     """End multiprocessing Pool and restore ptools-init.dat
 
-    mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
-    no_download_articles (bool): turning off loading of PubMed citations (True/False)
-    pathway_score (float): score between 0 and 1 to accept or reject pathway
+    Args:
+        mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
+        no_download_articles (bool): turning off loading of PubMed citations (True/False)
+        pathway_score (float): score between 0 and 1 to accept or reject pathway
+        old_pathway_score (float): original value of pathway score
     """
     mpwt_pool.close()
     mpwt_pool.join()
@@ -212,12 +214,19 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_flat_creation (bool): if True flat files will be created
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
-        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+        permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user)
+    Returns:
+        run_folder (str): name of the folder containing input files
+        input_error_status (bool): if True an error occurs during pathologic input files creation
+        patho_error_status (bool): if True an error occurs during PathoLogic run
+        flat_error_status (bool): if True an error occurs during flat fiels creation
+        move_error_status (bool): if True an error occurs when moving output files
     """
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
     species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
 
+    input_error_status = False
     patho_error_status = False
     flat_error_status = False
     move_error_status = False
@@ -226,18 +235,20 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_folder_path = os.path.join(input_folder, run_folder)
 
     if run_input_files_creation:
-        pwt_input_files(run_folder_path, taxon_file)
+        input_error_status = pwt_input_files(run_folder_path, taxon_file)
+        if input_error_status:
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_patho_inference:
         patho_error_status = run_pwt(run_folder_path, *pathologic_options)
         if patho_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_flat_creation:
         flat_error_status = run_pwt_flat(run_folder_path)
         check_dat(run_folder_path, species_pgdb_folder)
         if flat_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission:
         give_permission(permission, species_pgdb_folder)
@@ -245,12 +256,12 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     if run_output_folder:
         move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
         if move_error_status:
-            return run_folder, patho_error_status, flat_error_status, move_error_status
+            return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission and output_folder:
         give_permission(permission, output_folder)
 
-    return run_folder, patho_error_status, flat_error_status, move_error_status
+    return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
 
 def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
@@ -325,12 +336,12 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     # Create the input for the creation of BioPAX/attribute-values files.
     if (flat_creation and not input_folder) or (output_folder and not input_folder):
         # Create a temporary folder in ptools-local where lisp script will be stored.
-        tmp_folder = os.path.join(ptools_local_path, 'tmp')
-        if not os.path.exists(tmp_folder):
-            os.mkdir(tmp_folder)
+        tmp_folder_path = os.path.join(ptools_local_path, 'tmp')
+        if not os.path.exists(tmp_folder_path):
+            os.mkdir(tmp_folder_path)
 
         # Create a lisp script file for each PGDB in the ptools-local folder.
-        run_ids = list(create_only_flat_lisp(pgdbs_folder_path, tmp_folder))
+        run_ids = list(create_only_flat_lisp(pgdbs_folder_path, tmp_folder_path))
         if flat_creation:
             run_flat_ids = list(run_ids)
         else:
@@ -350,16 +361,18 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     tmp_folder = False
 
     for run_id in run_ids:
+        if input_folder:
+            run_input_files_creation = True
+            run_input_folder = input_folder
         # For species without PGDB in ptools-local, launch input files creations, PathoLogic reconstruction, flat files creation and moving output files (according to user input)
         if run_patho_flat_ids and run_id in run_patho_flat_ids:
-            run_input_files_creation = True
             if patho_inference:
                 run_patho_inference = True
             if flat_creation:
                 run_flat_creation = True
             if output_folder:
                 run_output_folder = True
-        # For speccies with PGDB in ptools-local, launch only flat files creation and moving output files (according to user input)
+        # For species with PGDB in ptools-local, launch only flat files creation and moving output files (according to user input)
         if run_flat_ids and run_id in run_flat_ids:
             if flat_creation:
                 run_flat_creation = True
@@ -372,14 +385,14 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             # If flat_creation, flat files of these PGDBs will be created and moved to the output folder.
             if flat_creation:
                 run_flat_creation = True
-                input_folder = os.path.join(ptools_local_path, 'tmp')
+                run_input_folder = os.path.join(ptools_local_path, 'tmp')
             if output_folder:
                 if not os.path.exists(os.path.join(output_folder, run_id)):
                     run_output_folder = True
                 else:
                     logger.info('{0} contains already {1}, output files will not be moved'.format(output_folder, run_id))
 
-        multiprocess_run_mpwt = [run_id, input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
+        multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
                                 run_flat_creation, move_options, taxon_file, permission]
 
         multiprocess_run_mpwts.append(multiprocess_run_mpwt)
