@@ -92,14 +92,14 @@ def extract_pathologic(patho_log):
             # PGDB contains XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds
             # In Pathway Tools 25.5 it looks like this:
             # PGDB contains XXXX classes and XXXX instances: XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds, XXXX publications
-            if 'Build done.' in line or 'PGDB build done.' in line:
+            if 'PGDB contains ' in line:
                 log_str += line
                 if non_fatal_error_count > 0:
                     log_str += 'Number of non fatal errors: ' + str(non_fatal_error_count) + '. More information in ' + patho_log + '.\n'
                 if warning_count > 0:
                     log_str += 'Number of warning: ' + str(warning_count) + '. More information in ' + patho_log + '.\n'
 
-                resume_inference_line = next(input_file)
+                resume_inference_line = line
                 log_str += resume_inference_line
                 pgdb_build_done = True
                 # Search the PGDB stat line and use regex to extract informations.
