@@ -93,7 +93,6 @@ def extract_pathologic(patho_log):
             # In Pathway Tools 25.5 it looks like this:
             # PGDB contains XXXX classes and XXXX instances: XXXX genes, XXXX polypeptides, XXXX base pathways, XXXX reactions, XXXX compounds, XXXX publications
             if 'PGDB contains ' in line:
-                log_str += line
                 if non_fatal_error_count > 0:
                     log_str += 'Number of non fatal errors: ' + str(non_fatal_error_count) + '. More information in ' + patho_log + '.\n'
                 if warning_count > 0:
