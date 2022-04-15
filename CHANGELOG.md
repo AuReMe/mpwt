@@ -4,7 +4,7 @@
 
 ## Fix:
 
-- an issue with log creation with Pathway Tools 26.0
+- an issue with log creation with Pathway Tools 26.0.
 
 # mpwt 0.7.1 (2022-03-18)
 
