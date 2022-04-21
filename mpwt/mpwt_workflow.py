@@ -269,7 +269,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission:
-        give_permission(permission, species_pgdb_folder)
+        give_permission(species_pgdb_folder, permission)
 
     if run_output_folder:
         move_error_status = run_move_pgdb(run_folder, species_pgdb_folder, output_folder, *move_options)
@@ -277,7 +277,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if permission and output_folder:
-        give_permission(permission, output_folder)
+        give_permission(output_folder, permission)
 
     return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
