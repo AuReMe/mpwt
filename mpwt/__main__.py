@@ -295,7 +295,7 @@ def run_mpwt():
     patho_hole_filler = args.hf
     patho_operon_predictor = args.op
     patho_transporter_inference = args.tp
-    patho_complex_inference = args
+    patho_complex_inference = args.cp
     no_download_articles = args.nc
     flat_creation = args.flat
     move_dat = args.md
