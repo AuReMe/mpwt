@@ -268,7 +268,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         if flat_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
-    if permission:
+    if permission and (run_flat_creation or run_patho_inference):
         give_permission(species_pgdb_folder, permission)
 
     if run_output_folder:
