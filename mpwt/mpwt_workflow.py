@@ -39,11 +39,12 @@ logger = logging.getLogger(__name__)
 
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
-                     patho_transporter_inference=None, no_download_articles=None,
-                     flat_creation=None, dat_extraction=None, xml_extraction=None,
-                     owl_extraction=None, col_extraction=None, size_reduction=None,
-                     number_cpu=None, patho_log=None, pathway_score=None,
-                     taxon_file=None, verbose=None, permission=None):
+                     patho_transporter_inference=None, patho_complex_inference=None,
+                     no_download_articles=None, flat_creation=None, dat_extraction=None,
+                     xml_extraction=None, owl_extraction=None, col_extraction=None,
+                     size_reduction=None, number_cpu=None, patho_log=None,
+                     pathway_score=None, taxon_file=None, verbose=None,
+                     permission=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -55,6 +56,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_hole_filler (bool): PathoLogic hole filler (True/False)
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
         patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
+        patho_complex_inference (bool): PathoLogic Complex Inference (True/False)
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
         dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
@@ -105,6 +107,15 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if pathway_score and not patho_inference:
         sys.exit('To use -p/pathway_score, you need to use the --patho/patho_inference argument.')
 
+    # Check if patho_complex_inference is used with patho_inference and at least Pathway Tools 26.0.
+    ptools_version = utils.get_ptools_version()
+    if ptools_version >= (26, 0):
+        if patho_complex_inference:
+            patho_complex_inference = None
+    else:
+        if patho_complex_inference:
+            sys.exit('To use --cp/patho_complex_inference, you need to use the --patho/patho_inference argument and have at least Pathway Tools 26.0.')
+
     # Check if pathway_score is a float between 0 and 1.
     if pathway_score:
         try:
@@ -146,11 +157,11 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
 
     independent_mpwt(input_folder, output_folder, patho_inference,
                         patho_hole_filler, patho_operon_predictor,
-                        patho_transporter_inference, no_download_articles,
-                        flat_creation, dat_extraction, xml_extraction,
-                        owl_extraction, col_extraction, size_reduction,
-                        number_cpu_to_use, patho_log, pathway_score,
-                        taxon_file, permission)
+                        patho_transporter_inference, patho_complex_inference,
+                        no_download_articles, flat_creation, dat_extraction,
+                        xml_extraction, owl_extraction, col_extraction,
+                        size_reduction, number_cpu_to_use, patho_log,
+                        pathway_score, taxon_file, permission)
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
@@ -181,16 +192,17 @@ def give_permission(folder, permission):
         folder (str): pathname to the input folder
         permission (str): level of permission (either group or all)
     """
+    permission_mode = os.stat(folder).st_mode
     if permission == 'group':
         for dirpath, _dirnames, filenames in os.walk(folder):
-            os.chmod(dirpath, stat.S_IRGRP | ~stat.S_IWGRP | ~stat.S_IXGRP)
+            os.chmod(dirpath, permission_mode | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
             for filename in filenames:
-                os.chmod(os.path.join(dirpath, filename), ~stat.S_IRGRP | ~stat.S_IWGRP | ~stat.S_IXGRP)
+                os.chmod(os.path.join(dirpath, filename), permission_mode | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
     elif permission == 'all':
         for dirpath, _dirnames, filenames in os.walk(folder):
-            os.chmod(dirpath, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            os.chmod(dirpath, permission_mode | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
             for filename in filenames:
-                os.chmod(os.path.join(dirpath, filename), stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+                os.chmod(os.path.join(dirpath, filename), permission_mode | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
     else:
         logger.critical(f'Invalid permission "{permission}", permission must be "group" or "all"')
 
@@ -231,6 +243,8 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     flat_error_status = False
     move_error_status = False
 
+    ptools_version = utils.get_ptools_version()
+
     if input_folder:
         run_folder_path = os.path.join(input_folder, run_folder)
 
@@ -240,11 +254,15 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_patho_inference:
-        patho_error_status = run_pwt(run_folder_path, *pathologic_options)
+        if ptools_version >= (26, 0):
+            if run_flat_creation:
+                patho_error_status = run_pwt(run_folder_path, *pathologic_options, run_flat_creation)
+        else:
+            patho_error_status = run_pwt(run_folder_path, *pathologic_options)
         if patho_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
-    if run_flat_creation:
+    if run_flat_creation and ptools_version < (26, 0):
         flat_error_status = run_pwt_flat(run_folder_path)
         check_dat(run_folder_path, species_pgdb_folder)
         if flat_error_status:
@@ -266,11 +284,11 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
 
 def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
-                     patho_transporter_inference=None, no_download_articles=None,
-                     flat_creation=None, dat_extraction=None, xml_extraction=None,
-                     owl_extraction=None, col_extraction=None, size_reduction=None,
-                     number_cpu_to_use=None, patho_log=None, pathway_score=None,
-                     taxon_file=None, permission=None):
+                     patho_transporter_inference=None, patho_complex_inference=None,
+                     no_download_articles=None, flat_creation=None, dat_extraction=None,
+                     xml_extraction=None, owl_extraction=None, col_extraction=None,
+                     size_reduction=None, number_cpu_to_use=None, patho_log=None,
+                     pathway_score=None, taxon_file=None, permission=None):
     """
     Function managing the workflow for independent run of mpwt.
     Each process of Pathway Tools on an organism are run separatly so if one failed the other that passed will succeed.
@@ -282,6 +300,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         patho_hole_filler (bool): PathoLogic hole filler (True/False)
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
         patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
+        patho_complex_inference (bool): PathoLogic Complex Inference (True/False)
         no_download_articles (bool): turning off loading of PubMed citations (True/False)
         flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
         dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
@@ -348,7 +367,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             run_flat_ids = None
         run_patho_flat_ids = None
 
-    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference]
+    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference]
     move_options = [dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction]
 
     # Create data for multiprocessing.

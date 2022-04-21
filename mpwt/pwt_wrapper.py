@@ -87,12 +87,10 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
     """
     fatal_error_index = None
     log_file_path = os.path.join(species_input_folder_path, log_filename)
-    if log_filename == 'flat_files_creation.log':
-        encoding = 'utf-8'
-    else:
-        encoding = 'ascii'
-    with open(log_file_path, 'r', encoding=encoding) as log_file:
-        for index, line in enumerate(log_file):
+    with open(log_file_path, 'rb') as log_file:
+        for index, line in enumerate(iter(log_file.readline, b'')):
+            encoding = chardet.detect(line)['encoding']
+            line = line.decode(encoding, errors='replace')
             if line != '':
                 if not line.startswith(';;;'):
                     if any(error in line for error in log_errors) and not fatal_error_index:
@@ -108,7 +106,8 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
     return error_status
 
 
-def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference):
+def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference,
+            patho_complex_inference, run_flat_creation=None):
     """
     Create PGDB using files created during 'create_flats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
@@ -121,6 +120,8 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         patho_hole_filler (bool): boolean to use or not PathoLogic Hole Filler
         patho_operon_predictor (bool): boolean to use or not PathoLogic Operon Predictor
         patho_transporter_inference (bool): boolean to use or not PathoLogic Transport Inference Parser
+        patho_complex_inference (bool): boolean to use or not Complex Inference tool
+        run_flat_creation (bool): if Pathway Tools >= 26.0 it is possible to use -dump-flat-files-biopax instead of run_pwt_flat()
     Returns:
         boolean: True if there is an error during Pathway Tools run
     """
@@ -137,12 +138,18 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     if patho_transporter_inference:
         cmd_pwt.append('-tip')
 
+    if patho_complex_inference:
+        cmd_pwt.append('-complex-inference')
+
+    if run_flat_creation is not None:
+        cmd_pwt.append('-dump-flat-files-biopax')
+
     species_name = os.path.basename(species_input_folder_path)
     logger.info('|PathoLogic|{}| '.format(species_name) + ' '.join(cmd_pwt))
 
     error_status = None
     # Errors are either a fatal error or opening the lisp listener.
-    errors = ['fatal error', '[Current process: Initial Lisp Listener]']
+    errors = ['fatal error', '[Current process: Initial Lisp Listener]', 'Restart actions (select using :continue)']
     patho_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
@@ -214,7 +221,7 @@ def run_pwt_flat(species_input_folder_path):
     error_status = None
     flat_creation_ends = ['Opening Navigator window.']
     # Errors are either a fatal error or opening the lisp listener.
-    load_errors = ['fatal error', '[Current process: Initial Lisp Listener]']
+    load_errors = ['fatal error', '[Current process: Initial Lisp Listener]', 'Restart actions (select using :continue)']
     load_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.

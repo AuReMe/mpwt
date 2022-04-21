@@ -17,7 +17,7 @@ Check results from Pathway Tools command:
 -check_mpwt_pathologic_runs: results from PathoLogic (by looking at pathologic.log)
 -check_dat: attribute-values dat files
 """
-
+import chardet
 import csv
 import os
 import logging
@@ -72,9 +72,10 @@ def extract_pathologic(patho_log):
         log_resume_list.append([organism_name, 'ERROR', '', '', '', ''])
         logger.info('No pathologic log for {0}, an error occured before PathoLogic run.'.format(organism_name))
         return
-
-    with open(patho_log, 'r') as input_file:
-        for index, line in enumerate(input_file):
+    with open(patho_log, 'rb') as log_file:
+        for index, line in enumerate(iter(log_file.readline, b'')):
+            encoding = chardet.detect(line)['encoding']
+            line = line.decode(encoding, errors='replace')
             if ';;; Error:' in line:
                 non_fatal_error_count += 1
             if 'Warning:' in line:
