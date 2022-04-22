@@ -167,7 +167,6 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
 
                 # An error occured, kill Pathway Tools.
                 if any(error in patho_line for error in errors):
-                    logger.info('Error possibly with the genbank file.')
                     error_status = True
                     patho_subprocess.kill()
                     os.killpg(os.getpgid(patho_subprocess.pid), signal.SIGKILL)
