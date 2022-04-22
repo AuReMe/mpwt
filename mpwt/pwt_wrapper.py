@@ -40,40 +40,45 @@ def pwt_check_error(species_input_folder_path, subprocess_stdout, cmd, error_sta
     Returns:
         boolean: True if there is an error during Pathway Tools run
     """
-    if error_status:
-        logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
     species_name = os.path.basename(species_input_folder_path)
+    show_logs = ''
+    if error_status:
+        show_logs += '!!!!!!!!!!!!!!!!!-------------------- Begin error message for {0} ---------------------!!!!!!!!!!!!!!!!!!'.format(species_name) + '\n'
+
     if subprocess_returncode:
-        logger.critical('Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)))
+        show_logs += 'Error for {0} with PathoLogic subprocess, return code: {1}'.format(species_name, str(subprocess_returncode)) + '\n'
     if subprocess_stderr:
-        logger.critical('An error occurred :' + subprocess_stderr.decode('utf-8'))
+        show_logs +=  'An error occurred :' + subprocess_stderr.decode('utf-8') + '\n'
 
     # Look for error in pathologic.log.
     if '-patho' in cmd:
         pathologic_erros = ['fatal error', 'Error']
-        patho_error_status = check_log(species_input_folder_path, 'pathologic.log', error_status, pathologic_erros)
+        patho_error_status, show_logs = check_log(species_input_folder_path, 'pathologic.log', error_status, pathologic_erros, show_logs)
     else:
         patho_error_status = None
 
     if '-load' in cmd:
         load_errors = ['Error', 'fatal error', 'No protein-coding genes with sequence data found.', 'Cannot continue.']
-        flat_error_status = check_log(species_input_folder_path, 'flat_files_creation.log', error_status, load_errors)
+        flat_error_status, show_logs = check_log(species_input_folder_path, 'flat_files_creation.log', error_status, load_errors, show_logs)
     else:
         flat_error_status = None
 
     error_status = any([error_status, patho_error_status, flat_error_status])
 
     if error_status:
-        logger.critical('=== Pathway Tools log ===')
+        show_logs += '=== Pathway Tools log ===' + '\n'
         for line in subprocess_stdout:
             if line != '':
-                logger.critical('\t' + line)
-        logger.critical('!!!!!!!!!!!!!!!!!----------------------------------------!!!!!!!!!!!!!!!!!')
+                show_logs += '\t' + line + '\n'
+        show_logs +=  '!!!!!!!!!!!!!!!!!-------------------- End error message for {0} --------------------!!!!!!!!!!!!!!!!!'.format(species_name)
+
+    if show_logs != '':
+        logger.critical(show_logs)
 
     return error_status
 
 
-def check_log(species_input_folder_path, log_filename, error_status, log_errors):
+def check_log(species_input_folder_path, log_filename, error_status, log_errors, show_logs):
     """
     Look for error and fatal error in pathologic.log after build.
 
@@ -82,8 +87,10 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
         log_filename (str): name of the log file
         error_status (bool): True if there is an error during Pathway Tools run
         log_errors (list): list of strings containing possible errors.
+        show_logs (str): string containing error message
     Returns:
-        boolean: True if there is an error during Pathway Tools run
+        error_satuts (bool): True if there is an error during Pathway Tools run
+        show_logs (str): string containing error message
     """
     fatal_error_index = None
     log_file_path = os.path.join(species_input_folder_path, log_filename)
@@ -95,15 +102,15 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors)
                 if not line.startswith(';;;'):
                     if any(error in line for error in log_errors) and not fatal_error_index:
                         fatal_error_index = index
-                        logger.critical('=== Error in {0} for {1}==='.format(log_filename, species_input_folder_path))
-                        logger.critical('\t' + 'Error from the {0} file: {1}'.format(log_filename, log_file_path))
-                        logger.critical('\t' + line)
+                        show_logs += '=== Error in {0} for {1}==='.format(log_filename, species_input_folder_path) + '\n'
+                        show_logs += '\t' + 'Error from the {0} file: {1}'.format(log_filename, log_file_path) + '\n'
+                        show_logs += '\t' + line + '\n'
                         error_status = True
                     if fatal_error_index:
                         if index > fatal_error_index:
-                            logger.critical('\t' + line)
+                            show_logs += '\t' + line + '\n'
 
-    return error_status
+    return error_status, show_logs
 
 
 def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference,
@@ -189,8 +196,9 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         error_status = True
         error_status = pwt_check_error(species_input_folder_path, patho_lines, cmd_pwt, error_status, subprocess_error.returncode, patho_subprocess.stderr)
 
-    # Check pathologic.log for error.
-    error_status = pwt_check_error(species_input_folder_path, patho_lines, cmd_pwt, error_status)
+    if error_status is not True:
+        # Check pathologic.log for error.
+        error_status = pwt_check_error(species_input_folder_path, patho_lines, cmd_pwt, error_status)
 
     patho_subprocess.stdout.close()
 

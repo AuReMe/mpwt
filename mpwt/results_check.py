@@ -167,7 +167,7 @@ def check_mpwt_pathologic_runs(species_input_folder_paths, patho_log_folder):
             elif species_pathologic_informations[3] is None and species_pathologic_informations[4] is not None:
                 failed_inferences.append(species_pathologic_informations[0])
         else:
-            logger.info('|Output Check|WARNING: No pathologic.log file for {0}, could not write log.'.format(species_input_folder_path))
+            logger.info('|Output Check| WARNING: No pathologic.log file for {0}, could not write log.'.format(species_input_folder_path))
             base_name = os.path.basename(species_input_folder_path)
             no_pathologic_files.append(base_name)
             log_str = ''
@@ -188,7 +188,7 @@ def check_mpwt_pathologic_runs(species_input_folder_paths, patho_log_folder):
     if number_passed_inference > 0:
         logger.info('|Output Check| {0} on {1} {2} passed!'.format(str(number_passed_inference), str(number_total_build), string_passed_build))
     if number_failed_inference > 0:
-        logger.critical('|Output Check|WARNING: {0} on {1} {2} failed: {3}! See the log for more information.'.format(str(number_failed_inference), str(number_total_build), string_failed_build, ' '.join(failed_inferences)))
+        logger.critical('|Output Check| WARNING: {0} on {1} {2} failed: {3}! See the log for more information.'.format(str(number_failed_inference), str(number_total_build), string_failed_build, ' '.join(failed_inferences)))
 
     if patho_log_folder:
         patho_error_pathname = os.path.join(patho_log_folder, 'log_error.txt')
