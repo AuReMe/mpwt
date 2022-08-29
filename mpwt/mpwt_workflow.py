@@ -254,16 +254,21 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
     if run_patho_inference:
-        if ptools_version >= (26, 0):
-            if run_flat_creation:
-                patho_error_status = run_pwt(run_folder_path, *pathologic_options, run_flat_creation)
+        # Use Pathway Tools option in version 26.0 to create flat files (if required).
+        if run_flat_creation and ptools_version >= (26, 0):
+            patho_error_status = run_pwt(run_folder_path, *pathologic_options, run_flat_creation)
         else:
             patho_error_status = run_pwt(run_folder_path, *pathologic_options)
         if patho_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
-    if run_flat_creation and ptools_version < (26, 0):
-        flat_error_status = run_pwt_flat(run_folder_path)
+    if run_flat_creation:
+        # Use mpwt method to create flat files for Pathway Tools version inferior to 26.0.
+        # Or when PGDBs have already been reconstructed.
+        if not run_patho_inference:
+            flat_error_status = run_pwt_flat(run_folder_path)
+        if ptools_version < (26, 0) and run_patho_inference:
+            flat_error_status = run_pwt_flat(run_folder_path)
         check_dat(run_folder_path, species_pgdb_folder)
         if flat_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status

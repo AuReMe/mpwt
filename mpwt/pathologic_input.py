@@ -486,73 +486,79 @@ def create_flats_and_lisp(run_folder, taxon_file):
         logger.critical('Issue with taxon ID of {0}.'.format(run_folder))
         return None
 
+    if not os.path.exists(organism_dat):
     # Create the organism-params dat file.
-    with open(organism_dat, 'w', encoding='utf-8') as organism_file:
-        organism_writer = csv.writer(organism_file, delimiter='\t', lineterminator='\n')
-        organism_writer.writerow(['ID', pgdb_id])
-        organism_writer.writerow(['STORAGE', "FILE"])
-        organism_writer.writerow(['NCBI-TAXON-ID', taxon_id])
-        organism_writer.writerow(['NAME', species_name])
-        if 'reference_pgdbs' in taxon_datas:
-            for reference_pgdb in taxon_datas['reference_pgdbs']:
-                organism_writer.writerow(['REF-ORGID', reference_pgdb])
+        with open(organism_dat, 'w', encoding='utf-8') as organism_file:
+            organism_writer = csv.writer(organism_file, delimiter='\t', lineterminator='\n')
+            organism_writer.writerow(['ID', pgdb_id])
+            organism_writer.writerow(['STORAGE', "FILE"])
+            organism_writer.writerow(['NCBI-TAXON-ID', taxon_id])
+            organism_writer.writerow(['NAME', species_name])
+            if 'reference_pgdbs' in taxon_datas:
+                for reference_pgdb in taxon_datas['reference_pgdbs']:
+                    organism_writer.writerow(['REF-ORGID', reference_pgdb])
 
+    if not os.path.exists(genetic_dat):
     # Create the genetic-elements dat file.
-    with open(genetic_dat, 'w', encoding='utf-8') as genetic_file:
-        if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname) or os.path.isfile(gbff_pathname):
-            genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
-            genetic_writer.writerow(['NAME', ''])
-            genetic_writer.writerow(['ANNOT-FILE', input_name])
-            if os.path.isfile(gff_pathname):
-                genetic_writer.writerow(['SEQ-FILE', gff_fasta])
-            if 'circular' in taxon_datas:
-                circular = taxon_datas['circular']
-                genetic_writer.writerow(['CIRCULAR?', circular])
-            if 'element_type' in taxon_datas:
-                element_type = taxon_datas['element_type']
-                genetic_writer.writerow(['TYPE', element_type])
-            if 'codon_table' in taxon_datas:
-                codon_table = taxon_datas['codon_table']
-                genetic_writer.writerow(['CODON-TABLE', codon_table])
-            genetic_writer.writerow(['//'])
-        elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file]):
-            genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
-            for species_file in os.listdir(run_folder):
-                    if '.pf' in species_file:
-                        species_file_name = os.path.splitext(species_file)[0]
-                        genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
-                        genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
-                        genetic_writer.writerow(['ANNOT-FILE', species_file])
-                        fasta_path = os.path.join(run_folder, species_file.replace('.pf', '.fasta'))
-                        fsa_path = os.path.join(run_folder, species_file.replace('.pf', '.fsa'))
-                        if os.path.exists(fasta_path):
-                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
-                        elif os.path.exists(fsa_path):
-                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
+        with open(genetic_dat, 'w', encoding='utf-8') as genetic_file:
+            if os.path.isfile(gff_pathname) or os.path.isfile(gbk_pathname) or os.path.isfile(gbff_pathname):
+                genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
+                genetic_writer.writerow(['NAME', ''])
+                genetic_writer.writerow(['ANNOT-FILE', input_name])
+                if os.path.isfile(gff_pathname):
+                    genetic_writer.writerow(['SEQ-FILE', gff_fasta])
+                if 'circular' in taxon_datas:
+                    circular = taxon_datas['circular']
+                    genetic_writer.writerow(['CIRCULAR?', circular])
+                if 'element_type' in taxon_datas:
+                    element_type = taxon_datas['element_type']
+                    genetic_writer.writerow(['TYPE', element_type])
+                if 'codon_table' in taxon_datas:
+                    codon_table = taxon_datas['codon_table']
+                    genetic_writer.writerow(['CODON-TABLE', codon_table])
+                genetic_writer.writerow(['//'])
+            elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file]):
+                genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
+                for species_file in os.listdir(run_folder):
+                        if '.pf' in species_file:
+                            species_file_name = os.path.splitext(species_file)[0]
+                            genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
+                            genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
+                            genetic_writer.writerow(['ANNOT-FILE', species_file])
+                            fasta_path = os.path.join(run_folder, species_file.replace('.pf', '.fasta'))
+                            fsa_path = os.path.join(run_folder, species_file.replace('.pf', '.fsa'))
+                            if os.path.exists(fasta_path):
+                                genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                            elif os.path.exists(fsa_path):
+                                genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
 
-                        if species_file_name in taxon_datas:
-                            if 'circular' in taxon_datas[species_file_name]:
-                                circular = taxon_datas[species_file_name]['circular']
-                                genetic_writer.writerow(['CIRCULAR?', circular])
-                            if 'element_type' in taxon_datas[species_file_name]:
-                                element_type = taxon_datas[species_file_name]['element_type']
-                                genetic_writer.writerow(['TYPE', element_type])
-                            if 'codon_table' in taxon_datas[species_file_name]:
-                                codon_table = taxon_datas[species_file_name]['codon_table']
-                                genetic_writer.writerow(['CODON-TABLE', codon_table])
-                        else:
-                            if 'circular' in taxon_datas:
-                                circular = taxon_datas['circular']
-                                genetic_writer.writerow(['CIRCULAR?', circular])
-                            if 'element_type' in taxon_datas:
-                                element_type = taxon_datas['element_type']
-                                genetic_writer.writerow(['TYPE', element_type])
-                            if 'codon_table' in taxon_datas:
-                                codon_table = taxon_datas['codon_table']
-                                genetic_writer.writerow(['CODON-TABLE', codon_table])
-                        genetic_writer.writerow(['//'])
+                            if species_file_name in taxon_datas:
+                                if 'circular' in taxon_datas[species_file_name]:
+                                    circular = taxon_datas[species_file_name]['circular']
+                                    genetic_writer.writerow(['CIRCULAR?', circular])
+                                if 'element_type' in taxon_datas[species_file_name]:
+                                    element_type = taxon_datas[species_file_name]['element_type']
+                                    genetic_writer.writerow(['TYPE', element_type])
+                                if 'codon_table' in taxon_datas[species_file_name]:
+                                    codon_table = taxon_datas[species_file_name]['codon_table']
+                                    genetic_writer.writerow(['CODON-TABLE', codon_table])
+                            else:
+                                if 'circular' in taxon_datas:
+                                    circular = taxon_datas['circular']
+                                    genetic_writer.writerow(['CIRCULAR?', circular])
+                                if 'element_type' in taxon_datas:
+                                    element_type = taxon_datas['element_type']
+                                    genetic_writer.writerow(['TYPE', element_type])
+                                if 'codon_table' in taxon_datas:
+                                    codon_table = taxon_datas['codon_table']
+                                    genetic_writer.writerow(['CODON-TABLE', codon_table])
+                            genetic_writer.writerow(['//'])
+
+    if not os.path.exists(lisp_pathname):
     # Create the lisp script.
-    check_lisp_file = create_flat_creation_script(pgdb_id, lisp_pathname)
+        check_lisp_file = create_flat_creation_script(pgdb_id, lisp_pathname)
+    else:
+        check_lisp_file = os.path.isfile(lisp_pathname)
 
     return all([os.path.isfile(organism_dat), os.path.isfile(genetic_dat), check_lisp_file])
 
