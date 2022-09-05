@@ -338,7 +338,7 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
         pgdb_tmp_folder_path = pgdb_folder_path
 
     if not os.path.exists(pgdb_tmp_folder_path):
-        logger.critical('Missing ' + pgdb_tmp_folder_path + ' folder.')
+        logger.critical('Missing PGDB ' + pgdb_tmp_folder_path + ' folder. Run mpwt with the --patho option to create the PGDB')
         return True
 
     # If size_reduction, mpwt will create a compressed version of the PGDB in output folder.
