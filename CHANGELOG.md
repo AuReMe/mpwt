@@ -1,5 +1,24 @@
 # Changelog
 
+# mpwt 0.8.0 (2022-09-21)
+
+## Add:
+
+- new option Complex Inference `--cp` (issue #75).
+- function get_ptools_version to extract Pathway Tools version.
+- `-dump-flat-files-biopax` option with Pathway Tools 26.0 (issue #76).
+- the possibility to use already present input files (issue #79).
+
+## Fix:
+
+- numerous issues with give_permission.
+- issue in mpwt figure.
+- issue if there are files in input folder (issue #80).
+
+## Modify:
+
+- import pwt_wrapper log creation.
+
 # mpwt 0.7.2 (2022-04-15)
 
 ## Fix:
