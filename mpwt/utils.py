@@ -19,6 +19,7 @@ Uselful functions for mpwt.
 import logging
 import os
 import shutil
+import subprocess
 import sys
 
 from multiprocessing import Pool
@@ -67,6 +68,24 @@ def check_ptools_local_pwt():
         error = True
 
     return error
+
+
+def get_ptools_version():
+    """
+    Check Pathway Tools version from pathway-tools -id.
+
+    Args:
+    Returns:
+        ptools_version (tuple): version of Pathway Tools (firstNumberVersion, secondNumberVersion)
+    """
+    ptools_version = None
+    response = subprocess.Popen(['pathway-tools', '-id', '-no-web-cel-overview', '-no-cel-overview', '-no-patch-download', '-disable-metadata-saving', '-nologfile'], stdout=subprocess.PIPE, start_new_session=True, universal_newlines="")
+    for ptools_line in response.stdout:
+        ptools_line = str(ptools_line)
+        if 'Pathway Tools version ' in ptools_line:
+            ptools_version = tuple([int(nb_version) for nb_version in ptools_line.split('Pathway Tools version ')[1].split('  :::')[0].split('.')])
+
+    return ptools_version
 
 
 def list_pgdb():
@@ -178,6 +197,7 @@ def cleaning_input(input_folder, verbose=None):
             flat_log = os.path.join(input_path, 'flat_files_creation.log')
             genetic_dat = os.path.join(input_path, 'genetic-elements.dat')
             organism_dat = os.path.join(input_path, 'organism-params.dat')
+            hole_filler_log = os.path.join(input_path, 'hole-filler.log')
             if os.path.exists(lisp_script):
                 os.remove(lisp_script)
             if os.path.exists(patho_log):
@@ -190,6 +210,8 @@ def cleaning_input(input_folder, verbose=None):
                 os.remove(genetic_dat)
             if os.path.exists(organism_dat):
                 os.remove(organism_dat)
+            if os.path.exists(hole_filler_log):
+                os.remove(hole_filler_log)
             species = os.path.basename(input_path)
             logger.info('Remove ' + species + ' temporary datas.')
 

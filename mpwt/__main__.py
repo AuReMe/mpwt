@@ -21,7 +21,7 @@ From Genbank/GFF/PF files this script will create Pathway Tools input data, then
 The script takes a folder name as argument.
 
 usage:
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--cp] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file]
     mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -39,6 +39,7 @@ options:
     --op    Use with --patho. Run the Operon predictor of Pathway-Tools.
     --tp    Use with --patho. Run the Transport Inference Parser of Pathway-Tools.
     --nc    Use with --patho. Turn off loading of Pubmed entries.
+    --cp    Use with --patho and at least Pathway Tools 26.0. Run the Complex Inference of Pathway Tools.
     -p=FLOAT   Use with --patho. Modify PathoLogic pathway prediction score.
     --flat    Will create BioPAX/attribute-value flat files from PGDB.
     --md    Move the dat files into the output folder.
@@ -141,6 +142,14 @@ def run_mpwt():
         '--tp',
         dest='tp',
         help='Use with --patho. Run the Transport Inference Parser of Pathway-Tools.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
+        '--cp',
+        dest='cp',
+        help='Use with --patho and at least Pathway Tools 26.0. Run the Complex Inference of Pathway Tools.',
         required=False,
         action='store_true',
         default=False,
@@ -286,6 +295,7 @@ def run_mpwt():
     patho_hole_filler = args.hf
     patho_operon_predictor = args.op
     patho_transporter_inference = args.tp
+    patho_complex_inference = args.cp
     no_download_articles = args.nc
     flat_creation = args.flat
     move_dat = args.md
@@ -361,6 +371,7 @@ def run_mpwt():
                     patho_hole_filler=patho_hole_filler,
                     patho_operon_predictor=patho_operon_predictor,
                     patho_transporter_inference=patho_transporter_inference,
+                    patho_complex_inference=patho_complex_inference,
                     no_download_articles=no_download_articles,
                     flat_creation=flat_creation,
                     dat_extraction=move_dat,

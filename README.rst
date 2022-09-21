@@ -4,7 +4,7 @@
 .. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
     :target: https://doi.org/10.7554/eLife.61968
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-25.5-brightgreen
+.. image:: https://img.shields.io/badge/Pathway%20Tools-26.0-brightgreen
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
@@ -349,7 +349,8 @@ mpwt can be used in a python script with an import:
               patho_inference=optional_boolean,
               patho_hole_filler=optional_boolean,
               patho_operon_predictor=optional_boolean,
-              patho_transporter_inference=patho_transporter_inference,
+              patho_transporter_inference=optional_boolean,
+              patho_complex_inference=optional_boolean,
               no_download_articles=optional_boolean,
               flat_creation=optional_boolean,
               dat_extraction=optional_boolean,
@@ -364,51 +365,53 @@ mpwt can be used in a python script with an import:
               verbose=optional_boolean,
               permission=optional_str)
 
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-| Command line argument   | Python argument                                | description                                                             |
-+=========================+================================================+=========================================================================+
-|          -f             | input_folder(string: folder pathname)          | Input folder as described in Input data                                 |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -o             | output_folder(string: folder pathname)         | Output folder containing PGDB data or flat files (see --flat arguments) |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --patho        | patho_inference(boolean)                       | Launch PathoLogic inference on input folder                             |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --hf           | patho_hole_filler(boolean)                     | Launch PathoLogic Hole Filler with Blast                                |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                      |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --tp           | patho_transporter_inference(boolean)           | Launch PathoLogic Transport Inference Parser                            |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)    |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score cutoff     |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --flat         | flat_creation(boolean)                         | Create BioPAX/attribute-value flat files                                |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --md           | dat_extraction(boolean)                        | Move the dat files into the output folder                               |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --mx           | xml_extraction(boolean)                        | Move the metabolic-reactions.xml file into the output folder            |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --mo           | owl_extraction(boolean)                        | Move owl files into the output folder                                   |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --mc           | col_extraction(boolean)                        | Move tabular files into the output folder                               |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --cpu          | number_cpu(int)                                | Number of cpu used for the multiprocessing                              |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -r             | size_reduction(boolean)                        | Delete PGDB in ptools-local to reduce size and return compressed files  |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --log          | patho_log(string: folder pathname)             | Folder where log files for PathoLogic inference will be store           |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | Delete a specific PGDB                                                  |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder  |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --taxon-file        | taxon_file(string: file pathanme)              | Force mpwt to use the taxon ID in the taxon_id.tsv file                 |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|     --permission        | permission(string: 'all', 'group')             | Choose permission access to PGDB in ptools-local and output files       |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
-|          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                     |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------+
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| Command line argument   | Python argument                                | description                                                                                     |
++=========================+================================================+=================================================================================================+
+|          -f             | input_folder(string: folder pathname)          | Input folder as described in Input data                                                         |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          -o             | output_folder(string: folder pathname)         | Output folder containing PGDB data or flat files (see --flat arguments)                         |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --patho        | patho_inference(boolean)                       | Launch PathoLogic inference on input folder                                                     |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --hf           | patho_hole_filler(boolean)                     | Launch PathoLogic Hole Filler with Blast                                                        |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --op           | patho_operon_predictor(boolean)                | Launch PathoLogic Operon Predictor                                                              |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --tp           | patho_transporter_inference(boolean)           | Launch PathoLogic Transport Inference Parser                                                    |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --cp           | patho_complex_inference(boolean)               | Use with --patho and at least Pathway Tools 26.0. Run the Complex Inference of Pathway Tools.   |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)                            |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score cutoff                             |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --flat         | flat_creation(boolean)                         | Create BioPAX/attribute-value flat files                                                        |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --md           | dat_extraction(boolean)                        | Move the dat files into the output folder                                                       |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --mx           | xml_extraction(boolean)                        | Move the metabolic-reactions.xml file into the output folder                                    |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --mo           | owl_extraction(boolean)                        | Move owl files into the output folder                                                           |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --mc           | col_extraction(boolean)                        | Move tabular files into the output folder                                                       |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --cpu          | number_cpu(int)                                | Number of cpu used for the multiprocessing                                                      |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          -r             | size_reduction(boolean)                        | Delete PGDB in ptools-local to reduce size and return compressed files                          |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --log          | patho_log(string: folder pathname)             | Folder where log files for PathoLogic inference will be store                                   |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --delete       | mpwt.remove_pgdbs(string: pgdb name)           | Delete a specific PGDB                                                                          |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          --clean        | mpwt.cleaning()                                | Delete all PGDBs in ptools-local folder or only PGDB from input folder                          |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|     --taxon-file        | taxon_file(string: file pathanme)              | Force mpwt to use the taxon ID in the taxon_id.tsv file                                         |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|     --permission        | permission(string: 'all', 'group')             | Choose permission access to PGDB in ptools-local and output files                               |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                                             |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
 There is also another argument:
 
@@ -661,7 +664,8 @@ Useful functions
                 patho_inference=optional_boolean,
                 patho_hole_filler=optional_boolean,
                 patho_operon_predictor=optional_boolean,
-                patho_transporter_inference=patho_transporter_inference,
+                patho_transporter_inference=optional_boolean,
+                patho_complex_inference=optional_boolean,
                 no_download_articles=optional_boolean,
                 flat_creation=optional_boolean,
                 dat_extraction=optional_boolean,
