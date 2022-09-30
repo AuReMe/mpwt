@@ -4,7 +4,7 @@
 
 ## Fix:
 
-- issue with PathoLogic's error that is not shown.
+- issue with a PathoLogic's error not shown.
 - issue with mpwt trying to move PGDB in output folder whereas there is already the PGDB in the output folder.
 
 # mpwt 0.8.0 (2022-09-21)
