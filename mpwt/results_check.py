@@ -84,6 +84,10 @@ def extract_pathologic(patho_log):
                 fatal_error_index = index
                 log_str += line
                 log_resume_list.append([organism_name, 'ERROR', '', '', '', ''])
+            if 'Pathologic build aborted.' in line:
+                fatal_error_index = index
+                log_str += line
+                log_resume_list.append([organism_name, 'ERROR', '', '', '', ''])
 
             if fatal_error_index:
                 if index > fatal_error_index:

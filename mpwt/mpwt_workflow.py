@@ -410,11 +410,15 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             if flat_creation:
                 run_flat_creation = True
                 run_input_folder = os.path.join(ptools_local_path, 'tmp')
-            if output_folder:
-                if not os.path.exists(os.path.join(output_folder, run_id)):
-                    run_output_folder = True
-                else:
-                    logger.info('{0} contains already {1}, output files will not be moved'.format(output_folder, run_id))
+
+        # Check if data are in output folder.
+        if output_folder:
+            run_id_output_folder = os.path.join(output_folder, run_id)
+            if not os.path.exists(run_id_output_folder):
+                run_output_folder = True
+            else:
+                run_output_folder = False
+                logger.info('/!\\ {0} contains already {1}, output files will not be moved.'.format(output_folder, run_id))
 
         multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
                                 run_flat_creation, move_options, taxon_file, permission]

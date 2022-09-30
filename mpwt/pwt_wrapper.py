@@ -156,7 +156,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
 
     error_status = None
     # Errors are either a fatal error or opening the lisp listener.
-    errors = ['fatal error', '[Current process: Initial Lisp Listener]', 'Restart actions (select using :continue)']
+    errors = ['fatal error', '[Current process: Initial Lisp Listener]', 'Restart actions (select using :continue)', 'Pathologic build aborted.']
     patho_lines = []
 
     # Name of the file containing the log from Pathway Tools terminal.
