@@ -161,7 +161,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                         no_download_articles, flat_creation, dat_extraction,
                         xml_extraction, owl_extraction, col_extraction,
                         size_reduction, number_cpu_to_use, patho_log,
-                        pathway_score, taxon_file, permission)
+                        pathway_score, taxon_file, permission, ptools_version)
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
@@ -211,7 +211,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
                 run_output_folder=None, output_folder=None,
                 run_patho_inference=None, pathologic_options=None,
                 run_flat_creation=None, move_options=None,
-                taxon_file=None, permission=None):
+                taxon_file=None, permission=None, ptools_version=None):
     """ Single run of mpwt on one folder.
     Used in multiprocessing in independent_mpwt.
 
@@ -227,6 +227,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user)
+        ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
     Returns:
         run_folder (str): name of the folder containing input files
         input_error_status (bool): if True an error occurs during pathologic input files creation
@@ -242,8 +243,6 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     patho_error_status = False
     flat_error_status = False
     move_error_status = False
-
-    ptools_version = utils.get_ptools_version()
 
     if input_folder:
         run_folder_path = os.path.join(input_folder, run_folder)
@@ -293,7 +292,8 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      no_download_articles=None, flat_creation=None, dat_extraction=None,
                      xml_extraction=None, owl_extraction=None, col_extraction=None,
                      size_reduction=None, number_cpu_to_use=None, patho_log=None,
-                     pathway_score=None, taxon_file=None, permission=None):
+                     pathway_score=None, taxon_file=None, permission=None,
+                     ptools_version= None):
     """
     Function managing the workflow for independent run of mpwt.
     Each process of Pathway Tools on an organism are run separatly so if one failed the other that passed will succeed.
@@ -318,6 +318,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         pathway_score (float): score between 0 and 1 to accept or reject pathway
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+        ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
     """
     logger.info('---------- Launching mpwt ----------')
     ptools_local_path = utils.find_ptools_path()
@@ -421,7 +422,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                 logger.info('/!\\ {0} contains already {1}, output files will not be moved.'.format(output_folder, run_id))
 
         multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
-                                run_flat_creation, move_options, taxon_file, permission]
+                                run_flat_creation, move_options, taxon_file, permission, ptools_version]
 
         multiprocess_run_mpwts.append(multiprocess_run_mpwt)
 
