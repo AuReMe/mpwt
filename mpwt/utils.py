@@ -85,6 +85,11 @@ def get_ptools_version():
         if 'Pathway Tools version ' in ptools_line:
             ptools_version = tuple([int(nb_version) for nb_version in ptools_line.split('Pathway Tools version ')[1].split('  :::')[0].split('.')])
 
+    if ptools_version is None:
+        logger.critical('mpwt could not find the version of Pathway Tools.')
+        logger.critical('It is possibly an issue with the installation of Pathway Tools (maybe it is not in the PATH). Or it can be due to a change in the output of pathway-tools -id command.')
+        sys.exit()
+
     return ptools_version
 
 
