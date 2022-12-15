@@ -79,6 +79,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     if error:
         sys.exit(1)
 
+    # Check if patho_inference is launched with input_folder.
+    if patho_inference and not input_folder:
+        sys.exit('To use --patho/patho_inference you need to add the -f/input_folder argument.')
+
     # Check if patho_hole_filler or patho_log are launched with patho_inference.
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
         sys.exit('To use either --hf/patho_hole_filler or --log/patho_log, you need to add the --patho/patho_inference argument.')
@@ -420,6 +424,11 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             else:
                 run_output_folder = False
                 logger.info('/!\\ {0} contains already {1}, output files will not be moved.'.format(output_folder, run_id))
+
+            # Test for compressed PGDB.
+            if os.path.exists(run_id_output_folder+'.zip'):
+                run_output_folder = False
+                logger.info('/!\\ {0} contains already compressed {1}, output files will not be moved.'.format(output_folder, run_id))
 
         multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
                                 run_flat_creation, move_options, taxon_file, permission, ptools_version]

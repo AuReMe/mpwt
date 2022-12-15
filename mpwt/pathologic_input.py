@@ -131,7 +131,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
     if output_folder:
         if os.path.exists(output_folder):
             if os.path.isdir(output_folder):
-                already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
+                # To handle PGDB created with size_reduction option, remove .zip extension.
+                already_present_outputs = [output_pgdb.replace('.zip', '') for output_pgdb in os.listdir(output_folder)]
                 new_run_ids = clean_run_ids - set(already_present_outputs)
                 new_run_ids = list(new_run_ids)
                 for pgdb in already_present_outputs:

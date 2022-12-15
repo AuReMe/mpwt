@@ -316,7 +316,7 @@ def run_mpwt():
     permission = args.permission
 
     # If no argument print the help.
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 or (len(sys.argv) == 2 and verbose):
         parser.print_help()
         sys.exit(1)
 
