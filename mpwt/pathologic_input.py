@@ -131,7 +131,8 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
     if output_folder:
         if os.path.exists(output_folder):
             if os.path.isdir(output_folder):
-                already_present_outputs = [output_pgdb for output_pgdb in os.listdir(output_folder)]
+                # To handle PGDB created with size_reduction option, remove .zip extension.
+                already_present_outputs = [output_pgdb.replace('.zip', '') for output_pgdb in os.listdir(output_folder)]
                 new_run_ids = clean_run_ids - set(already_present_outputs)
                 new_run_ids = list(new_run_ids)
                 for pgdb in already_present_outputs:
@@ -520,39 +521,39 @@ def create_flats_and_lisp(run_folder, taxon_file):
             elif all([True for species_file in os.listdir(run_folder) if '.pf' in species_file or '.fasta' in species_file or '.fsa' in species_file]):
                 genetic_writer = csv.writer(genetic_file, delimiter='\t', lineterminator='\n')
                 for species_file in os.listdir(run_folder):
-                        if '.pf' in species_file:
-                            species_file_name = os.path.splitext(species_file)[0]
-                            genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
-                            genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
-                            genetic_writer.writerow(['ANNOT-FILE', species_file])
-                            fasta_path = os.path.join(run_folder, species_file.replace('.pf', '.fasta'))
-                            fsa_path = os.path.join(run_folder, species_file.replace('.pf', '.fsa'))
-                            if os.path.exists(fasta_path):
-                                genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
-                            elif os.path.exists(fsa_path):
-                                genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
+                    if '.pf' in species_file:
+                        species_file_name = os.path.splitext(species_file)[0]
+                        genetic_writer.writerow(['NAME', species_file.replace('.pf', '')])
+                        genetic_writer.writerow(['ID', species_file.replace('.pf', '')])
+                        genetic_writer.writerow(['ANNOT-FILE', species_file])
+                        fasta_path = os.path.join(run_folder, species_file.replace('.pf', '.fasta'))
+                        fsa_path = os.path.join(run_folder, species_file.replace('.pf', '.fsa'))
+                        if os.path.exists(fasta_path):
+                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fasta')])
+                        elif os.path.exists(fsa_path):
+                            genetic_writer.writerow(['SEQ-FILE', species_file.replace('.pf', '.fsa')])
 
-                            if species_file_name in taxon_datas:
-                                if 'circular' in taxon_datas[species_file_name]:
-                                    circular = taxon_datas[species_file_name]['circular']
-                                    genetic_writer.writerow(['CIRCULAR?', circular])
-                                if 'element_type' in taxon_datas[species_file_name]:
-                                    element_type = taxon_datas[species_file_name]['element_type']
-                                    genetic_writer.writerow(['TYPE', element_type])
-                                if 'codon_table' in taxon_datas[species_file_name]:
-                                    codon_table = taxon_datas[species_file_name]['codon_table']
-                                    genetic_writer.writerow(['CODON-TABLE', codon_table])
-                            else:
-                                if 'circular' in taxon_datas:
-                                    circular = taxon_datas['circular']
-                                    genetic_writer.writerow(['CIRCULAR?', circular])
-                                if 'element_type' in taxon_datas:
-                                    element_type = taxon_datas['element_type']
-                                    genetic_writer.writerow(['TYPE', element_type])
-                                if 'codon_table' in taxon_datas:
-                                    codon_table = taxon_datas['codon_table']
-                                    genetic_writer.writerow(['CODON-TABLE', codon_table])
-                            genetic_writer.writerow(['//'])
+                        if species_file_name in taxon_datas:
+                            if 'circular' in taxon_datas[species_file_name]:
+                                circular = taxon_datas[species_file_name]['circular']
+                                genetic_writer.writerow(['CIRCULAR?', circular])
+                            if 'element_type' in taxon_datas[species_file_name]:
+                                element_type = taxon_datas[species_file_name]['element_type']
+                                genetic_writer.writerow(['TYPE', element_type])
+                            if 'codon_table' in taxon_datas[species_file_name]:
+                                codon_table = taxon_datas[species_file_name]['codon_table']
+                                genetic_writer.writerow(['CODON-TABLE', codon_table])
+                        else:
+                            if 'circular' in taxon_datas:
+                                circular = taxon_datas['circular']
+                                genetic_writer.writerow(['CIRCULAR?', circular])
+                            if 'element_type' in taxon_datas:
+                                element_type = taxon_datas['element_type']
+                                genetic_writer.writerow(['TYPE', element_type])
+                            if 'codon_table' in taxon_datas:
+                                codon_table = taxon_datas['codon_table']
+                                genetic_writer.writerow(['CODON-TABLE', codon_table])
+                        genetic_writer.writerow(['//'])
 
     if not os.path.exists(lisp_pathname):
     # Create the lisp script.
@@ -561,64 +562,6 @@ def create_flats_and_lisp(run_folder, taxon_file):
         check_lisp_file = os.path.isfile(lisp_pathname)
 
     return all([os.path.isfile(organism_dat), os.path.isfile(genetic_dat), check_lisp_file])
-
-
-def read_taxon_id(run_folder):
-    """
-    Search for Taxon ID in genbank or GFF files.
-    For GenBank file searc for ''taxon:' key in 'db_xref' qualifier.
-    For GFF file search for 'taxon' in dbxref feature.
-
-    Args:
-        run_folder (str): path to the input folder
-    """
-    taxon_ids = {}
-
-    for input_folder in os.listdir(run_folder):
-        input_folder_path = os.path.join(run_folder, input_folder)
-        for input_file in os.listdir(input_folder_path):
-            if '.gbk' in input_file:
-                gbk_pathname = os.path.join(input_folder_path, input_file)
-                # Take the species name and the taxon id from the genbank file.
-                with open(gbk_pathname, "r") as gbk:
-                    # Take the first record of the genbank (first contig/chromosome) to retrieve the species name.
-                    first_seq_record = next(SeqIO.parse(gbk, "genbank"))
-                    # Take the source feature of the first record.
-                    # This feature contains the taxon ID in the db_xref qualifier.
-                    src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
-                    for src_feature in src_features:
-                        try:
-                            src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
-                            for src_dbxref_qualifier in src_dbxref_qualifiers:
-                                if 'taxon:' in src_dbxref_qualifier:
-                                    taxon_id = src_dbxref_qualifier.replace('taxon:', '')
-                        except KeyError:
-                            logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
-
-            elif '.gff' in input_file:
-                gff_pathname = os.path.join(input_folder_path, input_file)
-
-                # Instead of parsing and creating a database from the GFF, parse the file and extract the first region feature.
-                try:
-                    region_feature = [feature for feature in DataIterator(gff_pathname) if feature.featuretype == 'region'][0]
-                except IndexError:
-                    raise IndexError('No region feature in the GFF file of {0}, GFF file must have region features.'.format(input_folder))
-
-                try:
-                    region_feature.attributes['Dbxref']
-                except KeyError:
-                    raise KeyError('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(input_folder))
-
-                for dbxref in region_feature.attributes['Dbxref']:
-                    if 'taxon' in dbxref:
-                        taxon_id = dbxref.split('taxon:')[1]
-
-            elif '.pf' in input_file:
-                logger.info('No taxon ID associated to a PathoLogic Format. {0} will have a missing taxon_id'.format(input_folder))
-                taxon_id = "missing"
-        taxon_ids[input_folder] = taxon_id
-
-    return taxon_ids
 
 
 def pwt_input_files(run_folder, taxon_file):

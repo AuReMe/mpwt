@@ -31,7 +31,7 @@ import time
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_flat, run_move_pgdb
 from mpwt.results_check import check_dat, check_mpwt_pathologic_runs
-from mpwt.pathologic_input import check_input_and_existing_pgdb, pwt_input_files, create_only_flat_lisp, create_flat_creation_script, read_taxon_id
+from mpwt.pathologic_input import check_input_and_existing_pgdb, pwt_input_files, create_only_flat_lisp
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     error = utils.check_ptools_local_pwt()
     if error:
         sys.exit(1)
+
+    # Check if patho_inference is launched with input_folder.
+    if patho_inference and not input_folder:
+        sys.exit('To use --patho/patho_inference you need to add the -f/input_folder argument.')
 
     # Check if patho_hole_filler or patho_log are launched with patho_inference.
     if (patho_hole_filler and not patho_inference) or (patho_log and not patho_inference):
@@ -161,7 +165,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                         no_download_articles, flat_creation, dat_extraction,
                         xml_extraction, owl_extraction, col_extraction,
                         size_reduction, number_cpu_to_use, patho_log,
-                        pathway_score, taxon_file, permission)
+                        pathway_score, taxon_file, permission, ptools_version)
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
@@ -211,7 +215,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
                 run_output_folder=None, output_folder=None,
                 run_patho_inference=None, pathologic_options=None,
                 run_flat_creation=None, move_options=None,
-                taxon_file=None, permission=None):
+                taxon_file=None, permission=None, ptools_version=None):
     """ Single run of mpwt on one folder.
     Used in multiprocessing in independent_mpwt.
 
@@ -227,6 +231,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user)
+        ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
     Returns:
         run_folder (str): name of the folder containing input files
         input_error_status (bool): if True an error occurs during pathologic input files creation
@@ -242,8 +247,6 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     patho_error_status = False
     flat_error_status = False
     move_error_status = False
-
-    ptools_version = utils.get_ptools_version()
 
     if input_folder:
         run_folder_path = os.path.join(input_folder, run_folder)
@@ -293,7 +296,8 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      no_download_articles=None, flat_creation=None, dat_extraction=None,
                      xml_extraction=None, owl_extraction=None, col_extraction=None,
                      size_reduction=None, number_cpu_to_use=None, patho_log=None,
-                     pathway_score=None, taxon_file=None, permission=None):
+                     pathway_score=None, taxon_file=None, permission=None,
+                     ptools_version= None):
     """
     Function managing the workflow for independent run of mpwt.
     Each process of Pathway Tools on an organism are run separatly so if one failed the other that passed will succeed.
@@ -318,6 +322,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         pathway_score (float): score between 0 and 1 to accept or reject pathway
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+        ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
     """
     logger.info('---------- Launching mpwt ----------')
     ptools_local_path = utils.find_ptools_path()
@@ -355,6 +360,9 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     if input_folder:
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
         run_patho_flat_ids, run_flat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
+        if run_patho_flat_ids is None and run_flat_ids is None:
+            logger.critical('/!\\ Issue during input check.')
+            sys.exit()
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creation of BioPAX/attribute-values files.
@@ -420,8 +428,13 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                 run_output_folder = False
                 logger.info('/!\\ {0} contains already {1}, output files will not be moved.'.format(output_folder, run_id))
 
+            # Test for compressed PGDB.
+            if os.path.exists(run_id_output_folder+'.zip'):
+                run_output_folder = False
+                logger.info('/!\\ {0} contains already compressed {1}, output files will not be moved.'.format(output_folder, run_id))
+
         multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
-                                run_flat_creation, move_options, taxon_file, permission]
+                                run_flat_creation, move_options, taxon_file, permission, ptools_version]
 
         multiprocess_run_mpwts.append(multiprocess_run_mpwt)
 
@@ -474,4 +487,3 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     end_time = time.time()
 
     logger.info('-------------- mpwt has finished in {0:.2f}s! Thank you for using it. --------------'.format(end_time - start_time))
-
