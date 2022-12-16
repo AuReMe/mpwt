@@ -31,7 +31,7 @@ import time
 from mpwt import utils
 from mpwt.pwt_wrapper import run_pwt, run_pwt_flat, run_move_pgdb
 from mpwt.results_check import check_dat, check_mpwt_pathologic_runs
-from mpwt.pathologic_input import check_input_and_existing_pgdb, pwt_input_files, create_only_flat_lisp, create_flat_creation_script, read_taxon_id
+from mpwt.pathologic_input import check_input_and_existing_pgdb, pwt_input_files, create_only_flat_lisp
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
