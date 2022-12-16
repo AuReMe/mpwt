@@ -1,5 +1,19 @@
 # Changelog
 
+# mpwt 0.8.2 (2022-12-16)
+
+## Modify:
+
+- decrease the number of calls to get Pathway Tools version.
+- error message when not finding Pathway Tools version (issue #84).
+- remove unused code.
+
+## Fix:
+
+- issue with compressed files not being check in output folder
+- issue when no arguments are given as input.
+- issue when mpwt does not exit correctly when detecting an error during check input step.
+
 # mpwt 0.8.1 (2022-09-30)
 
 ## Fix:
