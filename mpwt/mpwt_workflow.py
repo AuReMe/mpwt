@@ -360,6 +360,9 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     if input_folder:
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
         run_patho_flat_ids, run_flat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
+        if run_patho_flat_ids is None and run_flat_ids is None:
+            logger.critical('/!\\ Issue during input check.')
+            sys.exit()
 
     # Create path for lisp if there is no folder given.
     # Create the input for the creation of BioPAX/attribute-values files.
@@ -484,4 +487,3 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
     end_time = time.time()
 
     logger.info('-------------- mpwt has finished in {0:.2f}s! Thank you for using it. --------------'.format(end_time - start_time))
-
