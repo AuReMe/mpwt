@@ -38,7 +38,8 @@ def test_create_dats_and_lisp():
 
 
 def test_check_input_and_existing_pgdb():
-    mpwt.remove_pgdbs('fatty_acid_beta_oxydation_icyc,fatty_acid_beta_oxydation_i_gffcyc,fatty_acid_beta_oxydation_i_pfcyc')
+    pgdb_to_remove = ['fatty_acid_beta_oxydation_icyc', 'fatty_acid_beta_oxydation_i_gffcyc', 'fatty_acid_beta_oxydation_i_pfcyc']
+    mpwt.remove_pgdbs(pgdb_to_remove)
 
     run_patho_ids, run_flat_ids = mpwt.pathologic_input.check_input_and_existing_pgdb(['fatty_acid_beta_oxydation_I', 'fatty_acid_beta_oxydation_I_pf', 'fatty_acid_beta_oxydation_I_gff'], 'test', None, 1)
     assert sorted(run_patho_ids) == sorted(['fatty_acid_beta_oxydation_I', 'fatty_acid_beta_oxydation_I_pf', 'fatty_acid_beta_oxydation_I_gff'])
