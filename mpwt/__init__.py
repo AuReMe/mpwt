@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2023 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -17,4 +17,4 @@ from mpwt.mpwt_workflow import multiprocess_pwt
 from mpwt.utils import cleaning, cleaning_input, find_ptools_path, list_pgdb, pubmed_citations, remove_pgdbs
 from mpwt.to_pathologic import create_pathologic_file
 
-__version__='0.8.2'
+__version__='0.8.3'

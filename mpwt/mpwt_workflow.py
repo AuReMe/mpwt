@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss
+# Copyright (C) 2018-2023 Arnaud Belcour - Inria Dyliss
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -361,6 +361,12 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         run_ids = [folder_id for folder_id in next(os.walk(input_folder))[1]]
         run_patho_flat_ids, run_flat_ids = check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_cpu_to_use)
         if run_patho_flat_ids is None and run_flat_ids is None:
+            # If all run_ids are in output folder, return as it has complete.
+            if output_folder:
+                already_present_outputs = [output_pgdb.replace('.zip', '') for output_pgdb in os.listdir(output_folder)]
+                if set(run_ids) == set(already_present_outputs):
+                    return
+            # For other case, there is possibly an error, mpwt exits.
             logger.critical('/!\\ Issue during input check.')
             sys.exit()
 

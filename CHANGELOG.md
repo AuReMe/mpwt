@@ -1,5 +1,16 @@
 # Changelog
 
+# mpwt 0.8.3 (2023-01-13)
+
+## Fix:
+
+- issue making mpwt exits when all runs are already complete.
+- issue in test (wrong argument for removing PGDBs).
+
+## Modify:
+
+- update license year.
+
 # mpwt 0.8.2 (2022-12-16)
 
 ## Modify:
