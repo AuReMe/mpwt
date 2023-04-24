@@ -1,0 +1,43 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%labels
+    Maintainer Got J.
+    Version v0.8.3
+    Description mpwt Singularity recipe
+
+%files
+     pathway-tools-26.0-linux-64-tier1-install /opt
+
+%environment
+     export PATH="$PATH:/programs/pathway-tools:"
+     export PYTHONIOENCODING=utf8
+     export LC_ALL=C.UTF-8
+     export LANG=C.UTF-8
+
+%post
+     apt-get -y update && \
+     echo "deb http://security.ubuntu.com/ubuntu bionic-security main" >> /etc/apt/sources.list ;\
+     apt-get -y update && \
+     DEBIAN_FRONTEND=noninteractive apt-get install -y \
+     ssh-client \
+     curl \
+     csh \
+     git \
+     ncbi-blast+ \
+     python3-pip \
+     libxm4 \
+     default-jre \
+     libssl1.0-dev \
+     iputils-ping \
+     gnome-terminal ;\
+     apt-get clean; \
+     apt-get purge; \
+     mkdir /programs;\
+     mkdir -p /external/folder;\
+     chmod u+x /opt/pathway-tools-26.0-linux-64-tier1-install;\
+     ./opt/pathway-tools-26.0-linux-64-tier1-install --InstallDir /programs/pathway-tools --PTOOLS_LOCAL_PATH /external/folder --InstallDesktopShortcuts 0 --mode unattended;\
+     mkdir -p /opt;\
+     cp -r /external/folder/ptools-local/ /opt;\
+     rm /opt/pathway-tools-26.0-linux-64-tier1-install;\
+     pip install mpwt
