@@ -49,10 +49,10 @@ Consider adding Pathway Tools in ``$PATH`` permanently by using the following co
     echo 'export PATH="$PATH:/your/install/directory/pathway-tools:"' >> ~/.bashrc
     source ~/.bashrc
 
-If your OS doesn't support Pathway Tools, you can use a docker container. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/ArnaudBelcour/mpwt-docker>`__.
+If your OS doesn't support Pathway Tools, you can use a docker container. If it's your case, look at `Pathway Tools Multiprocessing Docker <https://github.com/AuReMe/mpwt-docker>`__.
 It is a dockerfile that will create a container with Pathway Tools, its dependencies and this package. You just need to give a Pathway Tools installer as input.
 
-You can also look at `Pathway Tools Multiprocessing Singularity <https://github.com/ArnaudBelcour/mpwt-singularity>`__.
+You can also look at `Pathway Tools Multiprocessing Singularity <https://github.com/AuReMe/mpwt-singularity>`__.
 More manipulations are required compared to Docker but with this you can create a Singularity image.
 
 Using pip
