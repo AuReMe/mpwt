@@ -4,7 +4,7 @@
 
 ## Add:
 
-- message if there are no source features in gebnak file.
+- message if there are no source features in genbank file.
 
 # mpwt 0.8.3 (2023-01-13)
 
