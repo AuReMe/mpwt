@@ -414,18 +414,23 @@ def create_flats_and_lisp(run_folder, taxon_file):
             try:
                 species_name = first_seq_record.annotations['organism']
             except KeyError:
-                logger.critical('No organism in the Genbank {0} In the SOURCE you must have: ORGANISM  Species name'.format(pgdb_id))
+                logger.critical('No organism in the Genbank {0}. In field SOURCE, you must have: ORGANISM  Species name'.format(pgdb_id))
                 return None
 
             # Take the source feature of the first record.
             # This feature contains the taxon ID in the db_xref qualifier.
             src_features = [feature for feature in first_seq_record.features if feature.type == "source"]
-            for src_feature in src_features:
-                if 'db_xref' in src_feature.qualifiers:
-                    src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
-                    for src_dbxref_qualifier in src_dbxref_qualifiers:
-                        if 'taxon:' in src_dbxref_qualifier:
-                            taxon_id = src_dbxref_qualifier.replace('taxon:', '')
+            if len(src_features) == 0:
+                logger.info('No FEATURES source in the Genbank {0}, you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
+                logger.info('Try to look in the taxon_id.tsv file')
+                taxon_error, taxon_id, taxon_datas = extract_taxon_id(run_folder, pgdb_id, taxon_id, taxon_file)
+            else:
+                for src_feature in src_features:
+                    if 'db_xref' in src_feature.qualifiers:
+                        src_dbxref_qualifiers = src_feature.qualifiers['db_xref']
+                        for src_dbxref_qualifier in src_dbxref_qualifiers:
+                            if 'taxon:' in src_dbxref_qualifier:
+                                taxon_id = src_dbxref_qualifier.replace('taxon:', '')
                 if not taxon_id:
                     logger.info('No taxon ID in the Genbank {0} In the FEATURES source you must have: /db_xref="taxon:taxonid" Where taxonid is the Id of your organism. You can find it on the NCBI.'.format(gbk_pathname))
                     logger.info('Try to look in the taxon_id.tsv file')
