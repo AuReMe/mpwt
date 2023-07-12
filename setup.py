@@ -29,7 +29,7 @@ setup(name='mpwt',
       url='https://github.com/AuReMe/mpwt',
       author='AuReMe',
       license='GPLv3',
-      python_requires='>=3.6',
+      python_requires='>=3.7',
       classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
