@@ -73,7 +73,13 @@ logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
 logging.getLogger('mpwt').setLevel(logging.CRITICAL)
 
-VERSION = pkg_resources.get_distribution('mpwt').version
+if sys.version_info >= (3, 9):
+    import importlib.metadata
+    VERSION = importlib.metadata.version("mpwt")
+else:
+    import pkg_resources
+    VERSION = pkg_resources.get_distribution("mpwt").version
+
 LICENSE = """Copyright (C) 2018-2022 Arnaud Belcour - Inria Dyliss\n
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
