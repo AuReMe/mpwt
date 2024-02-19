@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mpwt"
+dynamic = ["version"]
+authors = [{name = "AuReMe", email = "gem-aureme@inria.fr"}]
+readme = "README.rst"
+description = "Multiprocessing for Pathway Tools"
+license = {text = "LGPL-3.0-or-later"}
+requires-python = ">= 3.8"
+dependencies = [
+  'biopython>=1.70',
+  'chardet>=3.0.4',
+  'gffutils>=0.9',
+]
+
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  'Development Status :: 4 - Beta',
+
+  # Audience
+  'Intended Audience :: Science/Research',
+  'Intended Audience :: Developers',
+
+  # Environnement, OS, languages
+  'Programming Language :: Python :: 3'
+]
+
+[project.scripts]
+mpwt = "mpwt.__main__:run_mpwt"
+
+[project.urls]
+Homepage = "https://github.com/AuReMe/mpwt"
+Changelog = "https://github.com/AuReMe/mpwt/blob/main/CHANGELOG.md"
+
+[tool.setuptools.package-dir]
+toolbox = "mpwt"
+
+[tool.setuptools.dynamic]
+version = { attr = "mpwt.__version__" }
+dependencies = {file = ["requirements.txt"]}
