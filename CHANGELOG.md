@@ -1,5 +1,13 @@
 # Changelog
 
+# mpwt 0.8.5 (2024-02-26)
+
+## Modify:
+
+- first step in replacing pkg_resources with importlib.metadata.
+- move from setup.py/setup.cfg to pyproject.toml.
+- update license year.
+
 # mpwt 0.8.4 (2023-07-12)
 
 ## Add:
