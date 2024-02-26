@@ -1,5 +1,11 @@
 # Changelog
 
+# mpwt 0.8.6 (2024-02-26)
+
+## Fix:
+
+- issue in pyproject.toml.
+
 # mpwt 0.8.5 (2024-02-26)
 
 ## Modify:

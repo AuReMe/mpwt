@@ -38,8 +38,9 @@ mpwt = "mpwt.__main__:run_mpwt"
 Homepage = "https://github.com/AuReMe/mpwt"
 Changelog = "https://github.com/AuReMe/mpwt/blob/main/CHANGELOG.md"
 
-[tool.setuptools.package-dir]
-toolbox = "mpwt"
+[tool.setuptools]
+packages = ['mpwt']
+package-dir = {'mpwt'= 'mpwt'}
 
 [tool.setuptools.dynamic]
 version = { attr = "mpwt.__version__" }
