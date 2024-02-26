@@ -4,7 +4,7 @@
 
 ## Modify:
 
-- use mpwt \_\_version\_\_ to check mpwt version.
+- use mpwt \_\_version\_\_ to check mpwt version (remove the use of pkg_resource to check version as it will become deprecated in the future).
 - move from setup.py/setup.cfg to pyproject.toml.
 - update license year.
 
