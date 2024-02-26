@@ -4,7 +4,7 @@
 
 ## Modify:
 
-- first step in replacing pkg_resources with importlib.metadata.
+- use mpwt __version__ to check mpwt version.
 - move from setup.py/setup.cfg to pyproject.toml.
 - update license year.
 

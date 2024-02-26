@@ -65,19 +65,13 @@ import logging
 import os
 import sys
 
+from mpwt import __version__ as VERSION
 from mpwt import utils, to_pathologic
 from mpwt.mpwt_workflow import multiprocess_pwt
 
 logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
 logging.getLogger('mpwt').setLevel(logging.CRITICAL)
-
-if sys.version_info >= (3, 9):
-    import importlib.metadata
-    VERSION = importlib.metadata.version("mpwt")
-else:
-    import pkg_resources
-    VERSION = pkg_resources.get_distribution("mpwt").version
 
 LICENSE = """Copyright (C) 2018-2024 Arnaud Belcour - Inria Dyliss\n
 This program is free software: you can redistribute it and/or modify
