@@ -64,7 +64,6 @@ import argparse
 import logging
 import os
 import sys
-import pkg_resources
 
 from mpwt import utils, to_pathologic
 from mpwt.mpwt_workflow import multiprocess_pwt
