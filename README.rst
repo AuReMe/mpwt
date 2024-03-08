@@ -14,6 +14,11 @@ mpwt is a python package for running Pathway Tools [PathwayToolsarXiv]_ on multi
 
 The last version of Pathway Tools supported by mpwt is shown in the badge named "Pathway Tools".
 
+License
+--------
+
+This package is licensed under the GNU LGPL-3.0-or-later - see the `LICENCE <https://github.com/AuReMe/mpwt/blob/main/LICENSE>`__ file for details.
+
 mpwt: Pipeline summary
 ======================
 
