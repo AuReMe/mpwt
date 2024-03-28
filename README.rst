@@ -4,7 +4,7 @@
 .. image:: https://img.shields.io/badge/doi-10.7554/eLife.61968-blueviolet.svg
     :target: https://doi.org/10.7554/eLife.61968
 
-.. image:: https://img.shields.io/badge/Pathway%20Tools-27.5-brightgreen
+.. image:: https://img.shields.io/badge/Pathway0Tools-27.5-brightgreen.svg
     :target: https://bioinformatics.ai.sri.com/ptools/release-notes.html
 
 mpwt: Multiprocessing Pathway Tools
@@ -13,11 +13,6 @@ mpwt: Multiprocessing Pathway Tools
 mpwt is a python package for running Pathway Tools [PathwayToolsarXiv]_ on multiple genomes using multiprocessing. More precisely, it launches one PathoLogic [Karp2011]_ process for each organism (PathoLogic and Pathway Tools pathway prediction are described in this `blog entry <http://pathwaytools.blogspot.com/2020/10/how-does-metabolic-pathway-prediction.html>`__). This allows to increase the speed of draft metabolic network reconstruction when working on multiple organisms.
 
 The last version of Pathway Tools supported by mpwt is shown in the badge named "Pathway Tools".
-
-License
---------
-
-This package is licensed under the GNU LGPL-3.0-or-later - see the `LICENCE <https://github.com/AuReMe/mpwt/blob/main/LICENSE>`__ file for details.
 
 mpwt: Pipeline summary
 ======================
@@ -1027,3 +1022,8 @@ Peter Karp, Suzanne Paley, Markus Krummenacker, Richard Billington and Anamika K
 GenOuest bioinformatics (https://www.genouest.org/) core facility for providing the computing infrastructure to test this tool.
 
 All the users that have tested this tool.
+
+License
+-------
+
+This package is licensed under the GNU LGPL-3.0-or-later - see the `LICENCE <https://github.com/AuReMe/mpwt/blob/main/LICENSE>`__ file for details.
