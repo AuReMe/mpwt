@@ -490,7 +490,7 @@ Possible uses of mpwt:
     .. code:: python
 
         import mpwt
-        python script
+        python_script
 
 Create PGDBs of studied organisms inside ptools-local:
 
