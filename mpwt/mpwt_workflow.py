@@ -428,7 +428,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         # Check if data are in output folder.
         if output_folder:
             run_id_output_folder = os.path.join(output_folder, run_id)
-            if not os.path.exists(run_id_output_folder):
+            if not os.path.exists(run_id_output_folder) or len(os.listdir(run_id_output_folder)) == 0:
                 run_output_folder = True
             else:
                 run_output_folder = False

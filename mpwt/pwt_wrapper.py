@@ -358,7 +358,7 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
         shutil.rmtree(pgdb_folder_path)
 
     else:
-        shutil.copytree(pgdb_tmp_folder_path, output_species)
+        shutil.copytree(pgdb_tmp_folder_path, output_species, dirs_exist_ok=True)
         if len(keep_extensions) > 0:
             for pgdb_file in os.listdir(output_species):
                 pgdb_file_pathname = os.path.join(output_species, pgdb_file)

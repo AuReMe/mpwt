@@ -132,12 +132,16 @@ def check_input_and_existing_pgdb(run_ids, input_folder, output_folder, number_c
         if os.path.exists(output_folder):
             if os.path.isdir(output_folder):
                 # To handle PGDB created with size_reduction option, remove .zip extension.
-                already_present_outputs = [output_pgdb.replace('.zip', '') for output_pgdb in os.listdir(output_folder)]
+                already_present_subfolders = [output_pgdb_folder.replace('.zip', '') for output_pgdb_folder in os.listdir(output_folder)]
+                already_present_outputs = []
+                for pgdb in already_present_subfolders:
+                    # If PGDB subfolder is not empty and in the IDs list then do not run it
+                    if len(os.listdir(os.path.join(output_folder, pgdb))) and pgdb in clean_run_ids:
+                        logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
+                        already_present_outputs.append(pgdb)
+                
                 new_run_ids = clean_run_ids - set(already_present_outputs)
                 new_run_ids = list(new_run_ids)
-                for pgdb in already_present_outputs:
-                    if pgdb in clean_run_ids:
-                        logger.warning("! PGDB {0} already in output folder {1}, no inference will be launched on this species.".format(pgdb, output_folder))
 
                 if len(new_run_ids) == 0:
                     logger.info("All PGDBs are already present in the output folder. Remove them if you want a new inference.")
@@ -611,7 +615,7 @@ def create_only_flat_lisp(pgdbs_folder_path, tmp_folder):
 
     Args:
         pgdbs_folder_path (str): pathname to species PGDB in ptools-local
-        tmp_folder (str): termporary folder where lisp script will be stored
+        tmp_folder (str): temporary folder where lisp script will be stored
     Returns:
         generator: generator with the PGDB IDs.
     """
