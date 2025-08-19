@@ -1,5 +1,22 @@
 # Changelog
 
+# mpwt 0.8.7 (2025-08-19)
+
+## Add:
+
+- contributors file.
+- mocked tests to check that the issue with snakemake is fixed.
+
+## Modify:
+
+- update readme.
+- update license year.
+
+## Fix:
+
+- issue with snakemake (PR [#90](https://github.com/AuReMe/mpwt/pull/90) by [Agnès Barnabé](https://github.com/agnesbrnb)).
+- typos.
+
 # mpwt 0.8.6 (2024-02-26)
 
 ## Fix:
