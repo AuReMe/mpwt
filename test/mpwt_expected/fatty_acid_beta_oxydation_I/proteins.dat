@@ -1,0 +1,859 @@
+# 
+#
+# Authors:
+#
+# Please see the license agreement regarding the use of and distribution of this file.
+# The format of this file is defined at http://bioinformatics.ai.sri.com/ptools/flatfile-format.html .
+#
+# Filename: /root/ptools-local/pgdbs/user/fatty_acid_beta_oxydation_icyc/1.0/data/proteins.dat
+#
+# Organism: Escherichia coli
+# Database: NIL
+# Version: 1.0
+# Orthologs: false
+# Date and time generated: March 11, 2025, 10:54:47
+#
+# Attributes:
+#    UNIQUE-ID
+#    TYPES
+#    COMMON-NAME
+#    ABBREV-NAME
+#    ACCESSION-1
+#    ACTIVE-SITES
+#    AROMATIC-RINGS
+#    ATOM-CHARGES
+#    ATOM-ISOTOPES
+#    CATALYZES
+#    CELL-TYPES
+#    CHEMICAL-FORMULA
+#    CITATIONS
+#    CODING-SEGMENTS
+#    COFACTORS-OF
+#    COMMENT
+#    COMPONENT-COEFFICIENTS
+#    COMPONENT-OF
+#    COMPONENTS
+#    CONSENSUS-SEQUENCE
+#    COPY-NUMBER
+#    CREDITS
+#    DATA-SOURCE
+#    DBLINKS
+#    DNA-FOOTPRINT-SIZE
+#    DOCUMENTATION
+#    ENZYME-NOT-USED-IN
+#    EXPRESSION-MECHANISM
+#    FAST-EQUILIBRATING-INSTANCES?
+#    FEATURES
+#    FUNCTIONAL-ASSIGNMENT-COMMENT
+#    FUNCTIONAL-ASSIGNMENT-STATUS
+#    GENE
+#    GIBBS-0
+#    GO-TERMS
+#    HAS-NO-STRUCTURE?
+#    HIDE-SLOT?
+#    IN-MIXTURE
+#    INCHI
+#    INCHI-KEY
+#    INSTANCE-NAME-TEMPLATE
+#    INTERNALS-OF-GROUP
+#    ISOZYME-SEQUENCE-SIMILARITY
+#    LOCATIONS
+#    LOGP
+#    MEMBER-SORT-FN
+#    MODIFIED-FORM
+#    MOLECULAR-WEIGHT
+#    MOLECULAR-WEIGHT-EXP
+#    MOLECULAR-WEIGHT-KD
+#    MOLECULAR-WEIGHT-SEQ
+#    MONOISOTOPIC-MW
+#    N+1-NAME
+#    N-1-NAME
+#    N-NAME
+#    NEIDHARDT-SPOT-NUMBER
+#    NON-STANDARD-INCHI
+#    PATHOLOGIC-NAME-MATCHER-EVIDENCE
+#    PATHOLOGIC-PWY-EVIDENCE
+#    PI
+#    PKA1
+#    PKA2
+#    PKA3
+#    POLAR-SURFACE-AREA
+#    PROMOTER-BOX-NAME-1
+#    PROMOTER-BOX-NAME-2
+#    RADICAL-ATOMS
+#    RECOGNIZED-PROMOTERS
+#    REGULATED-BY
+#    REGULATES
+#    SMILES
+#    SOURCE-ORTHOLOG
+#    SPECIES
+#    STRUCTURE-BONDS
+#    SUPERATOMS
+#    SYMMETRY
+#    SYNONYMS
+#    SYSTEMATIC-NAME
+#    TAUTOMERS
+#    UNMODIFIED-FORM
+#
+UNIQUE-ID - ACYLCOASYN-CPLX
+TYPES - Protein-Complexes
+COMMON-NAME - long-chain-fatty-acid&mdash;CoA ligase
+COMMENT - Long chain fatty acid CoA-ligase, also known as acyl-CoA synthetase or synthase, plays a pivotal role in the transport and activation of exogenous fatty acids prior to their subsequent degradation or incorporation into phospholipids.  This is the rate limiting step of &beta;-oxidation in <i>E. coli</i> |CITS: [7016858]|. The enzyme catalyzes the esterification of fatty acids into metabolically active CoA thioesters concomitant with transport. The reaction proceeds by a two-step mechanism.  
+/
+/Early experiments with partially purified enzyme suggested the presence of two enzymes with different preferences for substrate chain length |CITS: [4909455][3907712]| (the other enzyme likely the |FRAME: B1701-MONOMER "medium-chain fatty acid:CoA ligase FadK"|). FadD has broad chain length specificity with maximal activities associated with fatty acids ranging in length between C-12 and C-18 |CITS: [1460045]|. Later experiments have shown that the enzyme has a broader substrate range than initially assumed. It is able to esterify not only even carbon number fatty acids (C6, C8, C12, C14 and C16), but also odd carbon number fatty acids (C9, C11 and C13). In addition, it can accept some phenylpropanoate derivatives such as |FRAME: CPD-674| and |FRAME: 3-PHENYLPROPIONATE| |CITS: [35726672]|.
+/
+/The enzyme was reported to be partially membrane-associated |CITS: [1460045]|. It was later suggested that FadD specifically associates with the inner membrane in response to the presence of long chain fatty acids |CITS: [12034706]|. Long chain fatty acid uptake into inner membrane vesicles is dependent on the level of FadD in the vesicles |CITS: [15067008]|. Import of labeled oleate is abolished in <i>fadD</i> null strains |CITS: [12034706]|. Specific mutations in <i>fadD</i> that abolish or reduce the formation of fatty acyl-CoA likewise abolish or reduce the import of exogenous long chain fatty acids |CITS: [12034706]|.
+/
+/FadD is implicated in a transenvelope lipid signaling pathway that detects phospholipid accumulation in the outer membrane (OM) and regulates LPS production to restore OM homeostasis; loss of FadD partially suppresses cell death associated with the gain of function |FRAME: G7216-MONOMER "<i>mlaA</i>*| mutation; loss of FadD prevents the |FRAME: CPLX0-7944 "PldA"|-dependent lipopolysaccharide increase associated with <i>mlaA</i>* |CITS: [29559571]|.
+/
+/Despite having two binding sites for the |FRAME: PD01520|, the expression of <i>fadD</i> is not as strongly repressed by FadR as the other <i>fad</i> genes |CITS: [1460045][23029459]|. 
+/
+/Review: |CITS: [15347640][35892328]|.
+COMPONENTS - B1805-MONOMER
+^COEFFICIENT - 2
+INSTANCE-NAME-TEMPLATE - CPLX-*
+MOLECULAR-WEIGHT-EXP - 130.
+MOLECULAR-WEIGHT-KD - 130.
+SPECIES - TAX-511145
+//
+UNIQUE-ID - B3846-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - dodecenoyl-CoA delta-isomerase, enoyl-CoA hydratase, 3-hydroxybutyryl-CoA epimerase, 3-hydroxyacyl-CoA dehydrogenase
+CATALYZES - ENZRXN2W-65
+CATALYZES - ENZRXN2W-61
+CATALYZES - ENZRXN2W-59
+CATALYZES - ENZRXN2W-53
+CATALYZES - ENZRXN2W-51
+CATALYZES - ENZRXN2W-50
+CATALYZES - ENZRXN2W-47
+CATALYZES - ENZRXN2W-45
+CATALYZES - ENZRXN2W-44
+CATALYZES - ENZRXN2W-43
+CATALYZES - ENZRXN2W-42
+CATALYZES - ENZRXN2W-32
+CATALYZES - ENZRXN2W-30
+CATALYZES - ENZRXN2W-29
+CATALYZES - ENZRXN2W-28
+CATALYZES - ENZRXN2W-20
+CATALYZES - ENZRXN2W-16
+CATALYZES - ENZRXN2W-13
+CATALYZES - ENZRXN2W-9
+CATALYZES - ENZRXN2W-6
+CATALYZES - ENZRXN2W-5
+CITATIONS - 35726672
+CITATIONS - 29807110
+CITATIONS - 28754100
+CITATIONS - 1438362
+CITATIONS - 1341905
+CITATIONS - 1712230
+CITATIONS - 1699931
+CITATIONS - 2204034
+CITATIONS - 2191949
+CITATIONS - 3286611
+CITATIONS - 3312186
+CITATIONS - 3536901
+CITATIONS - 3528151
+CITATIONS - 7024731
+CITATIONS - 4928881
+COMMENT - FadB is a multifunctional enzyme that is involved in the degradation of fatty acids via the &beta;-oxidation cycle.  Four enzymatic activities are associated with FadB: enoyl-CoA hydratase, 3-hydroxyacyl-CoA epimerase, 3-hydroxyacyl-CoA dehydrogenase, and &Delta;<sup>3</sup>-<i>cis</i>- &Delta;<sup>2</sup>-<i>trans</i>-enoyl-CoA isomerase |CITS: [3286611]|.  
+/
+/The 3-hydroxyacyl-CoA epimerase (EC 5.1.2.3) reaction occurs by a dehydration/hydration mechanism |CITS: [1748662]|.  The enoyl-CoA hydratase (EC 4.2.1.17) and 3-hydroxyacyl-CoA epimerase reactions are catalyzed by the same active site within the N-terminal domain of FadB.  A Gly116Phe mutation eliminates both activities |CITS: [8454629]|.  The protonated &gamma;-carboxylate of Glu139 |CITS: [7756275]| and deprotonated &gamma;-carboxylate of Glu119 |CITS: [9283097]| provide acid/base functional groups for dehydration.  A reaction mechanism was proposed |CITS: [9283097]|.
+/
+/The L-3-hydroxyacyl-CoA dehydrogenase (EC 1.1.1.35) activity maps to the C-terminal domain of FadB.  A His435Gln mutation specifically eliminates 3-hydroxyacyl-CoA dehydrogenase activity |CITS: [8755745]|.  Alanine-scanning mutagenesis of additional acidic residues showed that Glu462 is required for catalysis |CITS: [8993342]|.  The <i>fadB64</i> allele also leads to a specific defect in the 3-hydroxyacyl-CoA dehydrogenase activity of FadB |CITS: [6402028]|.
+/
+/FadA and FadB form a multifunctional enzyme complex |CITS: [334745][374410][6402028][3286611][8454629]| (data from <i>E. coli</i> B in |CITS: [322129][7012144][6350283]|).
+/
+/Overexpression of FadA and FadB can be utilized for the production of long-chain fatty acids in an engineered reversal of the &beta;-oxidation cycle |CITS: [21832992][23656231]|.
+/
+/Expression of the enzymes involved in &beta;-oxidation is normally induced by fatty acids of chain length 14 and longer |CITS: [4861587][4886296][18317523]|.  Regulation is at the transcriptional level and involves repression by FadR |CITS: [6271734][1569108]|.
+/
+/Reviews: |CITS: [10709637][11263873]|
+/
+COMPONENT-OF - FAO-CPLX
+DBLINKS - (REFSEQ "NP_418288" NIL NIL NIL NIL NIL)
+DBLINKS - (SWISSMODEL "P21177" NIL |pkarp| 3355444112 NIL NIL)
+DBLINKS - (MODBASE "P21177" NIL |pkarp| 3355444112 NIL NIL)
+DBLINKS - (ECOLIWIKI "b3846" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRIDE "P21177" NIL |kothari| 3568751503 NIL NIL)
+DBLINKS - (PROSITE "PS00067" IN-FAMILY |kothari| 3568751519 NIL NIL)
+DBLINKS - (PROSITE "PS00166" IN-FAMILY |kothari| 3568751519 NIL NIL)
+DBLINKS - (INTERPRO "IPR006180" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR006176" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR006108" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR008927" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR001753" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR018376" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR012799" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (DIP "DIP-9560N" NIL |kothari| 3568751539 NIL NIL)
+DBLINKS - (SMR "P21177" NIL |kothari| 3577727734 NIL NIL)
+DBLINKS - (INTERPRO "IPR029045" IN-FAMILY |kothari| 3631380556 NIL NIL)
+DBLINKS - (PFAM "PF00725" IN-FAMILY |kaipa| 3708888087 NIL NIL)
+DBLINKS - (PFAM "PF02737" IN-FAMILY |kaipa| 3708888087 NIL NIL)
+DBLINKS - (PFAM "PF00378" IN-FAMILY |kaipa| 3708888087 NIL NIL)
+DBLINKS - (INTERPRO "IPR036291" IN-FAMILY |kothari| 3741702747 NIL NIL)
+DBLINKS - (PDB "6TNM" |Structure| |kothari| 3812329253 NIL NIL)
+DBLINKS - (ALPHAFOLD "P21177" NIL |kothari| 3842362831 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_418288.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_418288.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P21177" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0012564" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "EG10279" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "948336" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1446577
+FEATURES - FTR0-1586158
+FEATURES - FTR0-1586159
+FEATURES - FTR0-1586160
+FEATURES - FTR0-1586161
+FEATURES - FTR0-1586162
+FEATURES - FTR0-1586163
+FEATURES - FTR0-1586164
+FEATURES - FTR0-1586165
+FEATURES - FTR0-1586166
+FEATURES - FTR0-1586167
+FEATURES - FTR0-1586168
+FEATURES - FTR0-1586169
+FEATURES - FTR0-1586170
+FEATURES - FTR0-1586171
+FEATURES - FTR0-1586172
+FEATURES - FTR0-1586173
+FEATURES - FTR0-1586174
+FEATURES - FTR0-1586175
+FEATURES - FTR0-1586176
+FEATURES - FTR0-1586177
+FEATURES - FTR0-1586178
+FEATURES - FTR0-1605881
+FEATURES - FTR0-1605882
+FEATURES - FTR0-1605883
+FEATURES - FTR0-1605884
+GENE - B3846
+GO-TERMS - GO:0008692
+GO-TERMS - GO:0004300
+GO-TERMS - GO:0003857
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0004165
+GO-TERMS - GO:0036125
+GO-TERMS - GO:0003824
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0008152
+GO-TERMS - GO:0016042
+GO-TERMS - GO:0016491
+GO-TERMS - GO:0016829
+GO-TERMS - GO:0016853
+GO-TERMS - GO:0009062
+GO-TERMS - GO:0016509
+GO-TERMS - GO:0070403
+GO-TERMS - GO:0016616
+GO-TERMS - GO:0044248
+GO-TERMS - GO:1901575
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+MOLECULAR-WEIGHT-EXP - 78.
+MOLECULAR-WEIGHT-KD - 79.594
+MOLECULAR-WEIGHT-KD - 78.
+MOLECULAR-WEIGHT-SEQ - 79.594
+PI - 6.16
+SPECIES - TAX-511145
+SYNONYMS - FadB
+SYNONYMS - OldB
+SYNONYMS - multifunctional enoyl-CoA hydratase, 3-hydroxyacyl-CoA epimerase, &Delta;<sup>3</sup>-<i>cis</i>- &Delta;<sup>2</sup>-<i>trans</i>-enoyl-CoA isomerase, L-3-hydroxyacyl-CoA dehydrogenase
+//
+UNIQUE-ID - B2342-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - 3-ketoacyl-CoA thiolase FadI
+CATALYZES - ENZRXN2W-150
+CATALYZES - ENZRXN2W-142
+CATALYZES - ENZRXN2W-137
+CATALYZES - ENZRXN2W-135
+CATALYZES - ENZRXN2W-132
+CATALYZES - ENZRXN2W-128
+CATALYZES - ENZRXN2W-117
+CATALYZES - ENZRXN2W-114
+CATALYZES - ENZRXN2W-113
+CATALYZES - ENZRXN2W-111
+CATALYZES - ENZRXN2W-110
+COMMENT - During anaerobic &beta;-oxidation of fatty acids, |FRAME: B2342 FadI|, |FRAME: B2341 FadJ|, and |FRAME: B1701 FadK| serve functions parallel to those of |FRAME: B3845 FadA|, |FRAME: B3846 FadB|, and |FRAME: B1805 FadD| in the aerobic pathway |CITS: [12535077]|.
+/
+/FadI and FadJ also exhibit partial functional redundancy with FadA and FadB under aerobic conditions; the two complexes are proposed to increase efficiency of &beta;-oxidation by favoring substrates of different chain length |CITS: [12535077]|. 
+/
+/A strain producing FadI and FadJ from a plasmid exhibits thiolase activity with &beta;-ketoacyl-CoAs of 6 to 12 carbon units, but not with acetoacetyl-CoA |CITS: [12270828]|.
+/
+/It has been shown that the &beta;-oxidation enzymes can be induced to work in the reverse direction, a phenomenon that is being utilized for metabolic engineering |CITS: [21832992][23656231]|. In the reverse direction FadI acts on an acyl-CoA and acetyl-CoA, catalyzing a non-decarboxylative Claisen condensation reaction that forms a 3-oxo-acyl-CoA elongated by two carbons. The enzyme has a broad substrate range when working in the reverse reaction, and was shown to act on |FRAME: CINNAMOYL-COA| and |FRAME: CPD-503|, catalyzing two rounds of extension and resulting in formation of the styrylpyrones |FRAME: CPD-22601| and |FRAME: CPD-26560| |CITS: [35726672]|. 
+/
+/
+/|FRAME: B2342 FadI| and |FRAME: B2341 FadJ| are transcribed together. FadR represses transcription of <i>fadIJ</i> in the presence of oxygen |CITS: [12535077]|.
+/
+/FadI is a putative C-tail-anchored (TA) membrane protein |CITS: [20406421]|.
+COMPONENT-OF - CPLX0-1668
+DBLINKS - (REFSEQ "NP_416844" NIL NIL NIL NIL NIL)
+DBLINKS - (SWISSMODEL "P76503" NIL |pkarp| 3355444114 NIL NIL)
+DBLINKS - (MODBASE "P76503" NIL |pkarp| 3355444114 NIL NIL)
+DBLINKS - (ECOLIWIKI "b2342" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRIDE "P76503" NIL |kothari| 3568751500 NIL NIL)
+DBLINKS - (PROSITE "PS00098" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (PROSITE "PS00737" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (PROSITE "PS00099" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (INTERPRO "IPR012806" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR002155" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR016039" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020615" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020610" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020617" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020613" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020616" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (DIP "DIP-11991N" NIL |kothari| 3568751536 NIL NIL)
+DBLINKS - (SMR "P76503" NIL |kothari| 3577727731 NIL NIL)
+DBLINKS - (PFAM "PF02803" IN-FAMILY |kaipa| 3708888128 NIL NIL)
+DBLINKS - (PFAM "PF00108" IN-FAMILY |kaipa| 3708888128 NIL NIL)
+DBLINKS - (PANTHER "PTHR18919:SF113" IN-FAMILY |kothari| 3741702674 NIL NIL)
+DBLINKS - (ALPHAFOLD "P76503" NIL |kothari| 3842362967 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_416844.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_416844.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P76503" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0007725" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "G7213" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "948823" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1593143
+FEATURES - FTR0-1593144
+FEATURES - FTR0-1593145
+FEATURES - FTR0-1601562
+FEATURES - FTR0-1601563
+GENE - B2342
+GO-TERMS - GO:0003988
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0005829
+GO-TERMS - GO:0005737
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0016042
+GO-TERMS - GO:0033542
+GO-TERMS - GO:0016740
+GO-TERMS - GO:0016746
+GO-TERMS - GO:0016747
+GO-TERMS - GO:0003857
+GO-TERMS - GO:0004300
+GO-TERMS - GO:0036125
+GO-TERMS - GO:0044281
+GO-TERMS - GO:0003985
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-CYTOSOL-GN
+MOLECULAR-WEIGHT-EXP - 46.5
+MOLECULAR-WEIGHT-KD - 46.531002
+MOLECULAR-WEIGHT-KD - 46.5
+MOLECULAR-WEIGHT-SEQ - 46.531002
+SPECIES - TAX-511145
+SYNONYMS - FadI component of anaerobic fatty acid oxidation complex
+SYNONYMS - YfcY
+SYNONYMS - FadI
+//
+UNIQUE-ID - B2341-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - 3-hydroxyacyl-CoA dehydrogenase FadJ
+CATALYZES - ENZRXN2W-218
+CATALYZES - ENZRXN2W-214
+CATALYZES - ENZRXN2W-212
+CATALYZES - ENZRXN2W-206
+CATALYZES - ENZRXN2W-204
+CATALYZES - ENZRXN2W-203
+CATALYZES - ENZRXN2W-200
+CATALYZES - ENZRXN2W-198
+CATALYZES - ENZRXN2W-197
+CATALYZES - ENZRXN2W-196
+CATALYZES - ENZRXN2W-195
+CATALYZES - ENZRXN2W-185
+CATALYZES - ENZRXN2W-183
+CATALYZES - ENZRXN2W-182
+CATALYZES - ENZRXN2W-181
+CATALYZES - ENZRXN2W-173
+CATALYZES - ENZRXN2W-169
+CATALYZES - ENZRXN2W-166
+CATALYZES - ENZRXN2W-162
+CATALYZES - ENZRXN2W-159
+CATALYZES - ENZRXN2W-158
+CITATIONS - 22248859
+CITATIONS - 12949091
+COMMENT - During anaerobic &beta;-oxidation of fatty acids, |FRAME: B2342 FadI|, |FRAME: B2341 FadJ|, and |FRAME: B1701 FadK| serve functions parallel to those of |FRAME: B3845 FadA|, |FRAME: B3846 FadB|, and |FRAME: B1805 FadD| in the aerobic pathway |CITS: [12535077]|.
+/
+/FadJ shows sequence similarity to FadB; the enoyl-CoA hydratase, 3-hydroxyacyl-CoA epimerase, and 3-hydroxyacyl-CoA dehydrogenase active site residues appear to be conserved.  In a strain engineered for polyhydroxyalkanoate (PHA) production, FadJ is essential for processing of long-chain fatty acids to medium-chain PHA if <i>fadB</i> is absent.  Crude cell extracts from a strain that overproduced FadJ contain increased enoyl-CoA hydratase and 3-hydroxyacyl-CoA dehydrogenase activity |CITS: [12270828]|.
+/
+/FadJ and FadI exhibit partial functional redundancy with FadA and FadB under aerobic conditions; the two complexes are proposed to increase efficiency of &beta;-oxidation by favoring substrates of different chain length |CITS: [12535077]|. Comparison of the structures of the two enzymes showed that the fatty acyl tail binding tunnel of the |FRAME: B2341 FadJ| hydratase domain is wider than that of |FRAME: B3846 FadB|, accommodating longer fatty acyl tails |CITS: [37192613]|.
+/
+/FadR represses transcription of <i>fadIJ</i> in the presence of oxygen |CITS: [12535077]|.  Transcription of <i>fadJ</i> is induced upon biofilm formation compared to planktonic growth in both exponential and stationary phase.  Induction of expression was found to be independent of the presence of the F plasmid |CITS: [14731270]|.
+/
+/A <i>fadJ</i> mutant is impaired in biofilm formation |CITS: [14731270]|.
+COMPONENT-OF - CPLX0-1668
+DBLINKS - (REFSEQ "NP_416843" NIL NIL NIL NIL NIL)
+DBLINKS - (MODBASE "P77399" NIL |pkarp| 3355444116 NIL NIL)
+DBLINKS - (ECOLIWIKI "b2341" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PROSITE "PS00067" IN-FAMILY |kothari| 3568751517 NIL NIL)
+DBLINKS - (INTERPRO "IPR006180" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR006176" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR006108" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR008927" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR001753" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR012802" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (DIP "DIP-11990N" NIL |kothari| 3568751537 NIL NIL)
+DBLINKS - (SMR "P77399" NIL |kothari| 3577727732 NIL NIL)
+DBLINKS - (INTERPRO "IPR029045" IN-FAMILY |kothari| 3631380557 NIL NIL)
+DBLINKS - (PRIDE "P77399" NIL |kothari| 3696210801 NIL NIL)
+DBLINKS - (PFAM "PF00725" IN-FAMILY |kaipa| 3708888037 NIL NIL)
+DBLINKS - (PFAM "PF02737" IN-FAMILY |kaipa| 3708888037 NIL NIL)
+DBLINKS - (PFAM "PF00378" IN-FAMILY |kaipa| 3708888037 NIL NIL)
+DBLINKS - (INTERPRO "IPR036291" IN-FAMILY |kothari| 3741702748 NIL NIL)
+DBLINKS - (ALPHAFOLD "P77399" NIL |kothari| 3842362979 NIL NIL)
+DBLINKS - (PDB "6YSW" |Structure| |kothari| 3874155681 NIL NIL)
+DBLINKS - (PDB "6YSV" |Structure| |kothari| 3874155681 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_416843.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_416843.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P77399" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0007723" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "G7212" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "949097" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1575846
+FEATURES - FTR0-1575847
+FEATURES - FTR0-1573987
+FEATURES - FTR0-1573988
+FEATURES - FTR0-1605359
+FEATURES - FTR0-1605360
+FEATURES - FTR0-1605361
+FEATURES - FTR0-1605362
+GENE - B2341
+GO-TERMS - GO:0004300
+GO-TERMS - GO:0003857
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0005829
+GO-TERMS - GO:0008692
+GO-TERMS - GO:0003824
+GO-TERMS - GO:0005737
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0008152
+GO-TERMS - GO:0016042
+GO-TERMS - GO:0016491
+GO-TERMS - GO:0016829
+GO-TERMS - GO:0016853
+GO-TERMS - GO:0051287
+GO-TERMS - GO:0005515
+GO-TERMS - GO:0016509
+GO-TERMS - GO:0070403
+GO-TERMS - GO:0016616
+GO-TERMS - GO:0036125
+GO-TERMS - GO:0044248
+GO-TERMS - GO:1901575
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-CYTOSOL-GN
+MOLECULAR-WEIGHT-EXP - 77.1
+MOLECULAR-WEIGHT-KD - 77.07200
+MOLECULAR-WEIGHT-KD - 77.1
+MOLECULAR-WEIGHT-SEQ - 77.07200
+SPECIES - TAX-511145
+SYNONYMS - FadJ component of anaerobic fatty acid oxidation complex
+SYNONYMS - YfcX
+SYNONYMS - FadJ
+SYNONYMS - multifunctional 3-hydroxyacyl-CoA dehydrogenase/3-hydroxyacyl-CoA epimerase/enoyl-CoA hydratase FadJ
+//
+UNIQUE-ID - B1701-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - short chain acyl-CoA synthetase
+CATALYZES - ENZRXN2W-284
+CATALYZES - ENZRXN2W-281
+CATALYZES - ENZRXN2W-278
+CATALYZES - ENZRXN2W-266
+COMMENT - FadK is an acyl-CoA synthetase that is primarily active on medium-chain (C6:0 and C8:0) fatty acids and acts in anaerobic &beta;-oxidation of fatty acids |CITS: [12535077][15213221]|.  During anaerobic &beta;-oxidation of fatty acids, |FRAME: B2342 FadI|, |FRAME: B2341 FadJ|, and |FRAME: B1701 FadK| serve functions parallel to those of |FRAME: B3845 FadA|, |FRAME: B3846 FadB|, and |FRAME: B1805 FadD| in the aerobic pathway |CITS: [12535077]|.
+/
+/FadK has a FACS (fatty acyl-CoA-binding) motif and an ATP/AMP binding motif |CITS: [12535077]|.  Based on sequence similarity, FadK has been predicted to be a hydroxycinnamate-CoA ligase |CITS: [12952533]|.  
+/
+/A <i>fadD fadK</i> double mutant exhibits a complete defect in anaerobic growth on fatty acids, indicating that FadD acyl-CoA synthetase activity partially complements FadK activity under anaerobic growth conditions |CITS: [12535077]|.  The failure of FadK to complement a <i>fadD</i> mutant under aerobic conditions is likely due to poor expression of FadK under those conditions |CITS: [15213221]|.
+/
+/FadK is not expressed under aerobic conditions, and the level of expression under anaerobic conditions depends on
+/the terminal electron acceptor: in the presence of nitrate, expression is low, while in the presence of fumarate,
+/expression is high |CITS: [15213221]|.
+DBLINKS - (REFSEQ "NP_416216" NIL NIL NIL NIL NIL)
+DBLINKS - (MODBASE "P38135" NIL |pkarp| 3355444112 NIL NIL)
+DBLINKS - (ECOLIWIKI "b1701" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRODB "PRO_000022571" NIL |kaipa| 3486405652 NIL NIL)
+DBLINKS - (PRIDE "P38135" NIL |kothari| 3568751503 NIL NIL)
+DBLINKS - (PROSITE "PS00455" IN-FAMILY |kothari| 3568751519 NIL NIL)
+DBLINKS - (INTERPRO "IPR020845" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR000873" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (INTERPRO "IPR025110" IN-FAMILY |kothari| 3568751532 NIL NIL)
+DBLINKS - (SMR "P38135" NIL |kothari| 3577727730 NIL NIL)
+DBLINKS - (PFAM "PF13193" IN-FAMILY |kaipa| 3708888149 NIL NIL)
+DBLINKS - (PFAM "PF00501" IN-FAMILY |kaipa| 3708888149 NIL NIL)
+DBLINKS - (INTERPRO "IPR042099" IN-FAMILY |kothari| 3780621557 NIL NIL)
+DBLINKS - (ALPHAFOLD "P38135" NIL |kothari| 3842362900 NIL NIL)
+DBLINKS - (INTERPRO "IPR045851" IN-FAMILY |kothari| 3874155693 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_416216.5" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_416216.5" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P38135" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0005676" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "EG12357" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "946213" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1588487
+FEATURES - FTR0-1605657
+FEATURES - FTR0-1605658
+GENE - B1701
+GO-TERMS - GO:0019395
+GO-TERMS - GO:0031956
+GO-TERMS - GO:0005829
+GO-TERMS - GO:0000166
+GO-TERMS - GO:0005524
+GO-TERMS - GO:0016020
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0016874
+GO-TERMS - GO:0005886
+GO-TERMS - GO:0006635
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-CYTOSOL-GN
+LOCATIONS - CCI-PM-BAC-NEG-GN
+MOLECULAR-WEIGHT-KD - 62.759003
+MOLECULAR-WEIGHT-SEQ - 62.759003
+SPECIES - TAX-511145
+SYNONYMS - medium-chain acyl-CoA synthetase
+SYNONYMS - YdiD
+SYNONYMS - FadK
+SYNONYMS - medium-chain-fatty-acid&mdash;CoA ligase
+//
+UNIQUE-ID - B3845-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - 3-ketoacyl-CoA thiolase
+CATALYZES - ENZRXN2W-106
+CATALYZES - ENZRXN2W-98
+CATALYZES - ENZRXN2W-93
+CATALYZES - ENZRXN2W-91
+CATALYZES - ENZRXN2W-88
+CATALYZES - ENZRXN2W-84
+CATALYZES - ENZRXN2W-73
+CATALYZES - ENZRXN2W-70
+CATALYZES - ENZRXN2W-69
+CATALYZES - ENZRXN2W-67
+CATALYZES - ENZRXN2W-66
+CITATIONS - 29807110
+CITATIONS - 25645093
+CITATIONS - 22038610
+CITATIONS - 12351234
+CITATIONS - 1678742
+CITATIONS - 1699931
+CITATIONS - 2204034
+CITATIONS - 2191949
+CITATIONS - 6402028
+CITATIONS - 3312186
+CITATIONS - 7024730
+CITATIONS - 334745
+CITATIONS - 4887396
+COMMENT - 3-ketoacyl-CoA thiolase (FadA) is involved in the degradation of fatty acids via the &beta;-oxidation cycle.  The enzyme acts on 3-oxoacyl-CoAs in the presence of a CoA acceptor to produce acetyl-CoA and an acyl-CoA shortened by two carbon atoms. FadA has broad chain-length specificity for substrates, but exhibits its highest activity with medium-chain substrates.
+/
+/FadA and FadB form a multifunctional enzyme complex |CITS: [334745][6402028][3286611][8454629]| (data from <i>E. coli</i> B in |CITS: [7012144][6350283]|).  
+/
+/Overexpression of FadA and FadB can be utilized for the production of long-chain fatty acids in an engineered reversal of the &beta;-oxidation cycle |CITS: [21832992][23656231]|. In the reverse direction the enzyme acts on an acyl-CoA and acetyl-CoA, catalyzing a non-decarboxylative Claisen condensation reaction that forms a 3-oxo-acyl-CoA elongated by two carbons. The enzyme has a broad substrate range when working in the reverse reaction, and was shown to act on |FRAME: CINNAMOYL-COA| and |FRAME: CPD-503|, catalyzing two rounds of extension and resulting in formation of the styrylpyrones |FRAME: CPD-22601| and |FRAME: CPD-26560| |CITS: [35726672]|.
+/
+/Expression of the enzymes involved in &beta;-oxidation is normally induced by fatty acids of chain length 14 and longer |CITS: [4861587][4886296][18317523]|.  Regulation is at the transcriptional level and involves repression by FadR |CITS: [6271734]|.
+/
+/OldA: "<b>ol</b>eate <b>d</b>egradation <b>A</b>" (<i>old-30</i>) |CITS: [4861587][4928881]|
+/
+/FadA: "<b>f</b>atty <b>a</b>cid <b>d</b>egradation <b>A</b>" |CITS: [4563344]|
+COMPONENT-OF - FAO-CPLX
+DBLINKS - (SWISSMODEL "P21151" NIL |pkarp| 3064870651)
+DBLINKS - (MODBASE "P21151" NIL |pkarp| 3355444112 NIL NIL)
+DBLINKS - (REFSEQ "YP_026272" NIL |kr| 3372219198 NIL NIL)
+DBLINKS - (ECOLIWIKI "b3845" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRIDE "P21151" NIL |kothari| 3568751500 NIL NIL)
+DBLINKS - (PROSITE "PS00098" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (PROSITE "PS00737" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (PROSITE "PS00099" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (INTERPRO "IPR012805" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR002155" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR016039" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020615" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020610" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020617" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020613" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR020616" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (DIP "DIP-9559N" NIL |kothari| 3568751537 NIL NIL)
+DBLINKS - (SMR "P21151" NIL |kothari| 3577727731 NIL NIL)
+DBLINKS - (PFAM "PF02803" IN-FAMILY |kaipa| 3708888016 NIL NIL)
+DBLINKS - (PFAM "PF00108" IN-FAMILY |kaipa| 3708888016 NIL NIL)
+DBLINKS - (ALPHAFOLD "P21151" NIL |kothari| 3842362831 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "YP_026272.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "YP_026272.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P21151" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0012562" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "EG10278" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "948324" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1594174
+FEATURES - FTR0-1594175
+FEATURES - FTR0-1594176
+FEATURES - FTR0-1594177
+FEATURES - FTR0-1594178
+FEATURES - FTR0-1594179
+FEATURES - FTR0-1603981
+FEATURES - FTR0-1603982
+GENE - B3845
+GO-TERMS - GO:0005737
+GO-TERMS - GO:0003988
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0005829
+GO-TERMS - GO:0009062
+GO-TERMS - GO:0036125
+GO-TERMS - GO:0005515
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0016746
+GO-TERMS - GO:0016042
+GO-TERMS - GO:0016740
+GO-TERMS - GO:0016747
+GO-TERMS - GO:0010124
+GO-TERMS - GO:0044281
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-CYTOSOL-GN
+MOLECULAR-WEIGHT-EXP - 42.
+MOLECULAR-WEIGHT-KD - 40.876003
+MOLECULAR-WEIGHT-KD - 42.
+MOLECULAR-WEIGHT-SEQ - 40.876003
+PI - 6.72
+SPECIES - TAX-511145
+SYNONYMS - thiolase I
+SYNONYMS - FadA
+SYNONYMS - OldA
+//
+UNIQUE-ID - B1805-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - fatty acyl-CoA synthetase
+CATALYZES - ENZRXN2W-249
+CATALYZES - ENZRXN2W-246
+CATALYZES - ENZRXN2W-243
+CATALYZES - ENZRXN2W-231
+CITATIONS - 4928881
+CITATIONS - 4887396
+CITATIONS - 27718375
+COMPONENT-OF - ACYLCOASYN-CPLX
+DBLINKS - (REFSEQ "NP_416319" NIL NIL NIL NIL NIL)
+DBLINKS - (MODBASE "P69451" NIL |pkarp| 3355444109 NIL NIL)
+DBLINKS - (ECOLIWIKI "b1805" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRODB "PRO_000022568" NIL |kaipa| 3486405652 NIL NIL)
+DBLINKS - (PRIDE "P69451" NIL |kothari| 3568751500 NIL NIL)
+DBLINKS - (PROSITE "PS00455" IN-FAMILY |kothari| 3568751516 NIL NIL)
+DBLINKS - (INTERPRO "IPR020845" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR000873" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (INTERPRO "IPR025110" IN-FAMILY |kothari| 3568751525 NIL NIL)
+DBLINKS - (SMR "P69451" NIL |kothari| 3577727733 NIL NIL)
+DBLINKS - (PFAM "PF13193" IN-FAMILY |kaipa| 3708888046 NIL NIL)
+DBLINKS - (PFAM "PF00501" IN-FAMILY |kaipa| 3708888046 NIL NIL)
+DBLINKS - (INTERPRO "IPR042099" IN-FAMILY |kothari| 3780621553 NIL NIL)
+DBLINKS - (ALPHAFOLD "P69451" NIL |kothari| 3842362936 NIL NIL)
+DBLINKS - (INTERPRO "IPR045851" IN-FAMILY |kothari| 3874155695 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_416319.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_416319.1" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "P69451" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0006005" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "EG11530" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "946327" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1552107
+FEATURES - FTR0-1579368
+FEATURES - FTR0-1579369
+FEATURES - FTR0-1579370
+FEATURES - FTR0-1579371
+FEATURES - FTR0-1579372
+FEATURES - FTR0-1579373
+FEATURES - FTR0-1579374
+FEATURES - FTR0-1579375
+FEATURES - FTR0-1579376
+FEATURES - FTR0-1579377
+FEATURES - FTR0-1579378
+FEATURES - FTR0-1579379
+FEATURES - FTR0-1605559
+FEATURES - FTR0-1605560
+GENE - B1805
+GO-TERMS - GO:0004467
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0006637
+GO-TERMS - GO:0009898
+GO-TERMS - GO:0005829
+GO-TERMS - GO:0009411
+GO-TERMS - GO:0042803
+GO-TERMS - GO:0015908
+GO-TERMS - GO:0000166
+GO-TERMS - GO:0005524
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0005737
+GO-TERMS - GO:0008654
+GO-TERMS - GO:0070538
+GO-TERMS - GO:0016020
+GO-TERMS - GO:0005504
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0016874
+GO-TERMS - GO:0001676
+GO-TERMS - GO:0102391
+GO-TERMS - GO:0005886
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-PM-BAC-NEG-GN
+LOCATIONS - CCI-CYTOSOL-GN
+MOLECULAR-WEIGHT-EXP - 62.
+MOLECULAR-WEIGHT-KD - 62.332005
+MOLECULAR-WEIGHT-KD - 62.
+MOLECULAR-WEIGHT-SEQ - 62.332005
+PI - 6.61
+SPECIES - TAX-511145
+SYNONYMS - FadD
+SYNONYMS - OldD
+SYNONYMS - long-chain-fatty-acid&mdash;CoA ligase
+//
+UNIQUE-ID - B0221-MONOMER
+TYPES - Polypeptides
+COMMON-NAME - acyl-CoA dehydrogenase
+CITATIONS - 29369593
+CITATIONS - 23656231
+CITATIONS - 16385050
+CITATIONS - 12694916
+CITATIONS - 6355101
+CITATIONS - 374354
+CITATIONS - 350850
+CITATIONS - 1097444
+COMMENT - Acyl-CoA dehydrogenase (FadE) catalyzes the first step in the degradation of fatty acids via the &beta;-oxidation cycle |CITS: [334745][11771124][12057976]|. 
+/
+/<i>fadE</i> mutants are unable to utilize oleate and other fatty acids as the sole source of carbon |CITS: [4928881][12057976]|.  The <i>fadE62</i> allele is a single base deletion resulting in a frame shift mutation, and <i>yafH</i> can complement the phenotype of the <i>fadE62</i> mutant strain |CITS: [12057976]|.
+/
+/Expression of the enzymes involved in &beta;-oxidation is normally induced by fatty acids of chain length 14 and longer |CITS: [4886296][16385050]|.  Regulation is at the transcriptional level and involves repression by FadR |CITS: [6271734]|.
+/
+/OldE: "<b>ol</b>eate <b>d</b>egradation <b>E</b>" |CITS: [4928881]|
+DBLINKS - (REFSEQ "NP_414756" NIL NIL NIL NIL NIL)
+DBLINKS - (MODBASE "Q47146" NIL |pkarp| 3355444109 NIL NIL)
+DBLINKS - (ECOLIWIKI "b0221" NIL |kr| 3409616149 NIL NIL)
+DBLINKS - (PRODB "PRO_000022569" NIL |kaipa| 3486405652 NIL NIL)
+DBLINKS - (PRIDE "Q47146" NIL |kothari| 3568751501 NIL NIL)
+DBLINKS - (PROSITE "PS00072" IN-FAMILY |kothari| 3568751517 NIL NIL)
+DBLINKS - (INTERPRO "IPR006091" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR009075" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR013786" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR009100" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (INTERPRO "IPR015396" IN-FAMILY |kothari| 3568751527 NIL NIL)
+DBLINKS - (PFAM "PF09317" IN-FAMILY |kaipa| 3708887964 NIL NIL)
+DBLINKS - (PFAM "PF00441" IN-FAMILY |kaipa| 3708887964 NIL NIL)
+DBLINKS - (PFAM "PF02770" IN-FAMILY |kaipa| 3708887964 NIL NIL)
+DBLINKS - (PFAM "PF02771" IN-FAMILY |kaipa| 3708887964 NIL NIL)
+DBLINKS - (INTERPRO "IPR037069" IN-FAMILY |kothari| 3741702747 NIL NIL)
+DBLINKS - (INTERPRO "IPR036250" IN-FAMILY |kothari| 3741702747 NIL NIL)
+DBLINKS - (ALPHAFOLD "Q47146" NIL |kothari| 3842362995 NIL NIL)
+DBLINKS - (INTERPRO "IPR046373" IN-FAMILY |kothari| 3906136919 NIL NIL)
+DBLINKS - (NCBI-REFSEQ-PRO "NP_414756.2" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT-VIA-REFSEQ "NP_414756.2" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (UNIPROT "Q47146" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ASAP "ABE-0000743" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (ECOCYC "G6105" NIL NIL 3950679194 NIL NIL)
+DBLINKS - (NCBI-GENE "949007" NIL NIL 3950679194 NIL NIL)
+FEATURES - FTR0-1587150
+FEATURES - FTR0-1603649
+FEATURES - FTR0-1603650
+FEATURES - FTR0-1603651
+FEATURES - FTR0-1603652
+FUNCTIONAL-ASSIGNMENT-STATUS - :AMBIGUOUS
+GENE - B0221
+GO-TERMS - GO:0003995
+GO-TERMS - GO:0033539
+GO-TERMS - GO:0005886
+GO-TERMS - GO:0009062
+GO-TERMS - GO:0005737
+GO-TERMS - GO:0006629
+GO-TERMS - GO:0006631
+GO-TERMS - GO:0016491
+GO-TERMS - GO:0006635
+GO-TERMS - GO:0016627
+GO-TERMS - GO:0050660
+GO-TERMS - GO:0004466
+GO-TERMS - GO:0070991
+INSTANCE-NAME-TEMPLATE - MONOMER-*
+LOCATIONS - CCI-PM-BAC-NEG-GN
+LOCATIONS - CCI-CYTOSOL-GN
+MOLECULAR-WEIGHT-KD - 89.22400
+MOLECULAR-WEIGHT-SEQ - 89.22400
+SPECIES - TAX-511145
+SYNONYMS - YafH
+SYNONYMS - FadE
+//
+UNIQUE-ID - FAO-CPLX
+TYPES - Protein-Complexes
+COMMON-NAME - aerobic fatty acid oxidation complex
+COMMENT - <i>E. coli</i> has two sets of enzymes involved in fatty acid &beta;-oxidation. One set comprises |FRAME: B0221 FadE|, |FRAME: B3845 FadA|, and |FRAME: B3846 FadB|, with the latter two forming a soluble tetrameric |FRAME: FAO-CPLX FadB<sub>2</sub>FadA<sub>2</sub> complex| |CITS: [334745][374410][6402028][3286611][8454629]| (data from <i>E. coli</i> B in |CITS: [322129][7012144][6350283]|). The second set of enzymes consists of |FRAME: G6918 YdiO|, |FRAME: B2342 FadI| and |FRAME: B2341 FadJ|, with the latter two forming a membrane-bound octameric |FRAME: CPLX0-1668 [FadJ<sub>2</sub>FadI<sub>2</sub>]<sub>2</sub> complex| |CITS: [12535077][31235482]|.
+/
+/In both complexes the &alpha;-subunits are bifunctional and have |FRAME: EC-4.2.1.17| and |FRAME: EC-1.1.1.35| active sites and the &beta;-subunits have |FRAME: EC-2.3.1.16| activity, leading to the name trifunctional enzyme (TFE). However, the two sets do not have high sequence similarity. In fact, the enzymes of the second set are more similar to the human mitochondrial TFE than to the <i>E. coli</i> soluble TFE. In addition, the enzymes have different substrate specificities: the membrane bound [FadJ<sub>2</sub>FadI<sub>2</sub>]<sub>2</sub> complex has a preference for medium- and long-chain enoyl-CoAs (similar to the human mitochondrial TFE), whereas the FadB<sub>2</sub>FadA<sub>2</sub> complex prefers short chain enoyl-CoA substrates |CITS: [31235482]|.
+/
+/After noticing that growth of a &Delta;<i>fadA</i> mutant is more robust in the absence of oxygen, it was proposed that the FadEAB enzymes operate under aerobic conditions, and the YdiO/FadIJ enzymes operate under anaerobic conditions. The complexes became known as the aerobic trifunctional enzyme (EcTFE) and the anaerobic trifunctional enzyme (anEcTFE) |CITS: [12535077][32171906]|.
+/
+/Several observations suggest that the relationship of the two enzyme sets may be more complicated. It was reported that while EcTFE is not expressed under anaerobic conditions, both pathways are active under aerobic conditions |CITS: [12535077]|. Nonetheless, the &Delta;<i>fadIJ</i> double mutant grows well on long-chain fatty acids under anaerobic conditions. A more recent proposal suggested that the membrane-bound FadIJ system carries out the &beta;-oxidation cycle of very long- and long-chain fatty acids, and the soluble FasAB system intervenes to catalyze the reactions on shorter acyl-CoA |CITS: [31235482][35892328]|.
+/
+/As of 2023, the exact roles of the two systems are not completely understood.
+COMPONENTS - B3846-MONOMER
+^COEFFICIENT - 2
+COMPONENTS - B3845-MONOMER
+^COEFFICIENT - 2
+INSTANCE-NAME-TEMPLATE - CPLX-*
+MOLECULAR-WEIGHT-EXP - 245.
+MOLECULAR-WEIGHT-KD - 245.
+SPECIES - TAX-511145
+SYNONYMS - EcTFE
+SYNONYMS - aerobic trifunctional enzyme
+//
+UNIQUE-ID - CPLX0-1668
+TYPES - Protein-Complexes
+COMMON-NAME - anaerobic fatty acid &beta;-oxidation complex
+COMMENT - <i>E. coli</i> has two sets of enzymes involved in fatty acid &beta;-oxidation. One set comprises |FRAME: B0221 FadE|, |FRAME: B3845 FadA|, and |FRAME: B3846 FadB|, with the latter two forming a soluble tetrameric |FRAME: FAO-CPLX FadB<sub>2</sub>FadA<sub>2</sub> complex| |CITS: [334745][374410][6402028][3286611][8454629]| (data from <i>E. coli</i> B in |CITS: [322129][7012144][6350283]|). The second set of enzymes consists of |FRAME: G6918 YdiO|, |FRAME: B2342 FadI| and |FRAME: B2341 FadJ|, with the latter two forming a membrane-bound octameric |FRAME: CPLX0-1668 [FadJ<sub>2</sub>FadI<sub>2</sub>]<sub>2</sub> complex| |CITS: [12535077][31235482]|.
+/
+/In both complexes the &alpha;-subunits are bifunctional and have |FRAME: EC-4.2.1.17| and |FRAME: EC-1.1.1.35| active sites and the &beta;-subunits have |FRAME: EC-2.3.1.16| activity, leading to the name trifunctional enzyme (TFE). However, the two sets do not have high sequence similarity. In fact, the enzymes of the second set are more similar to the human mitochondrial TFE than to the <i>E. coli</i> soluble TFE. In addition, the enzymes have different substrate specificities: the membrane bound [FadJ<sub>2</sub>FadI<sub>2</sub>]<sub>2</sub> complex has a preference for medium- and long-chain enoyl-CoAs (similar to the human mitochondrial TFE), whereas the FadB<sub>2</sub>FadA<sub>2</sub> complex prefers short chain enoyl-CoA substrates |CITS: [31235482]|.
+/
+/After noticing that growth of a &Delta;<i>fadA</i> mutant is more robust in the absence of oxygen, it was proposed that the FadEAB enzymes operate under aerobic conditions, and the YdiO/FadIJ enzymes operate under anaerobic conditions. The complexes became known as the aerobic trifunctional enzyme (EcTFE) and the anaerobic trifunctional enzyme (anEcTFE) |CITS: [12535077][32171906]|.
+/
+/Several observations suggest that the relationship of the two enzyme sets may be more complicated. It was reported that while EcTFE is not expressed under anaerobic conditions, both pathways are active under aerobic conditions |CITS: [12535077]|. Nonetheless, the &Delta;<i>fadIJ</i> double mutant grows well on long-chain fatty acids under anaerobic conditions. A more recent proposal suggested that the membrane-bound FadIJ system carries out the &beta;-oxidation cycle of very long- and long-chain fatty acids, and the soluble FasAB system intervenes to catalyze the reactions on shorter acyl-CoA |CITS: [31235482][35892328]|. As of 2023, the exact roles of the two systems are not completely understood.
+/
+/Comparison of the structures of the two enzymes showed that the fatty acyl tail binding tunnel of the |FRAME: B2341 FadJ| hydratase domain is wider than that of |FRAME: B3846 FadB|, accommodating longer fatty acyl tails |CITS: [37192613]|.
+COMPONENTS - B2342-MONOMER
+COMPONENTS - B2341-MONOMER
+INSTANCE-NAME-TEMPLATE - CPLX-*
+SPECIES - TAX-511145
+SYNONYMS - anaerobic trifunctional enzyme
+SYNONYMS - anEcTFE
+//
+# 
+#
+# Authors:
+#
+# Please see the license agreement regarding the use of and distribution of this file.
+# The format of this file is defined at http://bioinformatics.ai.sri.com/ptools/flatfile-format.html .
+#
+# Filename: /root/ptools-local/pgdbs/user/fatty_acid_beta_oxydation_icyc/1.0/data/proteins.dat
+#
+# Organism: Escherichia coli
+# Database: NIL
+# Version: 1.0
+# Orthologs: false
+# Date and time generated: March 11, 2025, 10:54:47
+#
+# Attributes:
+#    UNIQUE-ID
+#    TYPES
+#    COMMON-NAME
+#    ABBREV-NAME
+#    CITATIONS
+#    COMMENT
+#    COMPONENT-OF
+#    CONSENSUS-SEQUENCE
+#    COPY-NUMBER
+#    CREDITS
+#    DATA-SOURCE
+#    DBLINKS
+#    DNA-FOOTPRINT-SIZE
+#    DOCUMENTATION
+#    FEATURES
+#    GENE
+#    GO-TERMS
+#    HIDE-SLOT?
+#    INSTANCE-NAME-TEMPLATE
+#    MEMBER-SORT-FN
+#    MOLECULAR-WEIGHT-EXP
+#    PATHOLOGIC-NAME-MATCHER-EVIDENCE
+#    PATHOLOGIC-PWY-EVIDENCE
+#    PI
+#    REGULATES
+#    SYMMETRY
+#    SYNONYMS
+#
+# The FATTY_ACID_BETA_OXYDATION_I database contains no Pseudo-Products.

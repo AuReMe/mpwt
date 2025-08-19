@@ -1,0 +1,19 @@
+#
+#  fatty_acid_beta_oxydation_icyc 1.0 Genes link table generated on Tue Mar 11, 2025
+#  All columns are separated by tab characters.
+#  Columns are: 
+#
+#  GENE-ID  EG#  b#  y-name  CGSC-ID  UniProt-ID  GENE-NAME  
+#
+#   GENE-ID      = Pathway Tools unique identifier for the gene
+#   UniProt-ID = Swiss-Prot identifier
+#   GENE-NAME    = Pathway Tools gene name
+#
+#
+B0221	Q47146	fadE	
+B1701	P38135	fadK	
+B2342	P76503	fadI	
+B2341	P77399	fadJ	
+B3846	P21177	fadB	
+B3845	P21151	fadA	
+B1805	P69451	fadD	

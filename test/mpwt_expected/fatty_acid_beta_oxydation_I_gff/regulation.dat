@@ -1,0 +1,65 @@
+# 
+#
+# Authors:
+#
+# Please see the license agreement regarding the use of and distribution of this file.
+# The format of this file is defined at http://bioinformatics.ai.sri.com/ptools/flatfile-format.html .
+#
+# Filename: /root/ptools-local/pgdbs/user/fatty_acid_beta_oxydation_i_gffcyc/1.0/data/regulation.dat
+#
+# Organism: Escherichia coli
+# Database: NIL
+# Version: 1.0
+# Orthologs: false
+# Date and time generated: March 11, 2025, 10:52:41
+#
+# Attributes:
+#    UNIQUE-ID
+#    TYPES
+#    COMMON-NAME
+#    ACCESSORY-PROTEINS
+#    ANTI-ANTITERM-END-POS
+#    ANTI-ANTITERM-START-POS
+#    ANTITERMINATOR-END-POS
+#    ANTITERMINATOR-START-POS
+#    ASSOCIATED-BINDING-SITE
+#    ASSOCIATED-RNASE
+#    CITATIONS
+#    COMMENT
+#    CREDITS
+#    DATA-SOURCE
+#    DOCUMENTATION
+#    DOWNSTREAM-GENES-ONLY?
+#    GROWTH-CONDITIONS
+#    HIDE-SLOT?
+#    INSTANCE-NAME-TEMPLATE
+#    KI
+#    MECHANISM
+#    MEMBER-SORT-FN
+#    MODE
+#    PATHOLOGIC-NAME-MATCHER-EVIDENCE
+#    PATHOLOGIC-PWY-EVIDENCE
+#    PAUSE-END-POS
+#    PAUSE-START-POS
+#    PHYSIOLOGICALLY-RELEVANT?
+#    REGULATED-ENTITY
+#    REGULATOR
+#    SYNONYMS
+#
+UNIQUE-ID - REG0-6928
+TYPES - Regulation-of-Enzyme-Activity
+CITATIONS - [6350283]
+CITATIONS - 4919548
+INSTANCE-NAME-TEMPLATE - REG-*
+MODE - -
+REGULATED-ENTITY - ENZRXN2U-28
+REGULATOR - IODOACETAMIDE
+//
+UNIQUE-ID - REG0-6927
+TYPES - Regulation-of-Enzyme-Activity
+CITATIONS - [7012144]
+INSTANCE-NAME-TEMPLATE - REG-*
+MODE - -
+REGULATED-ENTITY - ENZRXN2U-28
+REGULATOR - N-ETHYLMALEIMIDE
+//

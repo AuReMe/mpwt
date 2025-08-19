@@ -1,0 +1,10 @@
+B2341-MONOMER	B2341	P77399	3-hydroxyacyl-CoA dehydrogenase FadJ	FadJ component of anaerobic fatty acid oxidation complex, YfcX, FadJ, multifunctional 3-hydroxyacyl-CoA dehydrogenase/3-hydroxyacyl-CoA epimerase/enoyl-CoA hydratase FadJ
+B1805-MONOMER	B1805	P69451	fatty acyl-CoA synthetase	FadD, OldD, long-chain-fatty-acid&mdash;CoA ligase
+B0221-MONOMER	B0221	Q47146	acyl-CoA dehydrogenase	YafH, FadE
+B2342-MONOMER	B2342	P76503	3-ketoacyl-CoA thiolase FadI	FadI component of anaerobic fatty acid oxidation complex, YfcY, FadI
+ACYLCOASYN-CPLX			long-chain-fatty-acid&mdash;CoA ligase	
+B3846-MONOMER	B3846	P21177	dodecenoyl-CoA delta-isomerase, enoyl-CoA hydratase, 3-hydroxybutyryl-CoA epimerase, 3-hydroxyacyl-CoA dehydrogenase	FadB, OldB, multifunctional enoyl-CoA hydratase, 3-hydroxyacyl-CoA epimerase, &Delta;<sup>3</sup>-<i>cis</i>- &Delta;<sup>2</sup>-<i>trans</i>-enoyl-CoA isomerase, L-3-hydroxyacyl-CoA dehydrogenase
+FAO-CPLX			aerobic fatty acid oxidation complex	EcTFE, aerobic trifunctional enzyme
+B1701-MONOMER	B1701	P38135	short chain acyl-CoA synthetase	medium-chain acyl-CoA synthetase, YdiD, FadK, medium-chain-fatty-acid&mdash;CoA ligase
+B3845-MONOMER	B3845	P21151	3-ketoacyl-CoA thiolase	thiolase I, FadA, OldA
+CPLX0-1668			anaerobic fatty acid &beta;-oxidation complex	anaerobic trifunctional enzyme, anEcTFE
