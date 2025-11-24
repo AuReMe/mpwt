@@ -44,7 +44,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                      xml_extraction=None, owl_extraction=None, col_extraction=None,
                      size_reduction=None, number_cpu=None, patho_log=None,
                      pathway_score=None, taxon_file=None, verbose=None,
-                     permission=None):
+                     permission=None, standalone=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -70,6 +70,7 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         taxon_file (str): pathname to the mpwt taxon ID file
         verbose (bool): verbose argument
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
+        standalone (bool): boolean to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.
     """
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -120,6 +121,10 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         if patho_complex_inference:
             sys.exit('To use --cp/patho_complex_inference, you need to use the --patho/patho_inference argument and have at least Pathway Tools 26.0.')
 
+    # Check if standalone is used with patho_inference and Pathway Tools >= 27.0.
+    if standalone and not patho_inference and ptools_version >= (27, 0):
+        sys.exit('To use --standalone, you need to use the --patho/patho_inference argument and Pathway Tools >= 27.0.')
+
     # Check if pathway_score is a float between 0 and 1.
     if pathway_score:
         try:
@@ -165,7 +170,8 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
                         no_download_articles, flat_creation, dat_extraction,
                         xml_extraction, owl_extraction, col_extraction,
                         size_reduction, number_cpu_to_use, patho_log,
-                        pathway_score, taxon_file, permission, ptools_version)
+                        pathway_score, taxon_file, permission, ptools_version,
+                        standalone)
 
 
 def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
@@ -297,7 +303,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      xml_extraction=None, owl_extraction=None, col_extraction=None,
                      size_reduction=None, number_cpu_to_use=None, patho_log=None,
                      pathway_score=None, taxon_file=None, permission=None,
-                     ptools_version= None):
+                     ptools_version= None, standalone=None):
     """
     Function managing the workflow for independent run of mpwt.
     Each process of Pathway Tools on an organism are run separatly so if one failed the other that passed will succeed.
@@ -323,6 +329,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user).
         ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
+        standalone (bool): boolean to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.
     """
     logger.info('---------- Launching mpwt ----------')
     ptools_local_path = utils.find_ptools_path()
@@ -386,7 +393,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             run_flat_ids = None
         run_patho_flat_ids = None
 
-    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference]
+    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference, standalone]
     move_options = [dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction]
 
     # Create data for multiprocessing.

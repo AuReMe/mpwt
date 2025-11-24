@@ -38,6 +38,11 @@ mpwt = "mpwt.__main__:run_mpwt"
 Homepage = "https://github.com/AuReMe/mpwt"
 Changelog = "https://github.com/AuReMe/mpwt/blob/main/CHANGELOG.md"
 
+[project.optional-dependencies]
+TEST = ['pytest',
+  'pytest-mock'
+]
+
 [tool.setuptools]
 packages = ['mpwt']
 package-dir = {'mpwt'= 'mpwt'}

@@ -1,5 +1,11 @@
 # Changelog
 
+# mpwt 0.8.8 (2025-11-24)
+
+## Add:
+
+- `--standalone` option to call `--standalone` for Pathway Tools >= 27.0 to minimize the queries to internet (replace not working `--nc`).
+
 # mpwt 0.8.7 (2025-08-19)
 
 ## Add:

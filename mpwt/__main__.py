@@ -162,6 +162,14 @@ def run_mpwt():
         default=False,
     )
     parser.add_argument(
+        '--standalone',
+        dest='standalone',
+        help='Use with --patho. Call option -standalone to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.',
+        required=False,
+        action='store_true',
+        default=False,
+    )
+    parser.add_argument(
         '-p',
         dest='p',
         help='Use with --patho. Modify PathoLogic pathway prediction score. Must be a float between 0 and 1.',
@@ -313,6 +321,7 @@ def run_mpwt():
     topf = args.topf
     version = args.version
     permission = args.permission
+    standalone = args.standalone
 
     # If no argument print the help.
     if len(sys.argv) == 1 or (len(sys.argv) == 2 and verbose):
@@ -383,7 +392,8 @@ def run_mpwt():
                     pathway_score=pathway_score,
                     taxon_file=taxon_file,
                     verbose=verbose,
-                    permission=permission)
+                    permission=permission,
+                    standalone=standalone)
 
 
 if __name__ == '__main__':

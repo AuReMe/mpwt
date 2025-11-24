@@ -114,7 +114,7 @@ def check_log(species_input_folder_path, log_filename, error_status, log_errors,
 
 
 def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference,
-            patho_complex_inference, run_flat_creation=None):
+            patho_complex_inference, standalone=None, run_flat_creation=None):
     """
     Create PGDB using files created during 'create_flats_and_lisp' ('organism-params.dat' and 'genetic-elements.dat').
     With verbose run check_output to retrieve the output of subprocess (and show when Pathway Tools has been killed).
@@ -128,6 +128,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
         patho_operon_predictor (bool): boolean to use or not PathoLogic Operon Predictor
         patho_transporter_inference (bool): boolean to use or not PathoLogic Transport Inference Parser
         patho_complex_inference (bool): boolean to use or not Complex Inference tool
+        standalone (bool): boolean to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.
         run_flat_creation (bool): if Pathway Tools >= 26.0 it is possible to use -dump-flat-files-biopax instead of run_pwt_flat()
     Returns:
         boolean: True if there is an error during Pathway Tools run
@@ -150,6 +151,9 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
 
     if run_flat_creation is not None:
         cmd_pwt.append('-dump-flat-files-biopax')
+
+    if standalone is not None:
+        cmd_pwt.append('-standalone')
 
     species_name = os.path.basename(species_input_folder_path)
     logger.info('|PathoLogic|{}| '.format(species_name) + ' '.join(cmd_pwt))
