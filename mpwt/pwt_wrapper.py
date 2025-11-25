@@ -209,7 +209,7 @@ def run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor
     return error_status
 
 
-def run_pwt_flat(species_input_folder_path):
+def run_pwt_flat(species_input_folder_path, standalone=None):
     """
     Create flat files using a lisp script created during 'create_flats_and_lisp'.
     Kill the subprocess when the command reach the Navigator Window opening proposition.
@@ -219,11 +219,15 @@ def run_pwt_flat(species_input_folder_path):
 
     Args:
         species_input_folder_path (str): path to input folder
+        standalone (bool): boolean to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.
     Returns:
         boolean: True if there is an error during lisp script execution
     """
     lisp_path = os.path.join(species_input_folder_path, 'flat_files_creation.lisp')
     cmd_options = ['-no-patch-download', '-disable-metadata-saving', '-nologfile']
+    if standalone is not None:
+        cmd_options.append('-standalone')
+
     cmd_flat = ['pathway-tools', *cmd_options, '-load', lisp_path]
 
     species_name = os.path.basename(species_input_folder_path)

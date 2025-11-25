@@ -117,8 +117,9 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
             sys.exit('To use --cp/patho_complex_inference, you need to use the --patho/patho_inference argument and have at least Pathway Tools 26.0.')
 
     # Check if standalone is used with patho_inference and Pathway Tools >= 27.0.
-    if standalone and not patho_inference and ptools_version >= (27, 0):
-        sys.exit('To use --standalone, you need to use the --patho/patho_inference argument and Pathway Tools >= 27.0.')
+    if standalone and not (patho_inference or flat_creation):
+        if ptools_version < (27, 0):
+            sys.exit('To use --standalone, you need to use the --patho/patho_inference or --flat/flat_creation argument and Pathway Tools >= 27.0.')
 
     # Check if pathway_score is a float between 0 and 1.
     if pathway_score:
@@ -211,7 +212,8 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
                 run_output_folder=None, output_folder=None,
                 run_patho_inference=None, pathologic_options=None,
                 run_flat_creation=None, move_options=None,
-                taxon_file=None, permission=None, ptools_version=None):
+                taxon_file=None, permission=None, ptools_version=None,
+                standalone=None):
     """ Single run of mpwt on one folder.
     Used in multiprocessing in independent_mpwt.
 
@@ -222,12 +224,13 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_output_folder (bool): if True moves the output file to the ouput folder
         output_folder (str): pathname to output folder
         run_patho_inference (bool): if True PathoLogic is run on the input folder
-        pathologic_options (list): list of bool for: patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference, standalone
+        pathologic_options (list): list of bool for: patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference
         run_flat_creation (bool): if True flat files will be created
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
         permission (str): Choose permission access to PGDB in ptools-local and output files, either 'all' or 'group' (by default it is user)
         ptools_version (tuple, None): Version number of Pathway Tools (obtained from get_ptools_version funciton).
+        standalone (bool): boolean to instruct Pathway-Tools to operate in standalone mode, meaning no network is available.
     Returns:
         run_folder (str): name of the folder containing input files
         input_error_status (bool): if True an error occurs during pathologic input files creation
@@ -235,7 +238,6 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         flat_error_status (bool): if True an error occurs during flat fiels creation
         move_error_status (bool): if True an error occurs when moving output files
     """
-    print(pathologic_options)
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
     species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
@@ -256,9 +258,9 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
     if run_patho_inference:
         # Use Pathway Tools option in version 26.0 to create flat files (if required).
         if run_flat_creation and ptools_version >= (26, 0):
-            patho_error_status = run_pwt(run_folder_path, *pathologic_options, run_flat_creation)
+            patho_error_status = run_pwt(run_folder_path, *pathologic_options, standalone, run_flat_creation)
         else:
-            patho_error_status = run_pwt(run_folder_path, *pathologic_options)
+            patho_error_status = run_pwt(run_folder_path, *pathologic_options, standalone)
         if patho_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
 
@@ -266,9 +268,9 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         # Use mpwt method to create flat files for Pathway Tools version inferior to 26.0.
         # Or when PGDBs have already been reconstructed.
         if not run_patho_inference:
-            flat_error_status = run_pwt_flat(run_folder_path)
+            flat_error_status = run_pwt_flat(run_folder_path, standalone)
         if ptools_version < (26, 0) and run_patho_inference:
-            flat_error_status = run_pwt_flat(run_folder_path)
+            flat_error_status = run_pwt_flat(run_folder_path, standalone)
         check_dat(run_folder_path, species_pgdb_folder)
         if flat_error_status:
             return run_folder, input_error_status, patho_error_status, flat_error_status, move_error_status
@@ -379,7 +381,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
             run_flat_ids = None
         run_patho_flat_ids = None
 
-    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference, standalone]
+    pathologic_options = [patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference]
     move_options = [dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction]
 
     # Create data for multiprocessing.
@@ -433,7 +435,7 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                 logger.info('/!\\ {0} contains already compressed {1}, output files will not be moved.'.format(output_folder, run_id))
 
         multiprocess_run_mpwt = [run_id, run_input_folder, run_input_files_creation, run_output_folder, output_folder, run_patho_inference, pathologic_options,
-                                run_flat_creation, move_options, taxon_file, permission, ptools_version]
+                                run_flat_creation, move_options, taxon_file, permission, ptools_version, standalone]
 
         multiprocess_run_mpwts.append(multiprocess_run_mpwt)
 
