@@ -324,7 +324,7 @@ mpwt can be used with the command lines:
 
 .. code:: sh
 
-    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--nc] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file]
+    mpwt -f=FOLDER [-o=FOLDER] [--patho] [--hf] [--op] [--tp] [--flat] [--md] [--mx] [--mo] [--mc] [-p=FLOAT] [--cpu=INT] [-r] [-v] [--clean] [--log=FOLDER] [--taxon-file] [--standalone]
     mpwt --flat [-f=FOLDER] [-o=FOLDER] [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt -o=FOLDER [--md] [--mx] [--mo] [--mc] [--cpu=INT] [-v]
     mpwt --clean [--cpu=INT] [-v]
@@ -351,7 +351,6 @@ mpwt can be used in a python script with an import:
               patho_operon_predictor=optional_boolean,
               patho_transporter_inference=optional_boolean,
               patho_complex_inference=optional_boolean,
-              no_download_articles=optional_boolean,
               flat_creation=optional_boolean,
               dat_extraction=optional_boolean,
               xml_extraction=optional_boolean,
@@ -363,7 +362,8 @@ mpwt can be used in a python script with an import:
               pathway_score=pathway_score,
               taxon_file=optional_str,
               verbose=optional_boolean,
-              permission=optional_str)
+              permission=optional_str,
+              standalone=optional_boolean)
 
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 | Command line argument   | Python argument                                | description                                                                                     |
@@ -380,9 +380,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 |          --tp           | patho_transporter_inference(boolean)           | Launch PathoLogic Transport Inference Parser                                                    |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
-|          --cp           | patho_complex_inference(boolean)               | Use with --patho and at least Pathway Tools 26.0. Run the Complex Inference of Pathway Tools.   |
-+-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
-|          --nc           | no_download_articles(boolean)                  | Launch PathoLogic without loading PubMed citations (**not working**)                            |
+|          --cp           | patho_complex_inference(boolean)               | Use with --patho and at least Pathway Tools 26.0. Run the Complex Inference of Pathway Tools    |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 |          -p             | pathway_score(float)                           | Launch PathoLogic using a specified pathway prediction score cutoff                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
@@ -411,6 +409,8 @@ mpwt can be used in a python script with an import:
 |     --permission        | permission(string: 'all', 'group')             | Choose permission access to PGDB in ptools-local and output files                               |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                                             |
++-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|     --standalone        | standalone(boolean)                            | Instruct Pathway-Tools (>= 27.0) to operate in standalone mode, limiting internet queries       |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
 There is also another argument:
@@ -666,7 +666,6 @@ Useful functions
                 patho_operon_predictor=optional_boolean,
                 patho_transporter_inference=optional_boolean,
                 patho_complex_inference=optional_boolean,
-                no_download_articles=optional_boolean,
                 flat_creation=optional_boolean,
                 dat_extraction=optional_boolean,
                 xml_extraction=optional_boolean,
@@ -678,7 +677,8 @@ Useful functions
                 pathway_score=pathway_score,
                 taxon_file=optional_str,
                 verbose=optional_boolean,
-                permission=optional_str)
+                permission=optional_str,
+                standalone=optional_boolean)
 
 - Delete all the previous PGDB and the metadata files
 
@@ -953,6 +953,12 @@ By using the ``-r /size_reduction`` argument, you will have compressed zip files
     ├── species_2.zip
     ├── species_3.zip
     ..
+
+If you encounter issues with internet queries, such as ``Fatal error: Timed out connecting to RDBMS server ortholog.ai.sri.com``, it is possible to limit internet queries with ``--standalone/standalone`` option (with Pathway Tools superior or equal 27.0):
+
+.. code:: sh
+
+    mpwt -f input_folder -o output_folder --patho --md --mx --mo --mc --standalone
 
 For developer
 -------------

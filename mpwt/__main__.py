@@ -154,12 +154,12 @@ def run_mpwt():
         default=False,
     )
     parser.add_argument(
-        '--nc',
-        dest='nc',
-        help='Use with --patho. Turn off loading of Pubmed entries.',
+        '--standalone',
+        dest='standalone',
+        help='Use with --patho. Call option -standalone to instruct Pathway-Tools to operate in standalone mode, meaning no network is available and limiting internet queries.',
         required=False,
         action='store_true',
-        default=False,
+        default=None,
     )
     parser.add_argument(
         '-p',
@@ -174,7 +174,7 @@ def run_mpwt():
         help='Will create BioPAX/attribute-value flat files from PGDB.',
         required=False,
         action='store_true',
-        default=False,
+        default=None,
     )
 
     parser.add_argument(
@@ -295,7 +295,6 @@ def run_mpwt():
     patho_operon_predictor = args.op
     patho_transporter_inference = args.tp
     patho_complex_inference = args.cp
-    no_download_articles = args.nc
     flat_creation = args.flat
     move_dat = args.md
     move_xml = args.mx
@@ -313,6 +312,7 @@ def run_mpwt():
     topf = args.topf
     version = args.version
     permission = args.permission
+    standalone = args.standalone
 
     # If no argument print the help.
     if len(sys.argv) == 1 or (len(sys.argv) == 2 and verbose):
@@ -371,7 +371,6 @@ def run_mpwt():
                     patho_operon_predictor=patho_operon_predictor,
                     patho_transporter_inference=patho_transporter_inference,
                     patho_complex_inference=patho_complex_inference,
-                    no_download_articles=no_download_articles,
                     flat_creation=flat_creation,
                     dat_extraction=move_dat,
                     xml_extraction=move_xml,
@@ -383,7 +382,8 @@ def run_mpwt():
                     pathway_score=pathway_score,
                     taxon_file=taxon_file,
                     verbose=verbose,
-                    permission=permission)
+                    permission=permission,
+                    standalone=standalone)
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ import os
 import shutil
 
 def fake_run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_predictor, patho_transporter_inference,
-            patho_complex_inference, run_flat_creation=None):
+            patho_complex_inference, standalone=None, run_flat_creation=None):
     output_folder = 'test_output'
     mpwt_expected = 'mpwt_expected'
 
@@ -26,7 +26,7 @@ def fake_run_pwt(species_input_folder_path, patho_hole_filler, patho_operon_pred
                 shutil.copyfile(os.path.join(expected_folder_path, expected_file), output_organism_file)
 
 
-def fake_run_pwt_flat(species_input_folder_path):
+def fake_run_pwt_flat(species_input_folder_path, standalone=None):
     output_folder = 'test_output'
     mpwt_expected = os.path.join('mpwt_expected')
 
