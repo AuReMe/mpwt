@@ -221,39 +221,6 @@ def cleaning_input(input_folder, verbose=None):
             logger.info('Remove ' + species + ' temporary datas.')
 
 
-def pubmed_citations(activate_citations):
-    """
-    Activate or deactivate loading of PubMed citations.
-
-    Args:
-        activate_citations (bool): boolean to indicate if you want to activate or not the downlaod of Pubmed entries.
-    """
-    ptools_init_filepath = os.path.join(find_ptools_path(), 'ptools-init.dat')
-    new_ptools_file = ""
-
-    download_pubmed_entries_parameter = None
-    with open(ptools_init_filepath, 'r') as ptools_init_file:
-        for line in ptools_init_file.read().split('\n'):
-            if 'Batch-PathoLogic-Download-Pubmed-Entries?' in line:
-                if '#' in line:
-                    line = line.replace('#', '')
-                download_pubmed_entries_parameter = True
-                if activate_citations:
-                    line = line.replace('NIL', 'T')
-                else:
-                    line = line.replace('T', 'NIL')
-            if line != '':
-                new_ptools_file = new_ptools_file + line + '\n'
-            else:
-                new_ptools_file = new_ptools_file + line
-
-    if not download_pubmed_entries_parameter:
-        sys.exit('There is no Batch-PathoLogic-Download-Pubmed-Entries parameter in ' + ptools_init_filepath +'. To use --nc/no_download_articles, mpwt needs Pathway Tools 23.5 or higher.')
-
-    with open(ptools_init_filepath, 'w', encoding='utf-8') as ptools_init_file:
-        ptools_init_file.write(new_ptools_file)
-
-
 def extract_pathway_score():
     """
     Get the Pathway-Prediction-Score-Cutoff of ptools-init.dat

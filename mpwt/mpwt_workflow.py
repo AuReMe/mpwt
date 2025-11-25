@@ -40,11 +40,11 @@ logger = logging.getLogger(__name__)
 def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
                      patho_transporter_inference=None, patho_complex_inference=None,
-                     no_download_articles=None, flat_creation=None, dat_extraction=None,
-                     xml_extraction=None, owl_extraction=None, col_extraction=None,
-                     size_reduction=None, number_cpu=None, patho_log=None,
-                     pathway_score=None, taxon_file=None, verbose=None,
-                     permission=None, standalone=None):
+                     flat_creation=None, dat_extraction=None, xml_extraction=None,
+                     owl_extraction=None, col_extraction=None, size_reduction=None,
+                     number_cpu=None, patho_log=None, pathway_score=None,
+                     taxon_file=None, verbose=None, permission=None,
+                     standalone=None):
     """
     Function managing all the workflow (from the creatin of the input files to the results).
     Use it when you import mpwt in a script.
@@ -57,7 +57,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
         patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
         patho_complex_inference (bool): PathoLogic Complex Inference (True/False)
-        no_download_articles (bool): turning off loading of PubMed citations (True/False)
         flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
         dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
         xml_extraction (bool): move metabolic-reactions.xml to output folder (True/False)
@@ -99,10 +98,6 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     # Check if patho_operon_predictor is used with patho_inference.
     if patho_operon_predictor and not patho_inference:
         sys.exit('To use --op/patho_operon_predictor, you need to use the --patho/patho_inference argument.')
-
-    # Check if no_download_articles is used with patho_inference.
-    if no_download_articles and not patho_inference:
-        sys.exit('To use --nc/no_download_articles, you need to use the --patho/patho_inference argument.')
 
     # Check if patho_transporter_inference is used with patho_inference.
     if patho_transporter_inference and not patho_inference:
@@ -167,28 +162,23 @@ def multiprocess_pwt(input_folder=None, output_folder=None, patho_inference=None
     independent_mpwt(input_folder, output_folder, patho_inference,
                         patho_hole_filler, patho_operon_predictor,
                         patho_transporter_inference, patho_complex_inference,
-                        no_download_articles, flat_creation, dat_extraction,
-                        xml_extraction, owl_extraction, col_extraction,
-                        size_reduction, number_cpu_to_use, patho_log,
-                        pathway_score, taxon_file, permission, ptools_version,
+                        flat_creation, dat_extraction, xml_extraction,
+                        owl_extraction, col_extraction, size_reduction,
+                        number_cpu_to_use, patho_log, pathway_score,
+                        taxon_file, permission, ptools_version,
                         standalone)
 
 
-def close_mpwt(mpwt_pool, no_download_articles, pathway_score=None, old_pathway_score=None):
+def close_mpwt(mpwt_pool, pathway_score=None, old_pathway_score=None):
     """End multiprocessing Pool and restore ptools-init.dat
 
     Args:
         mpwt_pool (multiprocessing Pool): mpwt multiprocessing Pool
-        no_download_articles (bool): turning off loading of PubMed citations (True/False)
         pathway_score (float): score between 0 and 1 to accept or reject pathway
         old_pathway_score (float): original value of pathway score
     """
     mpwt_pool.close()
     mpwt_pool.join()
-
-    # Turn on loading of pubmed entries.
-    if no_download_articles:
-        utils.pubmed_citations(activate_citations=True)
 
     # Remodify the pathway score to its original value.
     if pathway_score:
@@ -232,7 +222,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         run_output_folder (bool): if True moves the output file to the ouput folder
         output_folder (str): pathname to output folder
         run_patho_inference (bool): if True PathoLogic is run on the input folder
-        pathologic_options (list): list of bool for: patho_hole_filler, patho_operon_predictor, patho_transporter_inference
+        pathologic_options (list): list of bool for: patho_hole_filler, patho_operon_predictor, patho_transporter_inference, patho_complex_inference, standalone
         run_flat_creation (bool): if True flat files will be created
         move_options (list): list of bool for: dat_extraction, size_reduction, xml_extraction, owl_extraction, col_extraction
         taxon_file (str): pathname to the mpwt taxon ID file
@@ -245,6 +235,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
         flat_error_status (bool): if True an error occurs during flat fiels creation
         move_error_status (bool): if True an error occurs when moving output files
     """
+    print(pathologic_options)
     ptools_local_path = utils.find_ptools_path()
     pgdbs_folder_path = os.path.join(*[ptools_local_path, 'pgdbs', 'user'])
     species_pgdb_folder = os.path.join(pgdbs_folder_path, run_folder.lower() + 'cyc')
@@ -299,7 +290,7 @@ def run_mpwt(run_folder=None, input_folder=None, run_input_files_creation=None,
 def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
                      patho_hole_filler=None, patho_operon_predictor=None,
                      patho_transporter_inference=None, patho_complex_inference=None,
-                     no_download_articles=None, flat_creation=None, dat_extraction=None,
+                     flat_creation=None, dat_extraction=None,
                      xml_extraction=None, owl_extraction=None, col_extraction=None,
                      size_reduction=None, number_cpu_to_use=None, patho_log=None,
                      pathway_score=None, taxon_file=None, permission=None,
@@ -316,7 +307,6 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         patho_operon_predictor (bool): PathoLogic operon predictor (True/False)
         patho_transporter_inference (bool): PathoLogic Transport Inference Parser (True/False)
         patho_complex_inference (bool): PathoLogic Complex Inference (True/False)
-        no_download_articles (bool): turning off loading of PubMed citations (True/False)
         flat_creation (bool): BioPAX/attributes-values flat files creation (True/False)
         dat_extraction (bool): move BioPAX/attributes-values files to output folder (True/False)
         xml_extraction (bool): move metabolic-reactions.xml to output folder (True/False)
@@ -351,10 +341,6 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         if not os.path.exists(output_folder):
             logger.info('No output directory, it will be created.')
             os.mkdir(output_folder)
-
-    # Turn off loading of pubmed entries.
-    if no_download_articles:
-        utils.pubmed_citations(activate_citations=False)
 
     # Modify pathway prediction score.
     if pathway_score:
@@ -493,9 +479,9 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
 
     # Close multiprocessing Pool
     if pathway_score:
-        close_mpwt(mpwt_pool, no_download_articles, pathway_score, old_pathway_score)
+        close_mpwt(mpwt_pool, pathway_score, old_pathway_score)
     else:
-        close_mpwt(mpwt_pool, no_download_articles)
+        close_mpwt(mpwt_pool)
 
     end_time = time.time()
 
