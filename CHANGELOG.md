@@ -4,11 +4,11 @@
 
 ## Add:
 
-- `--standalone` option to call `--standalone` for Pathway Tools >= 27.0 to minimize the queries to internet (replace not working `--nc`).
+- `--standalone` option to call `-standalone` for Pathway Tools >= 27.0 to minimize the queries to internet (replace not working `--nc`).
 
 ## Remove:
 
-- remove not working `--nc/no_download_articles` option (`--standalone` achieves better result on this side).
+- remove not working `--nc/no_download_articles` option (`--standalone`) achieves better result on this side).
 
 # mpwt 0.8.7 (2025-08-19)
 
