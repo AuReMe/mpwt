@@ -410,7 +410,7 @@ mpwt can be used in a python script with an import:
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 |          -v             | verbose(boolean)                               | Print some information about the processing of mpwt                                             |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
-|     --standalone        | standalone(boolean)                            | Instruct Pathway-Tools to operate in standalone mode, limiting internet queries                 |
+|     --standalone        | standalone(boolean)                            | Instruct Pathway-Tools (>= 27.0) to operate in standalone mode, limiting internet queries       |
 +-------------------------+------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
 There is also another argument:
@@ -954,7 +954,7 @@ By using the ``-r /size_reduction`` argument, you will have compressed zip files
     ├── species_3.zip
     ..
 
-If you encounter issues with internet queries, such as ``Fatal error: Timed out connecting to RDBMS server ortholog.ai.sri.com``, it is possible to limit internet queries with ``--standalone/standalone`` option:
+If you encounter issues with internet queries, such as ``Fatal error: Timed out connecting to RDBMS server ortholog.ai.sri.com``, it is possible to limit internet queries with ``--standalone/standalone`` option (with Pathway Tools superior or equal 27.0):
 
 .. code:: sh
 
