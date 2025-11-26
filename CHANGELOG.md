@@ -8,7 +8,7 @@
 
 ## Remove:
 
-- remove not working `--nc/no_download_articles` option (`--standalone`) achieves better result on this side).
+- remove not working `--nc/no_download_articles` option (`--standalone` achieves better result on this side).
 
 # mpwt 0.8.7 (2025-08-19)
 
