@@ -1,5 +1,11 @@
 # Changelog
 
+# mpwt 0.8.7 (2025-12-18)
+
+## Fix:
+
+- issue in test data with Pathway Tools 29.5.
+
 # mpwt 0.8.8 (2025-11-25)
 
 ## Add:

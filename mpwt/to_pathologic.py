@@ -200,6 +200,8 @@ def run_create_pathologic_file(input_path, output_path, output_folder, input_nam
                         if 'product' in feature.qualifiers:
                             for function in feature.qualifiers['product']:
                                 element_file.write('FUNCTION\t' + function + '\n')
+                        else:
+                            element_file.write('FUNCTION\tORF\n')
                         if 'db_xref' in feature.qualifiers:
                             for db_xref in feature.qualifiers['db_xref']:
                                 if ':' in db_xref:
