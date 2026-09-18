@@ -1,9 +1,10 @@
 # Changelog
 
-# mpwt 0.8.9 (2025-12-18)
+# mpwt 0.8.9 (2026-09-18)
 
 ## Fix:
 
+- try to fix issue with `shutil.rmtree` and multiprocessing by moving the rmtree call outside the multiprocessed part.
 - issue in test data with Pathway Tools 29.5.
 
 # mpwt 0.8.8 (2025-11-25)

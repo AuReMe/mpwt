@@ -321,8 +321,6 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
             logger.critical('Missing metabolic-reactions.xml for ' + pgdb_folder_dbname + '. To create it use mpwt --dat.')
             return
         shutil.copyfile(xml_file, output_species+'.xml')
-        if size_reduction:
-            shutil.rmtree(pgdb_folder_path)
         return
 
     if owl_extraction and len(keep_extensions) == 1:
@@ -336,8 +334,6 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
             return
         shutil.copyfile(owl_level_2, output_species+'-level2.owl')
         shutil.copyfile(owl_level_3, output_species+'-level3.owl')
-        if size_reduction:
-            shutil.rmtree(pgdb_folder_path)
         return
 
     if len(keep_extensions) > 0:
@@ -363,7 +359,6 @@ def run_move_pgdb(pgdb_folder_dbname, pgdb_folder_path, output_folder, dat_extra
                         shutil.rmtree(pgdb_file_pathname)
         zip_input_path = os.path.join(output_folder, pgdb_folder_dbname)
         shutil.make_archive(zip_input_path, 'zip', pgdb_tmp_folder_path)
-        shutil.rmtree(pgdb_folder_path)
 
     else:
         shutil.copytree(pgdb_tmp_folder_path, output_species, dirs_exist_ok=True)

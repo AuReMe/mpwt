@@ -479,6 +479,12 @@ def independent_mpwt(input_folder, output_folder=None, patho_inference=None,
         ptools_local_tmp_path = os.path.join(ptools_local_path, 'tmp')
         shutil.rmtree(ptools_local_tmp_path)
 
+    # Remove PGDBs in ptools-local if size_reduction.
+    if size_reduction:
+        for pgdb in os.listdir(pgdbs_folder_path):
+            pgdb_folder_path = os.path.join(pgdbs_folder_path, pgdb)
+            shutil.rmtree(pgdb_folder_path)
+
     # Close multiprocessing Pool
     if pathway_score:
         close_mpwt(mpwt_pool, pathway_score, old_pathway_score)
