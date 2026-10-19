@@ -462,14 +462,12 @@ def create_flats_and_lisp(run_folder, taxon_file):
             logger.critical('No region feature in the GFF file of {0}, GFF file must have region features.'.format(pgdb_id))
             return None
 
-        try:
-            region_feature.attributes['Dbxref']
-        except KeyError:
+        if 'Dbxref' in region_feature.attributes:
+            for dbxref in region_feature.attributes['Dbxref']:
+                if 'taxon' in dbxref:
+                    taxon_id = dbxref.split('taxon:')[1]
+        else:
             logger.critical('No Dbxref in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))
-
-        for dbxref in region_feature.attributes['Dbxref']:
-            if 'taxon' in dbxref:
-                taxon_id = dbxref.split('taxon:')[1]
         if not taxon_id or taxon_file:
             if not taxon_id:
                 logger.info('Missing "taxon:" in GFF file of {0} GFF file must have a ;Dbxref=taxon:taxonid; in the region feature.'.format(pgdb_id))

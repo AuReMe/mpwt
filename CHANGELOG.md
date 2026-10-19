@@ -1,5 +1,11 @@
 # Changelog
 
+# mpwt 0.8.9 (2026-10-19)
+
+## Fix:
+
+- issue when parsing `gff` file without `Dbxref` but when there is a taxon_id file.
+
 # mpwt 0.8.9 (2025-12-18)
 
 ## Fix:
